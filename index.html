@@ -3830,6 +3830,9 @@
       });
     }
 
+    // Abre o dossiê (popup) de um item do histórico direto, sem passar pela
+    // tela de upload/preview — a pedra já foi lida antes, então não faz
+    // sentido reaproveitar a tela do "sensor" (que é só pra foto nova).
     function buscarEExibirIdentificacao(id, accessToken) {
       fetch('/api/obter', {
           method: 'POST',
@@ -3844,17 +3847,16 @@
         })
         .then(function(data) {
           esconderPaineis();
-          if (data.foto_base64 && data.foto_media_type) {
-            previewImg.src = 'data:' + data.foto_media_type + ';base64,' + data.foto_base64;
-            fotosSelecionadas = [{ base64: data.foto_base64, mediaType: data.foto_media_type, previewUrl: previewImg.src }];
-            fotoCarregada = true;
-            dropzone.style.display = 'none';
-            preview.style.display = 'block';
-            actions.style.display = 'flex';
-            fotoTiraWrap.style.display = 'none';
+          var fotoUrl = (data.foto_base64 && data.foto_media_type)
+            ? ('data:' + data.foto_media_type + ';base64,' + data.foto_base64)
+            : '/stone-placeholder.png';
+          data.nome = data.nome || data.nome_provavel;
+          identificacaoIdAtual = data.identificacao_id || id;
+          if (typeof data.avaliacoes_gratis_restantes === 'number') {
+            avaliacoesGratisRestantes = data.avaliacoes_gratis_restantes;
+            atualizarContadorGratis();
           }
-          resultadoIAAtual = data;
-          mostrarResultado(data);
+          abrirDossie(data, fotoUrl, { podeColocarVenda: true });
         })
         .catch(function(err) {
           erroEl.textContent = err.message || 'Não foi possível abrir essa identificação.';
