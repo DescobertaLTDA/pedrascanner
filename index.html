@@ -2638,6 +2638,11 @@
     var LINK_CHECKOUT_CAKTO = 'https://pay.cakto.com.br/jfotn5o_1030574';
     var catalogoDados = [];
     var catalogoDadosCarregados = false;
+    // Preenchidos após o login: token da sessão (pra chamadas autenticadas
+    // fora do fluxo de login) e o conjunto de IDs que pertencem à própria
+    // conta — usado pra só mostrar o ícone de lixeira nas próprias fotos.
+    var sessaoTokenGlobal = null;
+    var meusIdsIdentificacao = {};
     var feedDados = [];
 
     function formatarMoedaBR(valor) {
@@ -2667,6 +2672,7 @@
     }
 
     function atualizarValorColecao(accessToken) {
+      sessaoTokenGlobal = accessToken;
       var pillColecao = document.getElementById('nav-colecao');
       var dropdownColecaoValor = document.getElementById('nav-dropdown-colecao-valor');
       fetch('/api/historico', {
@@ -2680,6 +2686,12 @@
           var totalFormatado = formatarMoedaBR(total) || 'R$ 0,00';
           if (pillColecao) pillColecao.innerHTML = '💎 ' + totalFormatado;
           if (dropdownColecaoValor) dropdownColecaoValor.textContent = totalFormatado;
+          meusIdsIdentificacao = {};
+          itens.forEach(function(item) { meusIdsIdentificacao[item.id] = true; });
+          // Se a vitrine já tinha sido renderizada antes do login terminar,
+          // renderiza de novo agora que já sabemos quais itens são seus —
+          // é o que faz o ícone de lixeira aparecer nas suas próprias fotos.
+          if (catalogoDadosCarregados) carregarVitrine(paginaVitrineAtual || 1);
         })
         .catch(function() {
           if (pillColecao) pillColecao.innerHTML = '💎 R$ 0,00';
@@ -4789,6 +4801,34 @@
         fav.style.zIndex = '2';
         fav.style.pointerEvents = 'none';
         fav.innerHTML = '<svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:var(--ink-soft);stroke-width:1.9;fill:none;"><path d="M12 21s-7.5-4.6-10-9.1C.6 8.4 2.3 5 5.8 5c2 0 3.4 1 6.2 3.6C14.8 6 16.2 5 18.2 5c3.5 0 5.2 3.4 3.8 6.9C19.5 16.4 12 21 12 21z"/></svg>';
+        var ehMinha = !!meusIdsIdentificacao[item.id];
+        var lixeira = null;
+        if (ehMinha) {
+          lixeira = document.createElement('button');
+          lixeira.type = 'button';
+          lixeira.className = 'vitrine-lixeira';
+          lixeira.title = 'Apagar essa foto';
+          lixeira.style.position = 'absolute';
+          lixeira.style.top = '8px';
+          lixeira.style.left = '8px';
+          lixeira.style.width = '24px';
+          lixeira.style.height = '24px';
+          lixeira.style.borderRadius = '50%';
+          lixeira.style.border = 'none';
+          lixeira.style.background = 'rgba(255,255,255,0.94)';
+          lixeira.style.display = 'flex';
+          lixeira.style.alignItems = 'center';
+          lixeira.style.justifyContent = 'center';
+          lixeira.style.boxShadow = '0 1px 4px rgba(0,0,0,0.18)';
+          lixeira.style.zIndex = '3';
+          lixeira.style.cursor = 'pointer';
+          lixeira.style.padding = '0';
+          lixeira.innerHTML = '<svg viewBox="0 0 24 24" style="width:12px;height:12px;stroke:var(--danger);stroke-width:1.9;fill:none;"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
+          lixeira.addEventListener('click', function(e) {
+            e.stopPropagation();
+            excluirItemVitrine(item, lixeira, card);
+          });
+        }
         var foto = document.createElement('div');
         foto.className = 'vitrine-foto';
         foto.style.aspectRatio = '1/1';
@@ -4857,6 +4897,7 @@
         info.appendChild(meta);
         card.style.position = 'relative';
         card.appendChild(fav);
+        if (lixeira) card.appendChild(lixeira);
         card.appendChild(foto);
         card.appendChild(info);
         card.addEventListener('click', function() {
@@ -4890,6 +4931,41 @@
           })(p);
         }
       }
+    }
+
+    // Apaga permanentemente uma identificação (usada pelo ícone de lixeira,
+    // que só aparece nas próprias fotos). Some com a linha inteira no banco —
+    // diferente de "pausar anúncio", que só tira da área de vendas.
+    function excluirItemVitrine(item, botaoLixeira, cardEl) {
+      if (!sessaoTokenGlobal) return;
+      if (!window.confirm('Apagar essa foto para sempre? Essa ação não pode ser desfeita.')) return;
+      botaoLixeira.disabled = true;
+      botaoLixeira.style.opacity = '0.5';
+      fetch('/api/excluir-identificacao', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sessaoTokenGlobal },
+        body: JSON.stringify({ identificacao_id: item.id })
+      })
+        .then(function(res) { return res.json().then(function(corpo) { return { ok: res.ok, corpo: corpo }; }); })
+        .then(function(resultado) {
+          if (!resultado.ok) {
+            window.alert((resultado.corpo && resultado.corpo.error) || 'Não foi possível apagar. Tente novamente.');
+            botaoLixeira.disabled = false;
+            botaoLixeira.style.opacity = '1';
+            return;
+          }
+          delete meusIdsIdentificacao[item.id];
+          catalogoDados = catalogoDados.filter(function(i) { return i.id !== item.id; });
+          if (cardEl && cardEl.parentNode) cardEl.parentNode.removeChild(cardEl);
+          carregarVitrine(paginaVitrineAtual || 1);
+          if (typeof carregarRankingColecionadores === 'function') carregarRankingColecionadores();
+          if (typeof atualizarValorColecao === 'function') atualizarValorColecao(sessaoTokenGlobal);
+        })
+        .catch(function() {
+          window.alert('Não foi possível apagar agora. Tente novamente.');
+          botaoLixeira.disabled = false;
+          botaoLixeira.style.opacity = '1';
+        });
     }
 
     function abrirDossiePorItem(item) {
