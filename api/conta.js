@@ -143,7 +143,7 @@ async function handlerHistorico(req, res) {
 
   const { data: linhas, error } = await supabase
     .from('identificacoes')
-    .select('id, nome_provavel, confianca, desbloqueada, criado_em, faixa_preco_brasil, esta_a_venda, venda_status, valor_venda, telefone_venda, observacao_venda, negociavel_venda')
+    .select('id, nome_provavel, confianca, desbloqueada, criado_em, faixa_preco_brasil, esta_a_venda, venda_status, valor_venda, telefone_venda, observacao_venda, negociavel_venda, foto_base64, foto_media_type')
     .eq('email', email)
     .order('criado_em', { ascending: false })
     .limit(30);
@@ -166,7 +166,8 @@ async function handlerHistorico(req, res) {
       valor_venda: item.valor_venda || null,
       telefone_venda: item.telefone_venda || null,
       observacao_venda: item.observacao_venda || null,
-      negociavel_venda: !!item.negociavel_venda
+      negociavel_venda: !!item.negociavel_venda,
+      foto: item.foto_base64 ? ('data:' + (item.foto_media_type || 'image/jpeg') + ';base64,' + item.foto_base64) : null
     };
   });
 
