@@ -13,11 +13,13 @@
     { "source": "/api/reivindicar", "destination": "/api/conta?_fn=reivindicar" },
     { "source": "/api/colocar-venda", "destination": "/api/conta?_fn=colocar-venda" },
     { "source": "/api/remover-venda", "destination": "/api/conta?_fn=remover-venda" },
+    { "source": "/api/aceitar-termos", "destination": "/api/conta?_fn=aceitar-termos" },
     { "source": "/api/stats", "destination": "/api/publico?_fn=stats" },
     { "source": "/api/vitrine", "destination": "/api/publico?_fn=vitrine" },
     { "source": "/api/obter-publico", "destination": "/api/publico?_fn=obter-publico" },
     { "source": "/api/maps-key", "destination": "/api/publico?_fn=maps-key" },
     { "source": "/api/lojas-proximas", "destination": "/api/publico?_fn=lojas-proximas" },
-    { "source": "/api/pedras-venda", "destination": "/api/publico?_fn=pedras-venda" }
+    { "source": "/api/pedras-venda", "destination": "/api/publico?_fn=pedras-venda" },
+    { "source": "/api/ranking-colecionadores", "destination": "/api/publico?_fn=ranking-colecionadores" }
   ]
 }

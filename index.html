@@ -3214,7 +3214,18 @@
           termos_aceitos_em: new Date().toISOString(),
           permite_vitrine: permiteVitrine
         }, { onConflict: 'user_id' }).then(function(resp) {
-          if (resp.error) console.error('Falha ao registrar aceite dos termos:', resp.error);
+          if (resp.error) { console.error('Falha ao registrar aceite dos termos:', resp.error); return; }
+          // Sincroniza a permissão de vitrine em TODAS as identificações já
+          // salvas dessa conta (fotos antigas ficam visíveis automaticamente).
+          supa.rpc('sincronizar_permite_vitrine', { novo_valor: permiteVitrine }).then(function(rpcResp) {
+            if (rpcResp.error) { console.error('Falha ao sincronizar vitrine nas fotos antigas:', rpcResp.error); return; }
+            carregarDadosPublicos().then(function() {
+              renderizarCatalogo();
+              carregarVitrine(1);
+              renderizarRankings(rankingAtual);
+            });
+            carregarRankingColecionadores();
+          }, function(erroRpc) { console.error('Falha ao sincronizar vitrine nas fotos antigas:', erroRpc); });
         });
         // Mantém a chamada antiga como melhor esforço, caso o endpoint exista e faça algo além disso.
         fetch('/api/aceitar-termos', {
