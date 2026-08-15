@@ -4391,6 +4391,12 @@
     }
 
     dropzone.addEventListener('click', function(e) {
+      // O input de arquivo fica dentro da dropzone (escondido) e é clicado
+      // via JS (inputFoto.click()) quando a pessoa escolhe "Fazer upload de
+      // foto" no popup. Esse clique programático borbulha até aqui e, sem
+      // esse guard, reabria o popup de escolha por cima da foto recém-
+      // carregada. Ignorando cliques vindos do próprio input, resolve.
+      if (e.target === inputFoto) return;
       if (ehNavegadorInterno) {
         e.preventDefault();
         var modalAviso = document.getElementById('modal-navegador-interno');
