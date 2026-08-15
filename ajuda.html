@@ -11,6 +11,7 @@
   <link rel="apple-touch-icon" href="/logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/header-full.css">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
@@ -40,32 +41,6 @@
     a { color: inherit; }
     .wrap { max-width: 820px; margin: 0 auto; padding: 0 32px; }
     @media (max-width:480px) { .wrap { padding: 0 20px; } }
-
-    header {
-      position: sticky; top: 0; z-index: 50;
-      background: rgba(255,255,255,0.92);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--line);
-    }
-    .nav-wrap {
-      max-width: 820px; margin: 0 auto;
-      display: flex; align-items: center; justify-content: space-between;
-      gap: 10px; padding: 14px 32px;
-    }
-    @media (max-width:480px) { .nav-wrap { padding: 12px 20px; } }
-    .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
-    .logo .logo-icon { height: 26px; width: auto; }
-    .logo .logo-text { display: flex; flex-direction: column; line-height: 1.1; }
-    .logo .logo-main { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink); }
-    .logo .logo-sub { font-size: 9px; font-weight: 300; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute2); }
-    .btn-voltar {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-size: 13px; font-weight: 600; color: var(--accent-dark);
-      text-decoration: none; padding: 8px 14px; border: 1px solid var(--line-strong);
-      border-radius: 20px;
-    }
-    .btn-voltar:hover { background: var(--card-alt); }
-    .btn-voltar svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; }
 
     main { padding: 40px 0 0; }
     .titulo-pagina { font-size: 30px; margin-bottom: 6px; }
@@ -137,21 +112,7 @@
   </style>
 </head>
 <body>
-  <header>
-    <div class="nav-wrap">
-      <a href="index.html" class="logo">
-        <img src="/logo.png" alt="SCANNER 3.5" class="logo-icon">
-        <span class="logo-text">
-          <span class="logo-main">SCANNER</span>
-          <span class="logo-sub">3.5</span>
-        </span>
-      </a>
-      <a class="btn-voltar" href="index.html">
-        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-        Voltar ao scanner
-      </a>
-    </div>
-  </header>
+  <div id="header-placeholder"></div>
 
   <main class="wrap">
     <h1 class="titulo-pagina">Central de Ajuda</h1>
@@ -249,6 +210,8 @@
     </div>
   </footer>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="/header-full.js"></script>
   <script>
     // ========================================================================
     // SCRIPT EXCLUSIVO DA PÁGINA DE AJUDA — não compartilhado com index.html
