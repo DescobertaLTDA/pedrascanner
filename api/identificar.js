@@ -152,9 +152,11 @@ module.exports = async function handler(req, res) {
 
   const email = userData.user.email.toLowerCase();
   const acessoIlimitado = EMAILS_ACESSO_ILIMITADO.includes(email);
-  const nomeExibicao = (userData.user.user_metadata && userData.user.user_metadata.nome)
-    ? userData.user.user_metadata.nome
-    : email.split('@')[0];
+  // O "Editar perfil" (index.html) grava o nome em full_name/name via
+  // supa.auth.updateUser — não em "nome". Lê os mesmos campos aqui pra não
+  // cair sempre no fallback do prefixo do e-mail em pedras novas.
+  const metaUsuario = userData.user.user_metadata || {};
+  const nomeExibicao = metaUsuario.full_name || metaUsuario.name || email.split('@')[0];
   const whatsappExibicao = (userData.user.user_metadata && userData.user.user_metadata.whatsapp)
     ? userData.user.user_metadata.whatsapp
     : null;
