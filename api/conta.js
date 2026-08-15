@@ -88,6 +88,20 @@ async function handlerStatus(req, res) {
   const email = await autenticar(req, res);
   if (!email) return;
 
+  // Fonte confiável de "já aceitou os termos", consultada 1x e reaproveitada
+  // em qualquer branch de resposta abaixo (ilimitado, grátis ou pago).
+  const { data: perfil, error: erroPerfil } = await supabase
+    .from('perfis_usuario')
+    .select('aceitou_termos')
+    .eq('email', email)
+    .single();
+
+  if (erroPerfil && erroPerfil.code !== 'PGRST116') {
+    console.error('Erro Supabase (busca perfis_usuario):', erroPerfil);
+  }
+
+  const aceitouTermos = !!(perfil && perfil.aceitou_termos === true);
+
   if (EMAILS_ACESSO_ILIMITADO.includes(email)) {
     return res.status(200).json({
       pago: true,
@@ -96,7 +110,8 @@ async function handlerStatus(req, res) {
       limite: 999999,
       saldo: 999999,
       avaliacoes_gratis_restantes: 999999,
-      acesso_ilimitado: true
+      acesso_ilimitado: true,
+      aceitou_termos: aceitouTermos
     });
   }
 
@@ -125,7 +140,8 @@ async function handlerStatus(req, res) {
     return res.status(200).json({
       pago: false,
       email: email,
-      avaliacoes_gratis_restantes: avaliacoesGratisRestantes
+      avaliacoes_gratis_restantes: avaliacoesGratisRestantes,
+      aceitou_termos: aceitouTermos
     });
   }
 
@@ -140,7 +156,8 @@ async function handlerStatus(req, res) {
     usos: registro.usos,
     limite: registro.limite,
     saldo: saldo,
-    avaliacoes_gratis_restantes: avaliacoesGratisRestantes
+    avaliacoes_gratis_restantes: avaliacoesGratisRestantes,
+    aceitou_termos: aceitouTermos
   });
 }
 
