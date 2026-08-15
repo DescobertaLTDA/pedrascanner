@@ -234,6 +234,118 @@ async function handlerVitrine(req, res) {
 }
 
 // ============================================================================
+// /api/pedras-venda — lista pública das pedras que os membros colocaram à
+// venda (esta_a_venda = true), paginada (10 por página), com ordenação por
+// mais recentes / mais baratas / mais caras (baseado em valor_venda, texto
+// livre digitado pelo usuário no formulário de venda).
+// ============================================================================
+const PEDRAS_VENDA_POR_PAGINA = 10;
+
+function extrairValorVenda(valorTexto) {
+  if (!valorTexto) return null;
+  var limpo = String(valorTexto).replace(/[^\d.,]/g, '');
+  if (!limpo) return null;
+  // Se tiver os dois separadores, assume "." como milhar e "," como decimal
+  // (padrão brasileiro). Se só tiver um dos dois, trata como decimal.
+  if (limpo.indexOf('.') !== -1 && limpo.indexOf(',') !== -1) {
+    limpo = limpo.replace(/\./g, '').replace(',', '.');
+  } else {
+    limpo = limpo.replace(',', '.');
+  }
+  var numero = parseFloat(limpo);
+  return isNaN(numero) ? null : numero;
+}
+
+async function handlerPedrasVenda(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  if (req.method !== 'GET' && req.method !== 'POST') {
+    return res.status(405).json({ error: 'Método não permitido' });
+  }
+
+  const paginaBruta = (req.query && req.query.pagina) || (req.body && req.body.pagina) || '1';
+  const pagina = Math.max(1, parseInt(paginaBruta, 10) || 1);
+  const ordenar = (req.query && req.query.ordenar) || (req.body && req.body.ordenar) || 'recentes';
+  const de = (pagina - 1) * PEDRAS_VENDA_POR_PAGINA;
+  const ate = de + PEDRAS_VENDA_POR_PAGINA - 1;
+
+  try {
+    const baseSelect = 'id, nome_exibicao, nome_provavel, valor_venda, telefone_venda, observacao_venda, negociavel_venda, venda_criada_em, foto_base64, foto_media_type';
+    const ordenarPorPreco = ordenar === 'baratas' || ordenar === 'caras';
+
+    let linhas, count, error;
+
+    if (!ordenarPorPreco) {
+      // Ordenação por data: o próprio banco já pagina certo.
+      const resp = await supabase
+        .from('identificacoes')
+        .select(baseSelect, { count: 'exact' })
+        .eq('esta_a_venda', true)
+        .not('foto_base64', 'is', null)
+        .order('venda_criada_em', { ascending: false })
+        .range(de, ate);
+      linhas = resp.data; count = resp.count; error = resp.error;
+    } else {
+      // Ordenação por preço: valor_venda é texto livre digitado pelo usuário,
+      // então não dá pra ordenar no banco — busca tudo (tabela ainda pequena),
+      // ordena em memória e pagina depois.
+      const resp = await supabase
+        .from('identificacoes')
+        .select(baseSelect, { count: 'exact' })
+        .eq('esta_a_venda', true)
+        .not('foto_base64', 'is', null)
+        .order('venda_criada_em', { ascending: false })
+        .limit(500);
+      linhas = resp.data; count = resp.count; error = resp.error;
+    }
+
+    if (error) {
+      console.error('Erro Supabase (pedras-venda):', error);
+      return res.status(500).json({ error: 'Erro ao buscar pedras à venda.' });
+    }
+
+    let itens = (linhas || []).map(function (item) {
+      return {
+        id: item.id,
+        nome: mascararNome(item.nome_exibicao),
+        pedra: item.nome_provavel,
+        valor_venda: item.valor_venda,
+        valor_venda_num: extrairValorVenda(item.valor_venda),
+        telefone_venda: item.telefone_venda,
+        observacao_venda: item.observacao_venda,
+        negociavel_venda: !!item.negociavel_venda,
+        criado_em: item.venda_criada_em,
+        foto: 'data:' + (item.foto_media_type || 'image/jpeg') + ';base64,' + item.foto_base64
+      };
+    });
+
+    if (ordenarPorPreco) {
+      if (ordenar === 'baratas') {
+        itens.sort(function (a, b) { return (a.valor_venda_num || 0) - (b.valor_venda_num || 0); });
+      } else {
+        itens.sort(function (a, b) { return (b.valor_venda_num || 0) - (a.valor_venda_num || 0); });
+      }
+      itens = itens.slice(de, ate + 1);
+    }
+
+    const totalPaginas = Math.max(1, Math.ceil((count || itens.length) / PEDRAS_VENDA_POR_PAGINA));
+
+    return res.status(200).json({
+      itens: itens,
+      pagina: pagina,
+      total_paginas: totalPaginas
+    });
+  } catch (err) {
+    console.error('Erro inesperado (pedras-venda):', err);
+    return res.status(500).json({ error: 'Erro interno. Tente novamente em instantes.' });
+  }
+}
+
+// ============================================================================
 // /api/obter-publico — dados públicos de uma identificação (dossiê da vitrine)
 // ============================================================================
 async function handlerObterPublico(req, res) {
@@ -255,7 +367,7 @@ async function handlerObterPublico(req, res) {
   try {
     const { data, error } = await supabase
       .from('identificacoes')
-      .select('id, nome_provavel, confianca, caracteristicas, faixa_preco_brasil, onde_vender, desbloqueada, observacao, criado_em')
+      .select('id, nome_provavel, confianca, caracteristicas, faixa_preco_brasil, onde_vender, desbloqueada, observacao, criado_em, esta_a_venda, valor_venda, telefone_venda, observacao_venda, negociavel_venda')
       .eq('id', id)
       .single();
 
@@ -265,6 +377,10 @@ async function handlerObterPublico(req, res) {
 
     if (!data.desbloqueada) {
       data.onde_vender = null;
+    }
+    if (!data.esta_a_venda) {
+      data.valor_venda = null;
+      data.telefone_venda = null;
     }
 
     return res.status(200).json(data);
@@ -441,7 +557,8 @@ const ROTAS = {
   'vitrine': handlerVitrine,
   'obter-publico': handlerObterPublico,
   'maps-key': handlerMapsKey,
-  'lojas-proximas': handlerLojasProximas
+  'lojas-proximas': handlerLojasProximas,
+  'pedras-venda': handlerPedrasVenda
   // 'ranking-colecionadores': handlerRankingColecionadores,  <-- adicionar quando o arquivo original chegar
 };
 
