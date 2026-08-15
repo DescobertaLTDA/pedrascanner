@@ -3260,7 +3260,7 @@
         atualizarHeader();
         // Melhor esforço: sincroniza o nome nas pedras já catalogadas (o backend checa
         // conta própria vs. consentimento confirmado antes de aplicar).
-        supa.rpc('sincronizar_nome_exibicao', { novo_nome: nomeEscolhido }).catch(function() {});
+        supa.rpc('sincronizar_nome_exibicao', { novo_nome: nomeEscolhido }).then(function() {}, function() {});
         seguirParaBoasVindas();
       }).catch(function(erro) {
         btnSalvarNomeOnboarding.disabled = false;
