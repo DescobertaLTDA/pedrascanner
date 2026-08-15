@@ -3481,14 +3481,36 @@
         card.style.cssText = 'border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--card-alt);';
 
         var cabecalho = document.createElement('div');
-        cabecalho.style.cssText = 'display:flex;justify-content:space-between;align-items:flex-start;gap:8px;';
-        cabecalho.innerHTML =
-          '<div>' +
+        cabecalho.style.cssText = 'display:flex;justify-content:space-between;align-items:flex-start;gap:10px;';
+
+        var fotoWrapVender = document.createElement('div');
+        fotoWrapVender.style.cssText = 'flex-shrink:0;width:52px;height:52px;border-radius:9px;overflow:hidden;background:var(--card);border:1px solid var(--line);';
+        if (item.foto) {
+          var imgVender = document.createElement('img');
+          imgVender.src = item.foto;
+          imgVender.alt = item.nome_provavel || 'Pedra';
+          imgVender.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+          fotoWrapVender.appendChild(imgVender);
+        } else {
+          fotoWrapVender.style.display = 'flex';
+          fotoWrapVender.style.alignItems = 'center';
+          fotoWrapVender.style.justifyContent = 'center';
+          fotoWrapVender.style.fontSize = '18px';
+          fotoWrapVender.style.color = 'var(--ink-mute2)';
+          fotoWrapVender.textContent = '📷';
+        }
+        cabecalho.appendChild(fotoWrapVender);
+
+        var textoCabecalho = document.createElement('div');
+        textoCabecalho.style.cssText = 'flex:1;min-width:0;';
+        textoCabecalho.innerHTML =
+          '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">' +
           '<div style="font-weight:600;font-size:14px;color:var(--ink);">' + escapeHtml(item.nome_provavel || 'Pedra não identificada') + '</div>' +
-          '<div style="font-family:\'Space Mono\',monospace;font-weight:700;font-size:15px;color:var(--accent-dark);margin-top:2px;">' + escapeHtml(item.valor_venda) +
-          (item.negociavel_venda ? ' <span style="font-weight:600;font-size:10px;color:var(--ink-mute2);">negociável</span>' : '') + '</div>' +
+          '<span style="flex-shrink:0;font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px;background:' + info.cor + ';color:#fff;white-space:nowrap;">' + info.texto + '</span>' +
           '</div>' +
-          '<span style="flex-shrink:0;font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px;background:' + info.cor + ';color:#fff;white-space:nowrap;">' + info.texto + '</span>';
+          '<div style="font-family:\'Space Mono\',monospace;font-weight:700;font-size:15px;color:var(--accent-dark);margin-top:2px;">' + escapeHtml(item.valor_venda) +
+          (item.negociavel_venda ? ' <span style="font-weight:600;font-size:10px;color:var(--ink-mute2);">negociável</span>' : '') + '</div>';
+        cabecalho.appendChild(textoCabecalho);
         card.appendChild(cabecalho);
 
         var formEdit = document.createElement('div');
@@ -3507,7 +3529,7 @@
         card.appendChild(formEdit);
 
         var acoes = document.createElement('div');
-        acoes.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;';
+        acoes.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line);';
 
         function criarBotaoAcao(texto, cor) {
           var b = document.createElement('button');
@@ -3566,9 +3588,17 @@
           acoes.appendChild(btnVendida);
         }
 
-        var btnExcluir = criarBotaoAcao('Excluir', 'var(--card)');
-        btnExcluir.style.border = '1px solid var(--danger)';
-        btnExcluir.style.color = 'var(--danger)';
+        card.appendChild(acoes);
+
+        // "Excluir" fica separado das ações principais (Editar/Pausar/Vendida),
+        // que são as usadas no dia a dia — evita confundir com um botão a mais
+        // do mesmo tamanho no meio da fileira, já que apagar é irreversível.
+        var linhaExcluir = document.createElement('div');
+        linhaExcluir.style.cssText = 'display:flex;justify-content:flex-end;margin-top:6px;';
+        var btnExcluir = document.createElement('button');
+        btnExcluir.type = 'button';
+        btnExcluir.textContent = 'Excluir anúncio';
+        btnExcluir.style.cssText = 'background:none;border:none;color:var(--danger);font-size:11.5px;font-weight:600;cursor:pointer;padding:4px 2px;text-decoration:underline;';
         btnExcluir.addEventListener('click', function() {
           if (!window.confirm('Excluir esse anúncio? Essa ação não pode ser desfeita.')) return;
           btnExcluir.disabled = true;
@@ -3578,9 +3608,8 @@
             body: JSON.stringify({ identificacao_id: item.id, acao: 'excluir' })
           }).then(function() { abrirPainelVender(); invalidarCachePedrasVenda(); }).catch(function() { btnExcluir.disabled = false; });
         });
-        acoes.appendChild(btnExcluir);
-
-        card.appendChild(acoes);
+        linhaExcluir.appendChild(btnExcluir);
+        card.appendChild(linhaExcluir);
 
         var btnSalvarEdicao = formEdit.querySelector('.btn-salvar-edicao-venda');
         var erroEdicao = formEdit.querySelector('.erro-edicao-venda');
