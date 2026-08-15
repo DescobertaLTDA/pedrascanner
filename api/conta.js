@@ -506,6 +506,70 @@ async function handlerReivindicar(req, res) {
 }
 
 // ============================================================================
+// /api/aceitar-termos — grava o consentimento (tabela perfis_usuario) e
+// sincroniza permite_vitrine em TODAS as identificações já salvas dessa
+// conta, pra fotos antigas ficarem visíveis na vitrine/rankings sem precisar
+// enviar uma foto nova. Usa a service role key (ignora RLS), então funciona
+// de forma confiável mesmo se a gravação direta do client (perfis_usuario
+// via supabase-js) falhar por política de RLS.
+// ============================================================================
+async function handlerAceitarTermos(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Método não permitido' });
+  }
+
+  const token = pegarToken(req);
+  if (!token) {
+    return res.status(401).json({ error: 'Você precisa entrar na sua conta primeiro.' });
+  }
+  const { data: userData, error: erroAuth } = await supabase.auth.getUser(token);
+  if (erroAuth || !userData || !userData.user || !userData.user.email) {
+    return res.status(401).json({ error: 'Sessão inválida. Faça login novamente.' });
+  }
+
+  const userId = userData.user.id;
+  const email = userData.user.email.toLowerCase();
+  const permiteVitrine = !!(req.body && req.body.permite_vitrine);
+
+  try {
+    const { error: erroUpsert } = await supabase
+      .from('perfis_usuario')
+      .upsert({
+        user_id: userId,
+        email: email,
+        aceitou_termos: true,
+        termos_aceitos_em: new Date().toISOString(),
+        permite_vitrine: permiteVitrine
+      }, { onConflict: 'user_id' });
+
+    if (erroUpsert) {
+      console.error('Erro Supabase (upsert perfis_usuario):', erroUpsert);
+      return res.status(500).json({ error: 'Erro ao registrar aceite dos termos.' });
+    }
+
+    const { error: erroUpdate, count } = await supabase
+      .from('identificacoes')
+      .update({ permite_vitrine: permiteVitrine }, { count: 'exact' })
+      .eq('email', email);
+
+    if (erroUpdate) {
+      console.error('Erro Supabase (sync permite_vitrine em identificacoes):', erroUpdate);
+      // Não falha a resposta por causa disso — o consentimento em si já foi salvo.
+    }
+
+    return res.status(200).json({
+      ok: true,
+      aceitou_termos: true,
+      permite_vitrine: permiteVitrine,
+      identificacoes_sincronizadas: count || 0
+    });
+  } catch (err) {
+    console.error('Erro inesperado (aceitar-termos):', err);
+    return res.status(500).json({ error: 'Erro interno. Tente novamente.' });
+  }
+}
+
+// ============================================================================
 // DISPATCHER — decide qual sub-endpoint chamar, com base no parâmetro _fn
 // (definido pelos rewrites no vercel.json, transparente pro front-end)
 // ============================================================================
@@ -516,7 +580,8 @@ const ROTAS = {
   desbloquear: handlerDesbloquear,
   reivindicar: handlerReivindicar,
   'colocar-venda': handlerColocarVenda,
-  'remover-venda': handlerRemoverVenda
+  'remover-venda': handlerRemoverVenda,
+  'aceitar-termos': handlerAceitarTermos
 };
 
 module.exports = async function handler(req, res) {

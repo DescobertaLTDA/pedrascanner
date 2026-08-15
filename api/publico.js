@@ -9,14 +9,9 @@
 // /api/publico?_fn=<nome>, preservando também a query string original
 // (?pagina=1, ?id=..., ?ref=...), sem precisar mudar nada no front-end.
 //
-// ATENÇÃO: falta incluir aqui o /api/ranking-colecionadores — o arquivo
-// original não foi enviado. Assim que tiver o conteúdo dele, é só:
-//   1. Criar uma função handlerRankingColecionadores(req, res) aqui embaixo,
-//      com a mesma lógica do arquivo antigo;
-//   2. Adicionar 'ranking-colecionadores': handlerRankingColecionadores
-//      no objeto ROTAS lá no fim deste arquivo;
-//   3. Adicionar o rewrite correspondente no vercel.json (já deixei o
-//      comentário indicando onde).
+// Inclui também /api/ranking-colecionadores (handlerRankingColecionadores),
+// reconstruído do zero — agrupa por email as identificações desbloqueadas
+// e com permite_vitrine = true, somando o valor de cada pedra.
 
 const { createClient } = require('@supabase/supabase-js');
 
@@ -392,6 +387,80 @@ async function handlerObterPublico(req, res) {
 }
 
 // ============================================================================
+// /api/ranking-colecionadores — top colecionadores por valor total em pedras
+// catalogadas (soma da faixa de preço de cada identificação desbloqueada e
+// com permite_vitrine = true), agrupado por conta (email).
+// ============================================================================
+const RANKING_COLECIONADORES_LIMITE = 20;
+
+async function handlerRankingColecionadores(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+  if (req.method !== 'GET') {
+    return res.status(405).json({ error: 'Método não permitido' });
+  }
+
+  try {
+    const { data: linhas, error } = await supabase
+      .from('identificacoes')
+      .select('email, nome_exibicao, faixa_preco_brasil, foto_base64, foto_media_type, criado_em')
+      .eq('desbloqueada', true)
+      .eq('permite_vitrine', true)
+      .not('foto_base64', 'is', null)
+      .order('criado_em', { ascending: false });
+
+    if (error) {
+      console.error('Erro Supabase (ranking-colecionadores):', error);
+      return res.status(500).json({ error: 'Erro ao buscar ranking.' });
+    }
+
+    // Agrupa por email — cada colecionador vira uma entrada, somando o
+    // valor de todas as pedras e usando a foto mais recente como destaque.
+    const porEmail = {};
+    (linhas || []).forEach(function (item) {
+      const chave = (item.email || '').toLowerCase();
+      if (!chave) return;
+      if (!porEmail[chave]) {
+        porEmail[chave] = {
+          nome: item.nome_exibicao || 'Colecionador',
+          total_pedras: 0,
+          valor_total: 0,
+          foto_destaque: null
+        };
+      }
+      const grupo = porEmail[chave];
+      grupo.total_pedras += 1;
+      const valor = extrairValorExibicao(item.faixa_preco_brasil);
+      if (valor) grupo.valor_total += valor;
+      // Como as linhas já vêm ordenadas por criado_em desc, a primeira foto
+      // encontrada por email é a mais recente — vira a foto de destaque.
+      if (!grupo.foto_destaque && item.foto_base64) {
+        grupo.foto_destaque = 'data:' + (item.foto_media_type || 'image/jpeg') + ';base64,' + item.foto_base64;
+      }
+      // Nome de exibição pode ter sido preenchido só depois — prioriza o
+      // primeiro nome não vazio encontrado no grupo.
+      if (!grupo.nome || grupo.nome === 'Colecionador') {
+        grupo.nome = item.nome_exibicao || grupo.nome;
+      }
+    });
+
+    const ranking = Object.keys(porEmail)
+      .map(function (chave) { return porEmail[chave]; })
+      .sort(function (a, b) { return b.valor_total - a.valor_total; })
+      .slice(0, RANKING_COLECIONADORES_LIMITE);
+
+    return res.status(200).json({ ranking: ranking });
+  } catch (err) {
+    console.error('Erro inesperado (ranking-colecionadores):', err);
+    return res.status(500).json({ error: 'Erro interno.' });
+  }
+}
+
+// ============================================================================
 // /api/maps-key — expõe a chave do Google Maps/Places pro front-end
 // ============================================================================
 async function handlerMapsKey(req, res) {
@@ -558,8 +627,8 @@ const ROTAS = {
   'obter-publico': handlerObterPublico,
   'maps-key': handlerMapsKey,
   'lojas-proximas': handlerLojasProximas,
-  'pedras-venda': handlerPedrasVenda
-  // 'ranking-colecionadores': handlerRankingColecionadores,  <-- adicionar quando o arquivo original chegar
+  'pedras-venda': handlerPedrasVenda,
+  'ranking-colecionadores': handlerRankingColecionadores
 };
 
 module.exports = async function handler(req, res) {
