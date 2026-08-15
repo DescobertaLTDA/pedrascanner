@@ -366,6 +366,22 @@
       white-space: nowrap;
       flex-shrink: 0;
     }
+    .nav-colecao-pill {
+      font-size: 10.5px;
+      font-weight: 700;
+      color: #8a5a1e;
+      background: rgba(201, 150, 46, 0.14);
+      padding: 3px 8px;
+      border-radius: 20px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+    @media (max-width: 640px) {
+      .nav-colecao-pill { display: none; }
+    }
     .nav-chevron {
       width: 10px;
       height: 10px;
@@ -403,6 +419,27 @@
     }
     .nav-dropdown-saldo strong {
       color: var(--accent-dark);
+    }
+    .nav-dropdown-colecao {
+      font-size: 11px;
+      color: var(--ink-mute);
+      padding: 8px 10px 6px;
+      border-bottom: 1px solid var(--line);
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .nav-dropdown-colecao strong {
+      color: #8a5a1e;
+    }
+    .nav-dropdown-colecao svg {
+      width: 12px;
+      height: 12px;
+      stroke: #8a5a1e;
+      stroke-width: 2;
+      fill: none;
+      flex-shrink: 0;
     }
     .nav-dropdown button {
       width: 100%;
@@ -2258,6 +2295,48 @@
       return 'R$ ' + valor.toFixed(2).replace('.', ',');
     }
 
+    // Extrai um valor numérico estimado de um item do histórico, tentando os
+    // possíveis formatos que a API pode retornar (número pronto ou texto em faixa).
+    function extrairValorItem(item) {
+      if (!item) return 0;
+      if (typeof item.valor_exibicao === 'number' && !isNaN(item.valor_exibicao)) return item.valor_exibicao;
+      if (typeof item.valor_estimado === 'number' && !isNaN(item.valor_estimado)) return item.valor_estimado;
+      if (typeof item.preco_estimado === 'number' && !isNaN(item.preco_estimado)) return item.preco_estimado;
+      var textoFaixa = item.faixa_preco_brasil || item.valor || item.valor_exibicao;
+      if (typeof textoFaixa === 'string') {
+        var numeros = textoFaixa.match(/[\d.,]+/g);
+        if (numeros && numeros.length) {
+          var valoresParseados = numeros.map(function(n) {
+            return parseFloat(n.replace(/\./g, '').replace(',', '.'));
+          }).filter(function(n) { return !isNaN(n); });
+          if (valoresParseados.length >= 2) return (valoresParseados[0] + valoresParseados[1]) / 2;
+          if (valoresParseados.length === 1) return valoresParseados[0];
+        }
+      }
+      return 0;
+    }
+
+    function atualizarValorColecao(accessToken) {
+      var pillColecao = document.getElementById('nav-colecao');
+      var dropdownColecaoValor = document.getElementById('nav-dropdown-colecao-valor');
+      fetch('/api/historico', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + accessToken }
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          var itens = data.itens || [];
+          var total = itens.reduce(function(soma, item) { return soma + extrairValorItem(item); }, 0);
+          var totalFormatado = formatarMoedaBR(total) || 'R$ 0,00';
+          if (pillColecao) pillColecao.innerHTML = '💎 ' + totalFormatado;
+          if (dropdownColecaoValor) dropdownColecaoValor.textContent = totalFormatado;
+        })
+        .catch(function() {
+          if (pillColecao) pillColecao.innerHTML = '💎 R$ 0,00';
+          if (dropdownColecaoValor) dropdownColecaoValor.textContent = 'R$ 0,00';
+        });
+    }
+
     function tempoRelativo(dataIso) {
       if (!dataIso) return '';
       var diffMin = Math.max(0, Math.round((Date.now() - new Date(dataIso).getTime()) / 60000));
@@ -2676,10 +2755,12 @@
             '<button class="nav-user-btn" id="btn-nav-user-toggle">' +
             '<span class="nav-avatar">' + inicial + '</span>' +
             '<span class="nav-name">' + nomeExibido + '</span>' +
+            '<span class="nav-colecao-pill" id="nav-colecao" title="Valor estimado total das suas pedras escaneadas">💎 ···</span>' +
             '<span class="nav-saldo-pill" id="nav-saldo">···</span>' +
             '<svg class="nav-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>' +
             '</button>' +
             '<div class="nav-dropdown" id="nav-dropdown">' +
+            '<div class="nav-dropdown-colecao" id="nav-dropdown-colecao"><svg viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z"/></svg> <span>Coleção: <strong id="nav-dropdown-colecao-valor">···</strong></span></div>' +
             '<div class="nav-dropdown-saldo" id="nav-dropdown-saldo">···</div>' +
             '<div class="nav-dropdown-gratis" id="nav-dropdown-gratis" style="display:none;"></div>' +
             '<button class="sair" id="btn-header-sair">Sair</button>' +
@@ -2718,6 +2799,7 @@
               if (areaOferta) areaOferta.style.display = (data.pago && data.saldo > 0) ? 'none' : '';
             })
             .catch(function() {});
+          atualizarValorColecao(sessao.access_token);
           if (secaoInstitucional) secaoInstitucional.style.display = 'none';
         } else {
           headerAuthArea.innerHTML = '<button class="nav-cta" id="btn-header-entrar"><span class="full">Entrar / Registrar</span><span class="short">Entrar</span></button>';
@@ -2748,7 +2830,16 @@
             headers: { 'Authorization': 'Bearer ' + sessao.access_token }
           })
           .then(function(res) { return res.json(); })
-          .then(function(data) { renderizarHistorico(data.itens || []); })
+          .then(function(data) {
+            renderizarHistorico(data.itens || []);
+            var itens = data.itens || [];
+            var total = itens.reduce(function(soma, item) { return soma + extrairValorItem(item); }, 0);
+            var totalFormatado = formatarMoedaBR(total) || 'R$ 0,00';
+            var pillColecao = document.getElementById('nav-colecao');
+            var dropdownColecaoValor = document.getElementById('nav-dropdown-colecao-valor');
+            if (pillColecao) pillColecao.innerHTML = '💎 ' + totalFormatado;
+            if (dropdownColecaoValor) dropdownColecaoValor.textContent = totalFormatado;
+          })
           .catch(function() {
             historicoLista.innerHTML = '';
             historicoVazio.textContent = 'Não foi possível carregar seu histórico agora.';
