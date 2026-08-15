@@ -14,6 +14,7 @@
     { "source": "/api/colocar-venda", "destination": "/api/conta?_fn=colocar-venda" },
     { "source": "/api/remover-venda", "destination": "/api/conta?_fn=remover-venda" },
     { "source": "/api/aceitar-termos", "destination": "/api/conta?_fn=aceitar-termos" },
+    { "source": "/api/excluir-identificacao", "destination": "/api/conta?_fn=excluir-identificacao" },
     { "source": "/api/stats", "destination": "/api/publico?_fn=stats" },
     { "source": "/api/vitrine", "destination": "/api/publico?_fn=vitrine" },
     { "source": "/api/obter-publico", "destination": "/api/publico?_fn=obter-publico" },
