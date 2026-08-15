@@ -538,6 +538,52 @@ async function handlerReivindicar(req, res) {
 }
 
 // ============================================================================
+// /api/excluir-identificacao — apaga permanentemente uma identificação
+// (foto + dados) da conta autenticada. Diferente de /api/remover-venda
+// (que só tira o anúncio de venda, mantendo a identificação no histórico),
+// este endpoint remove a linha inteira — usado no botão de lixeira da
+// vitrine/catálogo, quando a pessoa se arrepende de ter catalogado algo.
+// ============================================================================
+async function handlerExcluirIdentificacao(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Método não permitido' });
+  }
+
+  const { identificacao_id } = req.body || {};
+  if (!identificacao_id) {
+    return res.status(400).json({ error: 'identificacao_id não enviado' });
+  }
+
+  const email = await autenticar(req, res);
+  if (!email) return;
+
+  const { data: identificacao, error: erroIdent } = await supabase
+    .from('identificacoes')
+    .select('id, email')
+    .eq('id', identificacao_id)
+    .single();
+
+  if (erroIdent || !identificacao) {
+    return res.status(404).json({ error: 'Identificação não encontrada.' });
+  }
+  if (identificacao.email !== email) {
+    return res.status(403).json({ error: 'Essa identificação não pertence a essa conta.' });
+  }
+
+  const { error: erroDelete } = await supabase
+    .from('identificacoes')
+    .delete()
+    .eq('id', identificacao_id);
+
+  if (erroDelete) {
+    console.error('Erro Supabase (excluir-identificacao):', erroDelete);
+    return res.status(500).json({ error: 'Erro ao excluir. Tente novamente.' });
+  }
+
+  return res.status(200).json({ ok: true });
+}
+
+// ============================================================================
 // /api/aceitar-termos — grava o consentimento (tabela perfis_usuario) e
 // sincroniza permite_vitrine em TODAS as identificações já salvas dessa
 // conta, pra fotos antigas ficarem visíveis na vitrine/rankings sem precisar
@@ -613,7 +659,8 @@ const ROTAS = {
   reivindicar: handlerReivindicar,
   'colocar-venda': handlerColocarVenda,
   'remover-venda': handlerRemoverVenda,
-  'aceitar-termos': handlerAceitarTermos
+  'aceitar-termos': handlerAceitarTermos,
+  'excluir-identificacao': handlerExcluirIdentificacao
 };
 
 module.exports = async function handler(req, res) {
