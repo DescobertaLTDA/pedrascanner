@@ -1198,6 +1198,91 @@
       }
     }
 
+    /* ranking de colecionadores */
+    .colecionadores-mini-stats {
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 6px;
+      font-size: 11.5px;
+      color: var(--ink-mute);
+    }
+    .colecionadores-mini-stats strong {
+      color: var(--accent-dark);
+      font-family: 'Space Mono', monospace;
+    }
+    .colecionadores-lista {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .colecionador-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px 14px;
+    }
+    .colecionador-pos {
+      width: 24px;
+      flex-shrink: 0;
+      text-align: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--ink-mute2);
+    }
+    .colecionador-foto {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 2px solid var(--card);
+      box-shadow: 0 0 0 1.5px var(--line-strong);
+      background: var(--card-alt);
+    }
+    .colecionador-foto-vazia {
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: var(--accent-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+    .colecionador-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .colecionador-nome {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--ink);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .colecionador-sub {
+      font-size: 11px;
+      color: var(--ink-mute2);
+      margin-top: 1px;
+    }
+    .colecionador-valor {
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      font-size: 13.5px;
+      color: var(--accent-dark);
+      flex-shrink: 0;
+      white-space: nowrap;
+    }
+
     /* demais componentes */
     .resultado {
       margin-top: 24px;
@@ -1987,12 +2072,15 @@
     </div>
 
     <div class="card" style="margin-top:20px;background:var(--accent-light);border-color:var(--line);">
-      <h2 style="font-size:18px;"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> Comunidade ao vivo</h2>
-      <div class="community-stats">
-        <div class="stat"><span class="num" id="stat-membros">...</span><span class="label">membros</span></div>
-        <div class="stat"><span class="num" id="stat-pedras">...</span><span class="label">pedras avaliadas</span></div>
-        <div class="stat"><span class="num" id="stat-hoje">...</span><span class="label">avaliações hoje</span></div>
+      <h2 style="font-size:18px;"><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M7 6H4a2 2 0 0 0 0 4h3M17 6h3a2 2 0 0 1 0 4h-3"/></svg> Top Colecionadores</h2>
+      <p style="font-size:12.5px;color:var(--ink-mute);text-align:center;margin-top:4px;">Quem já catalogou mais valor em pedras na comunidade</p>
+      <div class="colecionadores-mini-stats">
+        <span><strong id="stat-membros">···</strong> membros</span>
+        <span><strong id="stat-pedras">···</strong> pedras avaliadas</span>
+        <span><strong id="stat-hoje">···</strong> hoje</span>
       </div>
+      <div class="colecionadores-lista" id="colecionadores-lista"></div>
+      <p class="aviso" id="colecionadores-vazio" style="display:none;text-align:center;color:var(--ink-mute2);padding:14px 0 4px;font-size:13px;">Ainda não temos colecionadores suficientes pra montar o ranking.</p>
     </div>
 
     <div class="card" id="area-vitrine">
@@ -4234,6 +4322,78 @@
       });
     }
 
+    // ========================================================================
+    // RANKING DE COLECIONADORES
+    // ========================================================================
+    function formatarMoedaCompacta(valor) {
+      if (typeof valor !== 'number' || isNaN(valor)) return 'R$ 0';
+      if (valor >= 1000) return 'R$ ' + (valor / 1000).toFixed(1).replace('.', ',') + 'k';
+      return 'R$ ' + valor.toFixed(0);
+    }
+
+    function carregarRankingColecionadores() {
+      var lista = document.getElementById('colecionadores-lista');
+      var vazio = document.getElementById('colecionadores-vazio');
+      if (!lista) return;
+      fetch('/api/ranking-colecionadores')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          var ranking = data.ranking || [];
+          lista.innerHTML = '';
+          if (ranking.length === 0) {
+            vazio.style.display = 'block';
+            return;
+          }
+          vazio.style.display = 'none';
+          var medalhas = ['🥇', '🥈', '🥉'];
+          ranking.forEach(function(pessoa, indice) {
+            var row = document.createElement('div');
+            row.className = 'colecionador-row';
+
+            var pos = document.createElement('div');
+            pos.className = 'colecionador-pos';
+            pos.textContent = medalhas[indice] || ('#' + (indice + 1));
+            row.appendChild(pos);
+
+            if (pessoa.foto_destaque) {
+              var img = document.createElement('img');
+              img.className = 'colecionador-foto';
+              img.src = pessoa.foto_destaque;
+              img.alt = pessoa.nome;
+              row.appendChild(img);
+            } else {
+              var fotoVazia = document.createElement('div');
+              fotoVazia.className = 'colecionador-foto-vazia';
+              fotoVazia.textContent = '🪨';
+              row.appendChild(fotoVazia);
+            }
+
+            var info = document.createElement('div');
+            info.className = 'colecionador-info';
+            var nome = document.createElement('div');
+            nome.className = 'colecionador-nome';
+            nome.textContent = pessoa.nome;
+            var sub = document.createElement('div');
+            sub.className = 'colecionador-sub';
+            sub.textContent = pessoa.total_pedras + (pessoa.total_pedras === 1 ? ' pedra catalogada' : ' pedras catalogadas');
+            info.appendChild(nome);
+            info.appendChild(sub);
+            row.appendChild(info);
+
+            var valor = document.createElement('div');
+            valor.className = 'colecionador-valor';
+            valor.textContent = formatarMoedaCompacta(pessoa.valor_total);
+            row.appendChild(valor);
+
+            lista.appendChild(row);
+          });
+        })
+        .catch(function() {
+          vazio.textContent = 'Não foi possível carregar o ranking agora.';
+          vazio.style.display = 'block';
+        });
+    }
+
     // Foto fixa de demonstração do scanner — Jaspe Bumble Bee (Jaspe Abelha), id 1d4ae7d6-50ac-457b-88e8-3108185ee77e
     var FOTO_DEMO_SCAN_FIXA = '/stone-placeholder.png';
     function carregarFotoDemoScan() {
@@ -4259,7 +4419,9 @@
       renderizarRankings(rankingAtual);
     });
     carregarEstatisticas();
+    carregarRankingColecionadores();
     setInterval(carregarEstatisticas, 60000);
+    setInterval(carregarRankingColecionadores, 120000);
     document.addEventListener('visibilitychange', function() { if (!document.hidden) carregarEstatisticas(); });
 
     supa.auth.getSession().then(function(sessaoResp) {
