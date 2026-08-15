@@ -2052,9 +2052,6 @@
   <header>
     <div class="nav-wrap">
       <div class="nav-left">
-        <button class="btn-sidebar-toggle" id="btn-sidebar-toggle" title="Histórico" aria-label="Abrir histórico">
-          <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg>
-        </button>
         <a href="#" class="logo">
           <img src="/logo.png" alt="SCANNER 3.5" class="logo-icon">
           <span class="logo-text">
@@ -2064,6 +2061,14 @@
         </a>
       </div>
       <div class="nav-right">
+        <a class="nav-link" id="nav-link-minhas-pedras">
+          <svg viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z"/></svg>
+          Minhas Pedras
+        </a>
+        <a class="nav-link" id="nav-link-vender">
+          <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          Vender
+        </a>
         <a class="nav-link" id="nav-link-catalogo">
           <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
           Catálogo
@@ -2086,7 +2091,7 @@
   <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-head">
-      <h2><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></svg> Histórico</h2>
+      <h2><svg viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z"/></svg> Minhas Pedras</h2>
       <button class="btn-sidebar-close" id="btn-sidebar-close" aria-label="Fechar histórico"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
     </div>
     <div class="sidebar-body">
@@ -2251,6 +2256,18 @@
         <span class="google-text">Entrar com Google</span>
       </button>
       <p class="erro" id="erro-login" style="display:none;text-align:center;font-size:13px;color:var(--danger);margin-top:12px;"></p>
+    </div>
+
+    <!-- PAINEL DE GESTÃO DOS ANÚNCIOS ("Vender") -->
+    <div class="card painel-acesso" id="painel-vender" style="padding:28px 0 24px;max-width:520px;">
+      <button type="button" class="painel-fechar" id="btn-fechar-vender">&times;</button>
+      <div style="padding:0 24px;">
+        <div class="painel-tag" style="text-align:center;padding-right:0;">Seus anúncios</div>
+        <h2 style="font-size:20px;text-align:center;margin-top:4px;color:var(--ink);">Gerenciar vendas</h2>
+        <p style="font-size:13px;color:var(--ink-mute);text-align:center;margin:8px 0 0;">Edite valor, pause, marque como vendida ou remova seus anúncios.</p>
+      </div>
+      <div id="lista-vender" style="padding:18px 24px 0;display:flex;flex-direction:column;gap:12px;max-height:56vh;overflow-y:auto;"></div>
+      <p style="text-align:center;color:var(--ink-mute2);padding:20px 24px 0;font-size:13px;" id="vender-vazio">Carregando...</p>
     </div>
 
     <!-- PAINEL DE EDIÇÃO DE PERFIL -->
@@ -2876,6 +2893,10 @@
     var painelLogin = document.getElementById('painel-login');
     var btnFecharLogin = document.getElementById('btn-fechar-login');
     var painelPerfil = document.getElementById('painel-perfil');
+    var painelVender = document.getElementById('painel-vender');
+    var btnFecharVender = document.getElementById('btn-fechar-vender');
+    var listaVenderEl = document.getElementById('lista-vender');
+    var venderVazioEl = document.getElementById('vender-vazio');
     var btnFecharPerfil = document.getElementById('btn-fechar-perfil');
     var btnPerfilAvatar = document.getElementById('btn-perfil-avatar');
     var inputPerfilFoto = document.getElementById('input-perfil-foto');
@@ -2916,11 +2937,12 @@
     var avaliacoesGratisRestantes = 0;
     var sidebar = document.getElementById('sidebar');
     var sidebarBackdrop = document.getElementById('sidebar-backdrop');
-    var btnSidebarToggle = document.getElementById('btn-sidebar-toggle');
     var btnSidebarClose = document.getElementById('btn-sidebar-close');
     var historicoLista = document.getElementById('historico-lista');
     var historicoVazio = document.getElementById('historico-vazio');
     var btnCtaFinal = document.getElementById('btn-cta-final');
+    var navLinkMinhasPedras = document.getElementById('nav-link-minhas-pedras');
+    var navLinkVender = document.getElementById('nav-link-vender');
     var navLinkCatalogo = document.getElementById('nav-link-catalogo');
     var navLinkRankings = document.getElementById('nav-link-rankings');
     var navLinkAjuda = document.getElementById('nav-link-ajuda');
@@ -2958,6 +2980,7 @@
       painelLogin.classList.remove('active');
       painelBoasVindas.classList.remove('active');
       painelPerfil.classList.remove('active');
+      painelVender.classList.remove('active');
       document.body.classList.remove('popup-aberto');
       fecharSidebar();
     }
@@ -3223,7 +3246,8 @@
       });
     });
 
-    btnSidebarToggle.addEventListener('click', abrirHistorico);
+    navLinkMinhasPedras.addEventListener('click', function(e) { e.preventDefault(); abrirHistorico(); });
+    navLinkVender.addEventListener('click', function(e) { e.preventDefault(); abrirPainelVender(); });
     btnSidebarClose.addEventListener('click', fecharSidebar);
     sidebarBackdrop.addEventListener('click', fecharSidebar);
 
@@ -3406,6 +3430,191 @@
           });
       });
     }
+
+    // ========================================================================
+    // VENDER — gerenciar os anúncios do próprio usuário (editar, pausar,
+    // reativar, marcar como vendida, excluir)
+    // ========================================================================
+    var STATUS_VENDA_INFO = {
+      ativo: { texto: 'Anunciado', cor: 'var(--accent)' },
+      pausado: { texto: 'Pausado', cor: 'var(--ink-mute2)' },
+      vendido: { texto: 'Vendido', cor: '#b8860b' }
+    };
+
+    function abrirPainelVender() {
+      supa.auth.getSession().then(function(sessaoResp) {
+        var sessao = sessaoResp.data.session;
+        if (!sessao) { abrirPainelLogin(); return; }
+        abrirPopup(painelVender);
+        listaVenderEl.innerHTML = '';
+        venderVazioEl.style.display = 'block';
+        venderVazioEl.textContent = 'Carregando...';
+        fetch('/api/historico', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + sessao.access_token }
+          })
+          .then(function(res) { return res.json(); })
+          .then(function(data) {
+            var itens = (data.itens || []).filter(function(item) { return !!item.valor_venda; });
+            renderizarListaVender(itens, sessao.access_token);
+          })
+          .catch(function() {
+            venderVazioEl.textContent = 'Não foi possível carregar seus anúncios agora.';
+            venderVazioEl.style.display = 'block';
+          });
+      });
+    }
+
+    function renderizarListaVender(itens, accessToken) {
+      listaVenderEl.innerHTML = '';
+      if (!itens.length) {
+        venderVazioEl.textContent = 'Você ainda não colocou nenhuma pedra à venda. Abra uma pedra já identificada e toque em "Colocar à venda".';
+        venderVazioEl.style.display = 'block';
+        return;
+      }
+      venderVazioEl.style.display = 'none';
+
+      itens.forEach(function(item) {
+        var status = item.venda_status || 'ativo';
+        var info = STATUS_VENDA_INFO[status] || STATUS_VENDA_INFO.ativo;
+        var card = document.createElement('div');
+        card.style.cssText = 'border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--card-alt);';
+
+        var cabecalho = document.createElement('div');
+        cabecalho.style.cssText = 'display:flex;justify-content:space-between;align-items:flex-start;gap:8px;';
+        cabecalho.innerHTML =
+          '<div>' +
+          '<div style="font-weight:600;font-size:14px;color:var(--ink);">' + escapeHtml(item.nome_provavel || 'Pedra não identificada') + '</div>' +
+          '<div style="font-family:\'Space Mono\',monospace;font-weight:700;font-size:15px;color:var(--accent-dark);margin-top:2px;">' + escapeHtml(item.valor_venda) +
+          (item.negociavel_venda ? ' <span style="font-weight:600;font-size:10px;color:var(--ink-mute2);">negociável</span>' : '') + '</div>' +
+          '</div>' +
+          '<span style="flex-shrink:0;font-size:10px;font-weight:700;padding:3px 9px;border-radius:10px;background:' + info.cor + ';color:#fff;white-space:nowrap;">' + info.texto + '</span>';
+        card.appendChild(cabecalho);
+
+        var formEdit = document.createElement('div');
+        formEdit.style.cssText = 'display:none;margin-top:10px;padding-top:10px;border-top:1px solid var(--line);';
+        var idValor = 'ev-' + item.id, idTel = 'et-' + item.id, idObs = 'eo-' + item.id, idNeg = 'en-' + item.id;
+        formEdit.innerHTML =
+          '<label style="font-size:11px;font-weight:600;color:var(--ink-mute);display:block;margin-bottom:4px;">Valor</label>' +
+          '<input type="text" id="' + idValor + '" value="' + escapeHtml(item.valor_venda || '') + '" style="width:100%;padding:9px 10px;border-radius:8px;border:1px solid var(--line-strong);font-size:13px;font-family:inherit;margin-bottom:8px;">' +
+          '<label style="font-size:11px;font-weight:600;color:var(--ink-mute);display:block;margin-bottom:4px;">Telefone (WhatsApp)</label>' +
+          '<input type="text" id="' + idTel + '" value="' + escapeHtml(item.telefone_venda || '') + '" style="width:100%;padding:9px 10px;border-radius:8px;border:1px solid var(--line-strong);font-size:13px;font-family:inherit;margin-bottom:8px;">' +
+          '<label style="font-size:11px;font-weight:600;color:var(--ink-mute);display:block;margin-bottom:4px;">Observação</label>' +
+          '<textarea id="' + idObs + '" rows="2" style="width:100%;padding:9px 10px;border-radius:8px;border:1px solid var(--line-strong);font-size:13px;font-family:inherit;resize:vertical;margin-bottom:8px;">' + escapeHtml(item.observacao_venda || '') + '</textarea>' +
+          '<label style="display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-mute);margin-bottom:10px;"><input type="checkbox" id="' + idNeg + '"' + (item.negociavel_venda ? ' checked' : '') + '> Valor negociável</label>' +
+          '<button type="button" class="btn-salvar-edicao-venda" style="width:100%;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:700;cursor:pointer;">Salvar alterações</button>' +
+          '<p class="erro-edicao-venda" style="display:none;color:var(--danger);font-size:12px;margin-top:6px;text-align:center;"></p>';
+        card.appendChild(formEdit);
+
+        var acoes = document.createElement('div');
+        acoes.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;';
+
+        function criarBotaoAcao(texto, cor) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.textContent = texto;
+          b.style.cssText = 'flex:1;min-width:100px;background:' + cor + ';border:none;border-radius:8px;padding:8px;font-size:11.5px;font-weight:700;cursor:pointer;';
+          return b;
+        }
+
+        var btnEditar = criarBotaoAcao('Editar', 'var(--card)');
+        btnEditar.style.border = '1px solid var(--line-strong)';
+        btnEditar.style.color = 'var(--ink)';
+        btnEditar.addEventListener('click', function() {
+          formEdit.style.display = formEdit.style.display === 'none' ? 'block' : 'none';
+        });
+        acoes.appendChild(btnEditar);
+
+        if (status !== 'vendido') {
+          var btnPausarReativar = status === 'pausado' ?
+            criarBotaoAcao('Reativar', 'var(--accent)') :
+            criarBotaoAcao('Pausar', 'var(--card)');
+          if (status !== 'pausado') { btnPausarReativar.style.border = '1px solid var(--line-strong)'; btnPausarReativar.style.color = 'var(--ink)'; }
+          else { btnPausarReativar.style.color = '#fff'; }
+          btnPausarReativar.addEventListener('click', function() {
+            btnPausarReativar.disabled = true;
+            if (status === 'pausado') {
+              // Reativar = reenviar os mesmos dados pro colocar-venda
+              fetch('/api/colocar-venda', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
+                body: JSON.stringify({
+                  identificacao_id: item.id, valor: item.valor_venda, telefone: item.telefone_venda,
+                  observacao: item.observacao_venda, negociavel: item.negociavel_venda
+                })
+              }).then(function() { abrirPainelVender(); invalidarCachePedrasVenda(); }).catch(function() { btnPausarReativar.disabled = false; });
+            } else {
+              fetch('/api/remover-venda', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
+                body: JSON.stringify({ identificacao_id: item.id, acao: 'pausar' })
+              }).then(function() { abrirPainelVender(); invalidarCachePedrasVenda(); }).catch(function() { btnPausarReativar.disabled = false; });
+            }
+          });
+          acoes.appendChild(btnPausarReativar);
+
+          var btnVendida = criarBotaoAcao('Marcar vendida', '#b8860b');
+          btnVendida.style.color = '#fff';
+          btnVendida.addEventListener('click', function() {
+            btnVendida.disabled = true;
+            fetch('/api/remover-venda', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
+              body: JSON.stringify({ identificacao_id: item.id, acao: 'vendida' })
+            }).then(function() { abrirPainelVender(); invalidarCachePedrasVenda(); }).catch(function() { btnVendida.disabled = false; });
+          });
+          acoes.appendChild(btnVendida);
+        }
+
+        var btnExcluir = criarBotaoAcao('Excluir', 'var(--card)');
+        btnExcluir.style.border = '1px solid var(--danger)';
+        btnExcluir.style.color = 'var(--danger)';
+        btnExcluir.addEventListener('click', function() {
+          if (!window.confirm('Excluir esse anúncio? Essa ação não pode ser desfeita.')) return;
+          btnExcluir.disabled = true;
+          fetch('/api/remover-venda', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
+            body: JSON.stringify({ identificacao_id: item.id, acao: 'excluir' })
+          }).then(function() { abrirPainelVender(); invalidarCachePedrasVenda(); }).catch(function() { btnExcluir.disabled = false; });
+        });
+        acoes.appendChild(btnExcluir);
+
+        card.appendChild(acoes);
+
+        var btnSalvarEdicao = formEdit.querySelector('.btn-salvar-edicao-venda');
+        var erroEdicao = formEdit.querySelector('.erro-edicao-venda');
+        btnSalvarEdicao.addEventListener('click', function() {
+          erroEdicao.style.display = 'none';
+          var novoValor = document.getElementById(idValor).value.trim();
+          var novoTel = document.getElementById(idTel).value.trim().replace(/\D/g, '');
+          var novaObs = document.getElementById(idObs).value.trim();
+          var novoNeg = document.getElementById(idNeg).checked;
+          if (!novoValor) { erroEdicao.textContent = 'Informe o valor.'; erroEdicao.style.display = 'block'; return; }
+          if (!novoTel || novoTel.length < 10) { erroEdicao.textContent = 'Informe um telefone válido, com DDD.'; erroEdicao.style.display = 'block'; return; }
+          btnSalvarEdicao.disabled = true;
+          btnSalvarEdicao.textContent = 'Salvando...';
+          fetch('/api/colocar-venda', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
+              body: JSON.stringify({ identificacao_id: item.id, valor: novoValor, telefone: novoTel, observacao: novaObs, negociavel: novoNeg })
+            })
+            .then(function(res) { return res.json(); })
+            .then(function() { invalidarCachePedrasVenda(); abrirPainelVender(); })
+            .catch(function() {
+              erroEdicao.textContent = 'Não foi possível salvar agora. Tente de novo.';
+              erroEdicao.style.display = 'block';
+              btnSalvarEdicao.disabled = false;
+              btnSalvarEdicao.textContent = 'Salvar alterações';
+            });
+        });
+
+        listaVenderEl.appendChild(card);
+      });
+    }
+
+    btnFecharVender.addEventListener('click', function() { esconderPaineis(); });
+    painelVender.addEventListener('click', function(e) { if (e.target === painelVender) esconderPaineis(); });
 
     function atualizarNivelColecionador(total) {
       var box = document.getElementById('nivel-colecionador');
