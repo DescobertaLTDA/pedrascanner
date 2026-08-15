@@ -2049,6 +2049,40 @@
       <button id="btn-fechar-modal-navinterno" style="width:100%;background:none;border:none;color:var(--ink-mute);font-size:13px;cursor:pointer;padding:6px;">Entendi, continuar mesmo assim</button>
     </div>
   </div>
+
+  <!-- ESCOLHA: LIGAR CÂMERA OU ENVIAR FOTO JÁ EXISTENTE -->
+  <div id="modal-escolha-foto" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;padding:20px;">
+    <div style="background:var(--card);max-width:340px;width:100%;border-radius:16px;padding:26px 24px 22px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <h3 style="font-family:'Fraunces',serif;font-size:18px;color:var(--ink);margin-bottom:6px;">Como quer enviar a foto?</h3>
+      <p style="font-size:13px;color:var(--ink-mute);line-height:1.5;margin-bottom:20px;">Ligue a câmera e escaneie a pedra na hora, ou envie uma foto que já tem salva.</p>
+      <button type="button" id="btn-escolha-camera" style="width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#fff;stroke-width:2;fill:none;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Ligar câmera
+      </button>
+      <button type="button" id="btn-escolha-galeria" style="width:100%;background:var(--card-alt);color:var(--ink);border:1px solid var(--line-strong);border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;">Fazer upload de foto</button>
+      <button type="button" id="btn-escolha-cancelar" style="width:100%;background:none;border:none;color:var(--ink-mute);font-size:13px;cursor:pointer;padding:6px;">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- CÂMERA AO VIVO — "sensor" escaneando a pedra em tempo real -->
+  <div id="modal-camera" style="display:none;position:fixed;inset:0;z-index:9999;background:#000;align-items:center;justify-content:center;">
+    <div style="position:relative;width:100%;height:100%;max-width:520px;margin:0 auto;overflow:hidden;">
+      <video id="camera-video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:block;background:#000;"></video>
+      <div class="scanner-grid"></div>
+      <div class="scanner-line"></div>
+      <span class="dz-scan-corner tl" style="border-color:#fff;opacity:0.9;width:22px;height:22px;top:18px;left:18px;"></span>
+      <span class="dz-scan-corner tr" style="border-color:#fff;opacity:0.9;width:22px;height:22px;top:18px;right:18px;"></span>
+      <span class="dz-scan-corner bl" style="border-color:#fff;opacity:0.9;width:22px;height:22px;bottom:110px;left:18px;"></span>
+      <span class="dz-scan-corner br" style="border-color:#fff;opacity:0.9;width:22px;height:22px;bottom:110px;right:18px;"></span>
+      <button type="button" id="btn-camera-fechar" style="position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,0.5);border:none;color:#fff;font-size:20px;line-height:1;cursor:pointer;">&times;</button>
+      <p style="position:absolute;bottom:112px;left:0;right:0;text-align:center;color:#fff;font-size:12.5px;font-family:'Space Mono',monospace;text-shadow:0 1px 3px rgba(0,0,0,0.6);padding:0 20px;">Centralize a pedra no quadro e toque para escanear</p>
+      <div style="position:absolute;bottom:28px;left:0;right:0;display:flex;justify-content:center;">
+        <button type="button" id="btn-camera-capturar" aria-label="Escanear pedra" style="width:68px;height:68px;border-radius:50%;background:#fff;border:4px solid rgba(255,255,255,0.45);cursor:pointer;"></button>
+      </div>
+    </div>
+  </div>
+  <canvas id="camera-canvas" style="display:none;"></canvas>
+
   <header>
     <div class="nav-wrap">
       <div class="nav-left">
@@ -4107,18 +4141,103 @@
         if (modalAviso) { modalAviso.style.display = 'flex'; }
         return;
       }
-      inputFoto.click();
+      abrirEscolhaFoto();
     });
     inputFoto.addEventListener('change', function(e) {
       var file = e.target.files[0];
       inputFoto.value = '';
+      inputFoto.removeAttribute('capture');
       processarArquivoDeFoto(file);
     });
     btnAdicionarAngulo.addEventListener('click', function() {
       if (fotosSelecionadas.length >= MAX_FOTOS) return;
-      inputFoto.click();
+      abrirEscolhaFoto();
     });
     btnTrocar.addEventListener('click', resetarUploadCompleto);
+
+    // ========================================================================
+    // ESCOLHA CÂMERA x GALERIA + CÂMERA AO VIVO COM "SENSOR"
+    // ========================================================================
+    var modalEscolhaFoto = document.getElementById('modal-escolha-foto');
+    var btnEscolhaCamera = document.getElementById('btn-escolha-camera');
+    var btnEscolhaGaleria = document.getElementById('btn-escolha-galeria');
+    var btnEscolhaCancelar = document.getElementById('btn-escolha-cancelar');
+    var modalCamera = document.getElementById('modal-camera');
+    var cameraVideo = document.getElementById('camera-video');
+    var cameraCanvas = document.getElementById('camera-canvas');
+    var btnCameraCapturar = document.getElementById('btn-camera-capturar');
+    var btnCameraFechar = document.getElementById('btn-camera-fechar');
+    var streamCameraAtual = null;
+
+    function abrirEscolhaFoto() {
+      if (fotosSelecionadas.length >= MAX_FOTOS) return;
+      modalEscolhaFoto.style.display = 'flex';
+    }
+    function fecharEscolhaFoto() {
+      modalEscolhaFoto.style.display = 'none';
+    }
+    btnEscolhaCancelar.addEventListener('click', fecharEscolhaFoto);
+    modalEscolhaFoto.addEventListener('click', function(e) {
+      if (e.target === modalEscolhaFoto) fecharEscolhaFoto();
+    });
+    btnEscolhaGaleria.addEventListener('click', function() {
+      fecharEscolhaFoto();
+      inputFoto.removeAttribute('capture');
+      inputFoto.click();
+    });
+    btnEscolhaCamera.addEventListener('click', function() {
+      fecharEscolhaFoto();
+      abrirCamera();
+    });
+
+    function abrirCamera() {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        abrirCameraFallback();
+        return;
+      }
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false })
+        .then(function(stream) {
+          streamCameraAtual = stream;
+          cameraVideo.srcObject = stream;
+          modalCamera.style.display = 'flex';
+        })
+        .catch(function() {
+          // Sem permissão ou sem câmera acessível via navegador — deixa o
+          // próprio celular abrir o app de câmera nativo (input com capture).
+          abrirCameraFallback();
+        });
+    }
+
+    function abrirCameraFallback() {
+      inputFoto.setAttribute('capture', 'environment');
+      inputFoto.click();
+    }
+
+    function pararCamera() {
+      if (streamCameraAtual) {
+        streamCameraAtual.getTracks().forEach(function(t) { t.stop(); });
+        streamCameraAtual = null;
+      }
+      cameraVideo.srcObject = null;
+    }
+
+    function fecharCamera() {
+      pararCamera();
+      modalCamera.style.display = 'none';
+    }
+    btnCameraFechar.addEventListener('click', fecharCamera);
+
+    btnCameraCapturar.addEventListener('click', function() {
+      if (!cameraVideo.videoWidth) return;
+      cameraCanvas.width = cameraVideo.videoWidth;
+      cameraCanvas.height = cameraVideo.videoHeight;
+      cameraCanvas.getContext('2d').drawImage(cameraVideo, 0, 0, cameraCanvas.width, cameraCanvas.height);
+      cameraCanvas.toBlob(function(blob) {
+        if (!blob) return;
+        fecharCamera();
+        processarArquivoDeFoto(blob);
+      }, 'image/jpeg', 0.9);
+    });
 
     // ========================================================================
     // SCANNER E PROGRESSO
@@ -4526,7 +4645,7 @@
     }
     document.getElementById('modal-dossie-close').addEventListener('click', fecharDossie);
     document.getElementById('modal-dossie').addEventListener('click', function(e) { if (e.target === this) fecharDossie(); });
-    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { fecharDossie(); fecharPaywall(); } });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { fecharDossie(); fecharPaywall(); fecharEscolhaFoto(); fecharCamera(); } });
 
     // ========================================================================
     // PAYWALL — popup de "avaliações grátis esgotadas"
