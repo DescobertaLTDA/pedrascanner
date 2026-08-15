@@ -1,0 +1,14 @@
+{
+  "rewrites": [
+    { "source": "/api/status", "destination": "/api/conta?_fn=status" },
+    { "source": "/api/historico", "destination": "/api/conta?_fn=historico" },
+    { "source": "/api/obter", "destination": "/api/conta?_fn=obter" },
+    { "source": "/api/desbloquear", "destination": "/api/conta?_fn=desbloquear" },
+    { "source": "/api/reivindicar", "destination": "/api/conta?_fn=reivindicar" },
+    { "source": "/api/stats", "destination": "/api/publico?_fn=stats" },
+    { "source": "/api/vitrine", "destination": "/api/publico?_fn=vitrine" },
+    { "source": "/api/obter-publico", "destination": "/api/publico?_fn=obter-publico" },
+    { "source": "/api/maps-key", "destination": "/api/publico?_fn=maps-key" },
+    { "source": "/api/lojas-proximas", "destination": "/api/publico?_fn=lojas-proximas" }
+  ]
+}
