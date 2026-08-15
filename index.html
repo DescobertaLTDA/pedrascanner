@@ -2966,6 +2966,20 @@
           perfilStatusEl.textContent = 'Perfil atualizado!';
           perfilStatusEl.className = 'perfil-status sucesso';
           atualizarHeader();
+          // Sincroniza o nome nas pedras já catalogadas (ranking/vitrine).
+          // A checagem de "conta própria vs. precisa ter aceito os termos" é feita
+          // dentro da função no banco (sincronizar_nome_exibicao), não aqui no cliente.
+          supa.rpc('sincronizar_nome_exibicao', { novo_nome: novoNome }).then(function(rpcResp) {
+            if (rpcResp.error) { console.error('Falha ao sincronizar nome na vitrine:', rpcResp.error); return; }
+            if (typeof rpcResp.data === 'number' && rpcResp.data > 0) {
+              carregarDadosPublicos().then(function() {
+                renderizarCatalogo();
+                carregarVitrine(1);
+                renderizarRankings(rankingAtual);
+              });
+              carregarRankingColecionadores();
+            }
+          }).catch(function(erroRpc) { console.error('Falha ao sincronizar nome na vitrine:', erroRpc); });
           setTimeoutSeguro(function() { esconderPaineis(); }, 900);
         }).catch(function(erro) {
           btnSalvarPerfil.disabled = false;
