@@ -2656,6 +2656,37 @@
 
     var MAX_PAGINAS_API = 15;
 
+    // ========================================================================
+    // PEDRAS À VENDA (dados reais, separados da vitrine "Descobertas da comunidade")
+    // ========================================================================
+    var pedrasVendaDados = { recentes: null, baratas: null, caras: null };
+
+    function carregarPedrasVenda(tipo) {
+      tipo = tipo || 'recentes';
+      return fetch('/api/pedras-venda?pagina=1&ordenar=' + tipo)
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          var itens = (data.itens || []).map(function(item) {
+            return {
+              id: item.id,
+              nome: item.pedra || 'Pedra não identificada',
+              valor: formatarMoedaBR(item.valor_venda_num) || item.valor_venda || null,
+              negociavel: !!item.negociavel_venda,
+              data: item.criado_em || null,
+              avaliador: item.nome || 'cliente',
+              foto: item.foto || null
+            };
+          });
+          pedrasVendaDados[tipo] = itens;
+          return itens;
+        })
+        .catch(function(err) {
+          console.error('Erro ao carregar pedras à venda:', err);
+          pedrasVendaDados[tipo] = [];
+          return [];
+        });
+    }
+
     function carregarDadosPublicos() {
       return fetch('/api/vitrine?pagina=1')
         .then(function(r) { return r.json(); })
@@ -4197,6 +4228,7 @@
           .then(function() {
             document.getElementById('form-colocar-venda').style.display = 'none';
             document.getElementById('confirmacao-venda').style.display = 'block';
+            invalidarCachePedrasVenda();
             renderizarRankings(rankingAtual);
           })
           .catch(function(err) {
@@ -4709,70 +4741,29 @@
     // ========================================================================
     // RANKINGS
     // ========================================================================
-    function carregarRankingsComFotos(tipo) {
+    function renderizarGridVenda(itens, tipo) {
       var grid = document.getElementById('rankings-grid');
-      if (!catalogoDadosCarregados || catalogoDados.length === 0) {
-        var rankingsData = {
-          recentes: [{ nome: 'Quartzo Rosa Druza', meta: 'por LUCAS · há 2h', badge: 'novo' },
-          { nome: 'Turmalina Negra', meta: 'por LUCAS · há 3h', badge: 'novo' },
-          { nome: 'Água-marinha', meta: 'por LUCAS · há 4h', badge: 'novo' }],
-          baratas: [{ nome: 'Calcário', meta: 'R$ 20,00 · por Marcos', badge: 'barata' },
-          { nome: 'Calcita', meta: 'R$ 22,00 · por Luisa', badge: 'barata' },
-          { nome: 'Mica', meta: 'R$ 28,00 · por Pedro', badge: 'barata' }],
-          caras: [{ nome: 'Rubi', meta: 'R$ 1.200,00 · por Sofia', badge: 'premium' },
-          { nome: 'Esmeralda', meta: 'R$ 950,00 · por Thiago', badge: 'premium' },
-          { nome: 'Turmalina Negra', meta: 'R$ 400,00 · por LUCAS', badge: 'premium' }]
-        };
-        var dadosFallback = rankingsData[tipo] || rankingsData.recentes;
-        grid.innerHTML = '';
-        dadosFallback.forEach(function(item, index) {
-          var div = document.createElement('div');
-          div.className = 'rank-item';
-          div.style.background = 'var(--card-alt)';
-          div.style.borderRadius = '8px';
-          div.style.padding = '10px 12px';
-          div.style.border = '1px solid var(--line)';
-          var badgeIcon = '';
-          if (item.badge === 'novo') badgeIcon =
-            '<svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:currentColor;stroke-width:2;fill:none;"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>';
-          else if (item.badge === 'barata') badgeIcon =
-            '<svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:currentColor;stroke-width:2;fill:none;"><circle cx="12" cy="12" r="10"/><path d="M8 8l8 8M8 16l8-8"/></svg>';
-          else if (item.badge === 'premium') badgeIcon =
-            '<svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:currentColor;stroke-width:2;fill:none;"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>';
-          div.innerHTML =
-            '<div style="aspect-ratio:1/1;background:var(--card-alt);border-radius:6px;overflow:hidden;margin-bottom:8px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;color:var(--ink-mute2);font-size:11px;">📷</div>' +
-            '<div class="rank-pos" style="font-family:\'Space Mono\',monospace;font-size:10px;font-weight:700;color:var(--ink-mute2);">#' +
-            (index + 1) + '</div>' +
-            '<div class="rank-name" style="font-weight:600;font-size:13px;color:var(--ink);margin:2px 0 1px;">' + item
-            .nome + '</div>' +
-            '<div class="rank-meta" style="font-size:11px;color:var(--ink-mute2);">' + item.meta + '</div>' +
-            '<span class="rank-badge" style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;padding:1px 8px;border-radius:10px;background:var(--accent);color:#fff;margin-top:4px;">' +
-            badgeIcon + item.badge + '</span>';
-          grid.appendChild(div);
-        });
-        return;
-      }
-      var dados = catalogoDados.slice();
-      if (tipo === 'recentes') { dados.sort(function(a, b) { return new Date(b.data) - new Date(a.data); }); } else if (tipo ===
-        'baratas') {
-        dados.sort(function(a, b) {
-          var valA = parseFloat((a.valor || 'R$ 0').replace('R$ ', '').replace('.', '').replace(',', '.'));
-          var valB = parseFloat((b.valor || 'R$ 0').replace('R$ ', '').replace('.', '').replace(',', '.'));
-          return valA - valB;
-        });
-      } else if (tipo === 'caras') {
-        dados.sort(function(a, b) {
-          var valA = parseFloat((a.valor || 'R$ 0').replace('R$ ', '').replace('.', '').replace(',', '.'));
-          var valB = parseFloat((b.valor || 'R$ 0').replace('R$ ', '').replace('.', '').replace(',', '.'));
-          return valB - valA;
-        });
-      }
-      var top6 = dados.slice(0, 6);
       grid.innerHTML = '';
-      if (top6.length === 0) {
+      if (!itens || itens.length === 0) {
         grid.innerHTML =
-          '<p style="text-align:center;color:var(--ink-mute2);padding:20px 0;grid-column:1/-1;">Nenhuma pedra encontrada.</p>';
+          '<p style="text-align:center;color:var(--ink-mute2);padding:20px 0;grid-column:1/-1;">Ainda não tem nenhuma pedra à venda por aqui. Identifique a sua e seja o primeiro a anunciar!</p>';
         return;
+      }
+      var top6 = itens.slice(0, 6);
+      var badgeIcon = '';
+      var badgeTexto = '';
+      if (tipo === 'recentes') {
+        badgeIcon =
+          '<svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:currentColor;stroke-width:2;fill:none;"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>';
+        badgeTexto = 'recente';
+      } else if (tipo === 'baratas') {
+        badgeIcon =
+          '<svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:currentColor;stroke-width:2;fill:none;"><circle cx="12" cy="12" r="10"/><path d="M8 8l8 8M8 16l8-8"/></svg>';
+        badgeTexto = 'barata';
+      } else if (tipo === 'caras') {
+        badgeIcon =
+          '<svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:currentColor;stroke-width:2;fill:none;"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>';
+        badgeTexto = 'premium';
       }
       top6.forEach(function(item, index) {
         var div = document.createElement('div');
@@ -4782,21 +4773,6 @@
         div.style.padding = '10px 12px';
         div.style.border = '1px solid var(--line)';
         div.style.cursor = 'pointer';
-        var badgeIcon = '';
-        var badgeTexto = '';
-        if (tipo === 'recentes') {
-          badgeIcon =
-            '<svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:currentColor;stroke-width:2;fill:none;"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>';
-          badgeTexto = 'recente';
-        } else if (tipo === 'baratas') {
-          badgeIcon =
-            '<svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:currentColor;stroke-width:2;fill:none;"><circle cx="12" cy="12" r="10"/><path d="M8 8l8 8M8 16l8-8"/></svg>';
-          badgeTexto = 'barata';
-        } else if (tipo === 'caras') {
-          badgeIcon =
-            '<svg viewBox="0 0 24 24" style="width:10px;height:10px;stroke:currentColor;stroke-width:2;fill:none;"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>';
-          badgeTexto = 'premium';
-        }
         var fotoHtml = item.foto ?
           '<img src="' + item.foto + '" alt="' + item.nome + '" style="width:100%;height:100%;object-fit:cover;display:block;">' :
           '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--ink-mute2);font-size:11px;">📷</div>';
@@ -4808,8 +4784,8 @@
           '<div class="rank-name" style="font-weight:600;font-size:13px;color:var(--ink);margin:2px 0 1px;">' + (item
             .nome || 'Pedra não identificada') + '</div>' +
           '<div class="rank-meta" style="font-size:11px;color:var(--ink-mute2);">' + (item.valor ? item.valor +
-            ' · ' : '') + 'por ' + (item.avaliador || 'cliente') + (item.data ? ' · ' + tempoRelativo(item.data) :
-            '') + '</div>' +
+            (item.negociavel ? ' (negociável)' : '') + ' · ' : '') + 'por ' + (item.avaliador || 'cliente') + (item.data ?
+            ' · ' + tempoRelativo(item.data) : '') + '</div>' +
           '<span class="rank-badge" style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;padding:1px 8px;border-radius:10px;background:var(--accent);color:#fff;margin-top:4px;">' +
           badgeIcon + badgeTexto + '</span>';
         div.addEventListener('click', function() {
@@ -4817,6 +4793,21 @@
         });
         grid.appendChild(div);
       });
+    }
+
+    function carregarRankingsComFotos(tipo) {
+      var cache = pedrasVendaDados[tipo];
+      if (cache) { renderizarGridVenda(cache, tipo); return; }
+      var grid = document.getElementById('rankings-grid');
+      grid.innerHTML =
+        '<p style="text-align:center;color:var(--ink-mute2);padding:20px 0;grid-column:1/-1;">Carregando...</p>';
+      carregarPedrasVenda(tipo).then(function(itens) { renderizarGridVenda(itens, tipo); });
+    }
+
+    // Ao publicar um novo anúncio, ou reabrir a página, o cache fica velho —
+    // limpa pra forçar buscar de novo na próxima chamada.
+    function invalidarCachePedrasVenda() {
+      pedrasVendaDados = { recentes: null, baratas: null, caras: null };
     }
 
     function renderizarRankings(tipo) { carregarRankingsComFotos(tipo); }
