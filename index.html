@@ -3042,7 +3042,18 @@
         var checkVitrineUpload = document.getElementById('check-permite-vitrine');
         if (checkVitrineUpload) checkVitrineUpload.checked = permiteVitrine;
         marcarTermosAceitos(sessao.user.id);
-        // Melhor esforço: registra a aceitação no backend, se o endpoint existir.
+        // Registro confiável do consentimento: grava direto na tabela perfis_usuario
+        // (o /api/aceitar-termos antigo falhava em silêncio e não persistia nada).
+        supa.from('perfis_usuario').upsert({
+          user_id: sessao.user.id,
+          email: sessao.user.email,
+          aceitou_termos: true,
+          termos_aceitos_em: new Date().toISOString(),
+          permite_vitrine: permiteVitrine
+        }, { onConflict: 'user_id' }).then(function(resp) {
+          if (resp.error) console.error('Falha ao registrar aceite dos termos:', resp.error);
+        });
+        // Mantém a chamada antiga como melhor esforço, caso o endpoint exista e faça algo além disso.
         fetch('/api/aceitar-termos', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sessao.access_token },
