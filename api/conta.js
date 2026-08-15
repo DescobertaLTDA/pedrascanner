@@ -25,6 +25,9 @@ const supabase = createClient(
 // Mantido igual ao definido originalmente em identificar.js / status.js
 const LIMITE_AVALIACOES_GRATIS = 1;
 
+// ---- Contas com acesso ilimitado (mesma lista usada em identificar.js) ----
+const EMAILS_ACESSO_ILIMITADO = ['empresarialgerenciador@gmail.com'];
+
 function pegarToken(req) {
   const cabecalho = req.headers.authorization || '';
   if (cabecalho.indexOf('Bearer ') === 0) {
@@ -84,6 +87,18 @@ async function handlerStatus(req, res) {
 
   const email = await autenticar(req, res);
   if (!email) return;
+
+  if (EMAILS_ACESSO_ILIMITADO.includes(email)) {
+    return res.status(200).json({
+      pago: true,
+      email: email,
+      usos: 0,
+      limite: 999999,
+      saldo: 999999,
+      avaliacoes_gratis_restantes: 999999,
+      acesso_ilimitado: true
+    });
+  }
 
   const { count: avaliacoesGratisUsadas, error: erroContagem } = await supabase
     .from('identificacoes')

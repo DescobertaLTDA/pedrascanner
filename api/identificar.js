@@ -46,6 +46,10 @@ const PRECO_OUTPUT_POR_MILHAO = 15; // USD
 const LIMITE_AVALIACOES_GRATIS = 1;
 const MENSAGEM_UPSELL = 'Gostou do resultado? Libere agora onde anunciar essa pedra e desbloqueie +10 avaliações completas por apenas R$13,99.';
 
+// ---- Contas com acesso ilimitado (sem cota grátis, sem consumir crédito
+// pago, sempre desbloqueado) — uso interno/administrativo. ----
+const EMAILS_ACESSO_ILIMITADO = ['empresarialgerenciador@gmail.com'];
+
 // ---- Limites de upload de fotos (1 análise = até 5 fotos = 1 crédito) ----
 // Payload total do request precisa ficar bem abaixo do limite de body do Vercel
 // (4.5MB no plano Hobby). O front já comprime cada imagem no client (~1280px,
@@ -147,6 +151,7 @@ module.exports = async function handler(req, res) {
   }
 
   const email = userData.user.email.toLowerCase();
+  const acessoIlimitado = EMAILS_ACESSO_ILIMITADO.includes(email);
   const nomeExibicao = (userData.user.user_metadata && userData.user.user_metadata.nome)
     ? userData.user.user_metadata.nome
     : email.split('@')[0];
@@ -168,7 +173,7 @@ module.exports = async function handler(req, res) {
     // ---- 4. Se não tem crédito pago, checar cota de avaliações grátis ----
     // Bloqueia ANTES de chamar a IA, pra não gastar com uma chamada que não vai poder ser liberada.
     let avaliacoesGratisUsadas = 0;
-    if (!temCreditoDisponivel) {
+    if (!temCreditoDisponivel && !acessoIlimitado) {
       const { count, error: erroContagem } = await supabase
         .from('identificacoes')
         .select('id', { count: 'exact', head: true })
@@ -289,7 +294,11 @@ Se for uma pedra mas não for possível identificar com segurança, defina "e_pe
     let usosRestantes;
     let saldoRestante;
 
-    if (temCreditoDisponivel) {
+    if (acessoIlimitado) {
+      // Conta com acesso ilimitado: libera tudo, não consome crédito pago
+      // nem mexe na tabela de créditos.
+      desbloqueado = true;
+    } else if (temCreditoDisponivel) {
       const { error: erroUpdateCredito } = await supabase
         .from('creditos_avaliacao')
         .update({ usos: credito.usos + 1 })
