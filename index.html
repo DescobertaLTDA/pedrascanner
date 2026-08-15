@@ -2325,6 +2325,24 @@
       </div>
     </div>
 
+    <!-- PAINEL DE NOME DO PERFIL (exibido após aceitar os Termos, opcional) -->
+    <div class="card painel-acesso" id="painel-nome-perfil" style="padding:28px 0 24px;">
+      <div style="padding:0 24px;">
+        <div class="painel-tag" style="text-align:center;padding-right:0;">Quase lá</div>
+        <h2 style="font-size:20px;text-align:center;margin-top:4px;color:var(--ink);">Como quer aparecer na comunidade?</h2>
+        <p style="font-size:13px;color:var(--ink-mute);text-align:center;margin:8px 0 0;">Esse nome aparece no catálogo e nos rankings públicos, se você permitir exibição. Pode deixar em branco e escolher depois em "Editar perfil".</p>
+      </div>
+      <div style="padding:18px 24px 0;">
+        <label for="input-nome-perfil-onboarding" style="font-size:12px;font-weight:600;color:var(--ink-mute);display:block;margin-bottom:6px;">Nome de exibição (opcional)</label>
+        <input type="text" id="input-nome-perfil-onboarding" maxlength="60" placeholder="Ex: seu primeiro nome" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line-strong);font-size:14px;font-family:inherit;">
+        <p class="erro" id="erro-nome-perfil-onboarding" style="display:none;text-align:center;font-size:12.5px;color:var(--danger);margin-top:8px;"></p>
+      </div>
+      <div style="padding:18px 24px 0;">
+        <button class="btn btn-primary btn-block" id="btn-salvar-nome-onboarding" style="font-size:15px;padding:14px;">Salvar e continuar</button>
+        <button type="button" class="termos-sair" id="btn-pular-nome-onboarding" style="margin-top:10px;">Pular por agora</button>
+      </div>
+    </div>
+
     <!-- PAINEL DE BOAS-VINDAS -->
     <div class="card painel-acesso" id="painel-boas-vindas" style="padding:0;overflow:hidden;border-radius:20px;">
       <button type="button" class="painel-fechar" id="btn-fechar-boas-vindas" style="top:12px;right:12px;background:rgba(0,0,0,0.06);width:32px;height:32px;font-size:18px;">&times;</button>
@@ -2807,6 +2825,11 @@
     var btnAceitarTermos = document.getElementById('btn-aceitar-termos');
     var btnRecusarTermos = document.getElementById('btn-recusar-termos');
     var erroTermosEl = document.getElementById('erro-termos');
+    var painelNomePerfil = document.getElementById('painel-nome-perfil');
+    var inputNomePerfilOnboarding = document.getElementById('input-nome-perfil-onboarding');
+    var btnSalvarNomeOnboarding = document.getElementById('btn-salvar-nome-onboarding');
+    var btnPularNomeOnboarding = document.getElementById('btn-pular-nome-onboarding');
+    var erroNomePerfilOnboarding = document.getElementById('erro-nome-perfil-onboarding');
     var btnGoogleLogin = document.getElementById('btn-google-login');
     var erroLoginEl = document.getElementById('erro-login');
     var fotoTiraWrap = document.getElementById('foto-tira-wrap');
@@ -3075,7 +3098,49 @@
         }).catch(function() {});
         painelTermos.classList.remove('active');
         document.body.classList.remove('popup-aberto');
-        abrirPopup(painelBoasVindas);
+        inputNomePerfilOnboarding.value = '';
+        erroNomePerfilOnboarding.style.display = 'none';
+        abrirPopup(painelNomePerfil);
+      });
+    });
+
+    function seguirParaBoasVindas() {
+      painelNomePerfil.classList.remove('active');
+      document.body.classList.remove('popup-aberto');
+      abrirPopup(painelBoasVindas);
+    }
+
+    btnPularNomeOnboarding.addEventListener('click', function() {
+      seguirParaBoasVindas();
+    });
+
+    btnSalvarNomeOnboarding.addEventListener('click', function() {
+      var nomeEscolhido = inputNomePerfilOnboarding.value.trim();
+      if (!nomeEscolhido) {
+        // campo é opcional: sem nome digitado, só segue em frente
+        seguirParaBoasVindas();
+        return;
+      }
+      btnSalvarNomeOnboarding.disabled = true;
+      btnSalvarNomeOnboarding.textContent = 'Salvando...';
+      supa.auth.updateUser({ data: { full_name: nomeEscolhido, name: nomeEscolhido } }).then(function(resultado) {
+        btnSalvarNomeOnboarding.disabled = false;
+        btnSalvarNomeOnboarding.textContent = 'Salvar e continuar';
+        if (resultado.error) {
+          erroNomePerfilOnboarding.textContent = 'Erro ao salvar: ' + resultado.error.message;
+          erroNomePerfilOnboarding.style.display = 'block';
+          return;
+        }
+        atualizarHeader();
+        // Melhor esforço: sincroniza o nome nas pedras já catalogadas (o backend checa
+        // conta própria vs. consentimento confirmado antes de aplicar).
+        supa.rpc('sincronizar_nome_exibicao', { novo_nome: nomeEscolhido }).catch(function() {});
+        seguirParaBoasVindas();
+      }).catch(function(erro) {
+        btnSalvarNomeOnboarding.disabled = false;
+        btnSalvarNomeOnboarding.textContent = 'Salvar e continuar';
+        erroNomePerfilOnboarding.textContent = 'Erro ao salvar: ' + erro.message;
+        erroNomePerfilOnboarding.style.display = 'block';
       });
     });
 
