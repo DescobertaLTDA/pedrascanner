@@ -1,4 +1,10 @@
 {
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "redirects": [
+    { "source": "/index.html", "destination": "/", "permanent": true },
+    { "source": "/index.htm", "destination": "/", "permanent": true }
+  ],
   "rewrites": [
     { "source": "/api/status", "destination": "/api/conta?_fn=status" },
     { "source": "/api/historico", "destination": "/api/conta?_fn=historico" },
