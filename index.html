@@ -17,7 +17,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
   </script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     /* Reset & base */
     * {
@@ -2442,10 +2441,6 @@
             <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#fff;stroke-width:2;fill:none;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
             Compartilhar essa descoberta
           </button>
-          <button id="btn-certificado-dossie" style="width:100%;margin-top:10px;background:transparent;color:var(--ink);border:1.5px solid var(--line-strong);border-radius:10px;padding:12px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
-            <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--ink);stroke-width:2;fill:none;"><path d="M12 15a4 4 0 100-8 4 4 0 000 8z"/><path d="M8.5 13.5L7 22l5-2.5 5 2.5-1.5-8.5"/></svg>
-            Baixar certificado em PDF
-          </button>
         </div>
       </div>
     </div>
@@ -4163,13 +4158,6 @@
       });
     }
 
-    var btnCertificadoDossie = document.getElementById('btn-certificado-dossie');
-    if (btnCertificadoDossie) {
-      btnCertificadoDossie.addEventListener('click', function() {
-        gerarCertificadoPDF(dossieCompartilhamentoAtual || {});
-      });
-    }
-
     // ========================================================================
     // COLOCAR PEDRA À VENDA
     // ========================================================================
@@ -4208,6 +4196,8 @@
         }
         btnConfirmarVenda.disabled = true;
         btnConfirmarVenda.textContent = 'Publicando...';
+        var controladorTempoLimite = (typeof AbortController !== 'undefined') ? new AbortController() : null;
+        var timeoutId = controladorTempoLimite ? setTimeout(function() { controladorTempoLimite.abort(); }, 15000) : null;
         fetch('/api/colocar-venda', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
@@ -4217,10 +4207,15 @@
               telefone: telefoneDigitos,
               observacao: obs,
               negociavel: negociavel
-            })
+            }),
+            signal: controladorTempoLimite ? controladorTempoLimite.signal : undefined
           })
           .then(function(res) {
-            return res.json().then(function(d) {
+            return res.json().catch(function() {
+              // Resposta não veio em JSON (ex: rota /api/colocar-venda ainda não
+              // publicada no servidor) — trata como erro genérico em vez de travar.
+              throw new Error('O servidor não respondeu como esperado (status ' + res.status + '). Verifique se o backend foi publicado.');
+            }).then(function(d) {
               if (!res.ok || d.error) { throw new Error(d.error || 'Falha ao publicar o anúncio.'); }
               return d;
             });
@@ -4232,120 +4227,18 @@
             renderizarRankings(rankingAtual);
           })
           .catch(function(err) {
-            erroVenda.textContent = err.message || 'Não foi possível publicar o anúncio agora. Tente novamente.';
+            var mensagem = (err && err.name === 'AbortError')
+              ? 'A publicação demorou demais e foi cancelada. Verifique sua conexão e tente de novo.'
+              : ((err && err.message) || 'Não foi possível publicar o anúncio agora. Tente novamente.');
+            erroVenda.textContent = mensagem;
             erroVenda.style.display = 'block';
           })
           .finally(function() {
+            if (timeoutId) clearTimeout(timeoutId);
             btnConfirmarVenda.disabled = false;
             btnConfirmarVenda.textContent = 'Publicar anúncio';
           });
       });
-    }
-
-    function gerarCertificadoPDF(info) {
-      try {
-        var jsPDFLib = window.jspdf && window.jspdf.jsPDF;
-        if (!jsPDFLib) { window.alert('Não foi possível gerar o certificado agora. Tente novamente em instantes.'); return; }
-        var doc = new jsPDFLib({ orientation: 'portrait', unit: 'mm', format: 'a5' });
-        var W = doc.internal.pageSize.getWidth();
-        var H = doc.internal.pageSize.getHeight();
-        var corInk = '#141414';
-        var corMute = '#666666';
-        var corAccent = '#8a6d3b';
-
-        // fundo e moldura decorativa
-        doc.setFillColor('#f7f6f4');
-        doc.rect(0, 0, W, H, 'F');
-        doc.setDrawColor(corAccent);
-        doc.setLineWidth(0.8);
-        doc.rect(6, 6, W - 12, H - 12);
-        doc.setLineWidth(0.2);
-        doc.rect(9, 9, W - 18, H - 18);
-
-        // cabeçalho
-        doc.setTextColor(corAccent);
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(9);
-        doc.text('SCANNER 3.5 · CERTIFICADO DE IDENTIFICAÇÃO', W / 2, 20, { align: 'center' });
-
-        // foto (se existir e for base64)
-        var yCursor = 27;
-        if (info.foto && info.foto.indexOf('data:image') === 0) {
-          try {
-            var imgW = 40, imgH = 40;
-            var formatoImg = /data:image\/(png|jpeg|jpg)/i.exec(info.foto);
-            formatoImg = formatoImg ? formatoImg[1].toUpperCase().replace('JPG', 'JPEG') : 'JPEG';
-            doc.setDrawColor(corAccent);
-            doc.roundedRect(W / 2 - imgW / 2 - 1, yCursor - 1, imgW + 2, imgH + 2, 2, 2);
-            doc.addImage(info.foto, formatoImg, W / 2 - imgW / 2, yCursor, imgW, imgH);
-            yCursor += imgH + 10;
-          } catch (eImg) { yCursor += 4; }
-        } else { yCursor += 4; }
-
-        // nome da pedra
-        doc.setTextColor(corInk);
-        doc.setFont('times', 'bolditalic');
-        var nomeExibicao = info.nome || 'Pedra não identificada';
-        var tamanhoNome = nomeExibicao.length > 26 ? 15 : (nomeExibicao.length > 16 ? 18 : 22);
-        doc.setFontSize(tamanhoNome);
-        var linhasNome = doc.splitTextToSize(nomeExibicao, W - 24);
-        doc.text(linhasNome, W / 2, yCursor, { align: 'center' });
-        var alturaLinhaNome = tamanhoNome * 0.42;
-        yCursor += linhasNome.length * alturaLinhaNome + 5;
-
-        // confiança
-        if (info.confianca) {
-          doc.setTextColor(corAccent);
-          doc.setFont('courier', 'bold');
-          doc.setFontSize(9);
-          doc.text(('confiança ' + info.confianca).toUpperCase(), W / 2, yCursor, { align: 'center' });
-          yCursor += 8;
-        }
-
-        // faixa de preço
-        if (info.preco) {
-          doc.setTextColor(corMute);
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(10);
-          doc.text('Faixa de preço estimada', W / 2, yCursor, { align: 'center' });
-          yCursor += 5.5;
-          doc.setTextColor(corInk);
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(13);
-          doc.text(info.preco, W / 2, yCursor, { align: 'center' });
-          yCursor += 9;
-        }
-
-        // características
-        if (info.caracteristicas && info.caracteristicas.length > 0) {
-          doc.setTextColor(corMute);
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(9);
-          var linhas = doc.splitTextToSize(info.caracteristicas.join('  ·  '), W - 30);
-          doc.text(linhas, W / 2, yCursor, { align: 'center' });
-          yCursor += linhas.length * 4.5 + 6;
-        }
-
-        // rodapé
-        var dataEmissao = new Date().toLocaleDateString('pt-BR');
-        doc.setDrawColor('#dcd6cc');
-        doc.setLineWidth(0.2);
-        doc.line(W / 2 - 30, H - 22, W / 2 + 30, H - 22);
-        doc.setTextColor(corMute);
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8);
-        doc.text('Identificado com Inteligência Artificial em ' + dataEmissao, W / 2, H - 16, { align: 'center' });
-        doc.setFont('helvetica', 'italic');
-        doc.setFontSize(7.5);
-        var linhasAviso = doc.splitTextToSize('Certificado gerado automaticamente para fins de curiosidade e coleção.', W - 24);
-        doc.text(linhasAviso, W / 2, H - 11, { align: 'center' });
-
-        var nomeArquivo = 'certificado-' + (nomeExibicao || 'pedra').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') + '.pdf';
-        doc.save(nomeArquivo);
-      } catch (erroCertificado) {
-        console.error('Erro ao gerar certificado:', erroCertificado);
-        window.alert('Não foi possível gerar o certificado agora. Tente novamente.');
-      }
     }
 
     function fecharDossie() {
