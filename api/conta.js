@@ -211,7 +211,12 @@ async function handlerObter(req, res) {
     onde_vender: desbloqueada ? identificacao.onde_vender : '',
     foto_base64: identificacao.foto_base64,
     foto_media_type: identificacao.foto_media_type,
-    criado_em: identificacao.criado_em
+    criado_em: identificacao.criado_em,
+    esta_a_venda: !!identificacao.esta_a_venda,
+    valor_venda: identificacao.valor_venda || null,
+    telefone_venda: identificacao.telefone_venda || null,
+    observacao_venda: identificacao.observacao_venda || null,
+    negociavel_venda: !!identificacao.negociavel_venda
   });
 }
 
@@ -313,6 +318,110 @@ async function handlerDesbloquear(req, res) {
 }
 
 // ============================================================================
+// /api/colocar-venda — publica (ou atualiza) o anúncio de venda de UMA
+// identificação já feita pela própria conta. Exige valor e telefone.
+// ============================================================================
+async function handlerColocarVenda(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Método não permitido' });
+  }
+
+  const { identificacao_id, valor, telefone, observacao, negociavel } = req.body || {};
+
+  if (!identificacao_id) {
+    return res.status(400).json({ error: 'identificacao_id não enviado' });
+  }
+  const valorLimpo = (valor || '').toString().trim();
+  if (!valorLimpo) {
+    return res.status(400).json({ error: 'Informe o valor de venda.' });
+  }
+  const telefoneLimpo = (telefone || '').toString().replace(/\D/g, '');
+  if (!telefoneLimpo || telefoneLimpo.length < 10) {
+    return res.status(400).json({ error: 'Informe um telefone de contato válido, com DDD.' });
+  }
+
+  const email = await autenticar(req, res);
+  if (!email) return;
+
+  const { data: identificacao, error: erroIdent } = await supabase
+    .from('identificacoes')
+    .select('id, email')
+    .eq('id', identificacao_id)
+    .single();
+
+  if (erroIdent || !identificacao) {
+    return res.status(404).json({ error: 'Identificação não encontrada.' });
+  }
+  if (identificacao.email !== email) {
+    return res.status(403).json({ error: 'Essa identificação não pertence a essa conta.' });
+  }
+
+  const { data: atualizado, error: erroUpdate } = await supabase
+    .from('identificacoes')
+    .update({
+      esta_a_venda: true,
+      valor_venda: valorLimpo,
+      telefone_venda: telefoneLimpo,
+      observacao_venda: (observacao || '').toString().trim().slice(0, 200) || null,
+      negociavel_venda: !!negociavel,
+      venda_criada_em: new Date().toISOString()
+    })
+    .eq('id', identificacao_id)
+    .select('id, esta_a_venda, valor_venda, telefone_venda, observacao_venda, negociavel_venda, venda_criada_em')
+    .single();
+
+  if (erroUpdate) {
+    console.error('Erro Supabase (colocar-venda):', erroUpdate);
+    return res.status(500).json({ error: 'Erro ao publicar o anúncio. Tente novamente.' });
+  }
+
+  return res.status(200).json(atualizado);
+}
+
+// ============================================================================
+// /api/remover-venda — tira uma pedra da lista de "Pedras à venda" (marcar
+// como vendida ou apenas desistir do anúncio, sem apagar a identificação).
+// ============================================================================
+async function handlerRemoverVenda(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Método não permitido' });
+  }
+
+  const { identificacao_id } = req.body || {};
+  if (!identificacao_id) {
+    return res.status(400).json({ error: 'identificacao_id não enviado' });
+  }
+
+  const email = await autenticar(req, res);
+  if (!email) return;
+
+  const { data: identificacao, error: erroIdent } = await supabase
+    .from('identificacoes')
+    .select('id, email')
+    .eq('id', identificacao_id)
+    .single();
+
+  if (erroIdent || !identificacao) {
+    return res.status(404).json({ error: 'Identificação não encontrada.' });
+  }
+  if (identificacao.email !== email) {
+    return res.status(403).json({ error: 'Essa identificação não pertence a essa conta.' });
+  }
+
+  const { error: erroUpdate } = await supabase
+    .from('identificacoes')
+    .update({ esta_a_venda: false })
+    .eq('id', identificacao_id);
+
+  if (erroUpdate) {
+    console.error('Erro Supabase (remover-venda):', erroUpdate);
+    return res.status(500).json({ error: 'Erro ao remover o anúncio. Tente novamente.' });
+  }
+
+  return res.status(200).json({ ok: true });
+}
+
+// ============================================================================
 // /api/reivindicar — vincula o navegador ao crédito de compra mais antigo
 // ainda não usado, via cookie de sessão (sem token/e-mail). Mantido por
 // compatibilidade; status.js/desbloquear.js já cobrem o fluxo atual com
@@ -372,7 +481,9 @@ const ROTAS = {
   historico: handlerHistorico,
   obter: handlerObter,
   desbloquear: handlerDesbloquear,
-  reivindicar: handlerReivindicar
+  reivindicar: handlerReivindicar,
+  'colocar-venda': handlerColocarVenda,
+  'remover-venda': handlerRemoverVenda
 };
 
 module.exports = async function handler(req, res) {
