@@ -1947,7 +1947,7 @@
           <svg viewBox="0 0 24 24"><path d="M12 2v20M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg>
           Rankings
         </a>
-        <a class="nav-link" id="nav-link-ajuda">
+        <a class="nav-link" id="nav-link-ajuda" href="ajuda.html">
           <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;stroke-width:1.8;fill:none;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
           Ajuda
         </a>
@@ -2155,7 +2155,7 @@
 
       <div class="termos-check-row">
         <input type="checkbox" id="check-aceita-termos">
-        <label for="check-aceita-termos">Li e aceito os <a href="#" id="link-termos-completo">Termos de Uso</a>, incluindo a autorização de uso de imagem descrita acima.</label>
+        <label for="check-aceita-termos">Li e aceito os <a href="termos.html" id="link-termos-completo" target="_blank" rel="noopener">Termos de Uso</a>, incluindo a autorização de uso de imagem descrita acima.</label>
       </div>
       <div class="termos-check-row sub">
         <input type="checkbox" id="check-aceita-vitrine" checked>
@@ -2361,9 +2361,9 @@
     </a>
     <p>Identifique pedras, minerais e cristais com inteligência artificial. Faça parte da comunidade e descubra o valor das suas pedras.</p>
     <div class="foot-links">
-      <a href="#" id="foot-link-termos">Termos de uso</a>
-      <a href="#" id="foot-link-privacidade">Privacidade</a>
-      <a href="#" id="foot-link-contato">Contato</a>
+      <a href="termos.html" id="foot-link-termos">Termos de uso</a>
+      <a href="privacidade.html" id="foot-link-privacidade">Privacidade</a>
+      <a href="contato.html" id="foot-link-contato">Contato</a>
     </div>
   </footer>
 
@@ -2782,9 +2782,8 @@
       document.getElementById('secao-catalogo').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
     navLinkRankings.addEventListener('click', function(e) { e.preventDefault();
       document.getElementById('secao-rankings').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
-    navLinkAjuda.addEventListener('click', function(e) { e.preventDefault();
-      if (secaoInstitucional) secaoInstitucional.style.display = '';
-      secaoInstitucional.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+    // "Ajuda" agora é um link de verdade para ajuda.html (página própria, com script separado),
+    // por isso não tem mais handler de clique aqui.
 
     // Mostra quantas avaliações grátis restam dentro do dropdown do perfil
     // (clicando no nome/pill do usuário) em vez de um badge solto na nav,

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+  <title>Contato — SCANNER 3.5</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="icon" type="image/png" href="/logo.png">
+  <link rel="shortcut icon" type="image/png" href="/logo.png">
+  <link rel="apple-touch-icon" href="/logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #ffffff; --card: #f7f6f4; --card-alt: #efeeeb;
+      --ink: #141414; --ink-mute: #666666; --ink-mute2: #8a8a8a;
+      --accent: #1a4d3a; --accent-dark: #0f3326; --on-accent: #ffffff;
+      --danger: #d3302f;
+      --line: rgba(0,0,0,0.10); --line-strong: rgba(0,0,0,0.20);
+    }
+    html { -webkit-text-size-adjust: 100%; overflow-x: hidden; }
+    body { background: var(--bg); color: var(--ink); font-family: 'Inter', sans-serif; line-height: 1.6; min-height: 100vh; padding-bottom: 60px; }
+    h1, h2 { font-family: 'Fraunces', serif; font-weight: 600; letter-spacing: -0.01em; color: var(--ink); }
+    a { color: inherit; }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 0 32px; }
+    @media (max-width:480px) { .wrap { padding: 0 20px; } }
+
+    header { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,0.92); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+    .nav-wrap { max-width: 720px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 32px; }
+    @media (max-width:480px) { .nav-wrap { padding: 12px 20px; } }
+    .logo { display: flex; align-items: center; gap: 8px; text-decoration: none; }
+    .logo .logo-icon { height: 26px; width: auto; }
+    .logo .logo-text { display: flex; flex-direction: column; line-height: 1.1; }
+    .logo .logo-main { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; color: var(--ink); }
+    .logo .logo-sub { font-size: 9px; font-weight: 300; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-mute2); }
+    .btn-voltar { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600; color: var(--accent-dark); text-decoration: none; padding: 8px 14px; border: 1px solid var(--line-strong); border-radius: 20px; }
+    .btn-voltar:hover { background: var(--card-alt); }
+    .btn-voltar svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; }
+
+    main { padding: 40px 0 0; }
+    .titulo-pagina { font-size: 30px; margin-bottom: 6px; }
+    .subtitulo-pagina { font-size: 14.5px; color: var(--ink-mute); margin-bottom: 30px; }
+
+    .grid-contato { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width:640px) { .grid-contato { grid-template-columns: 1fr; } }
+
+    .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 26px; }
+    .card h2 { font-size: 18px; margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+    .card h2 svg { width: 19px; height: 19px; stroke: var(--ink); stroke-width: 1.8; fill: none; }
+
+    .canal { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+    .canal:last-child { margin-bottom: 0; }
+    .canal-icone { width: 34px; height: 34px; border-radius: 9px; background: var(--card-alt); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .canal-icone svg { width: 16px; height: 16px; stroke: var(--accent-dark); stroke-width: 1.9; fill: none; }
+    .canal-titulo { font-size: 13.5px; font-weight: 600; color: var(--ink); }
+    .canal-valor { font-size: 13px; color: var(--ink-mute); }
+    .canal-valor a { color: var(--accent-dark); text-decoration: underline; }
+
+    .campo { margin-bottom: 16px; }
+    .campo label { display: block; font-size: 12.5px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+    .campo input, .campo select, .campo textarea {
+      width: 100%; font-family: 'Inter', sans-serif; font-size: 14px; color: var(--ink);
+      background: var(--bg); border: 1px solid var(--line-strong); border-radius: 9px;
+      padding: 10px 12px; outline: none;
+    }
+    .campo textarea { resize: vertical; min-height: 100px; }
+    .campo input:focus, .campo select:focus, .campo textarea:focus { border-color: var(--accent); }
+
+    .btn-enviar {
+      width: 100%; background: var(--accent); color: var(--on-accent); border: none;
+      font-family: 'Inter', sans-serif; font-weight: 600; font-size: 14.5px;
+      padding: 13px; border-radius: 10px; cursor: pointer;
+    }
+    .btn-enviar:hover { background: var(--accent-dark); }
+    .btn-enviar:disabled { opacity: .6; cursor: not-allowed; }
+
+    .msg-erro { font-size: 12.5px; color: var(--danger); margin-top: 8px; display: none; }
+    .msg-sucesso {
+      font-size: 13px; color: var(--accent-dark); background: rgba(26,77,58,0.08);
+      border: 1px solid rgba(26,77,58,0.2); border-radius: 9px; padding: 10px 12px;
+      margin-top: 8px; display: none;
+    }
+
+    footer { max-width: 720px; margin: 40px auto 0; padding: 26px 20px 0; border-top: 1px solid var(--line); }
+    footer p { font-size: 13px; color: var(--ink-mute); max-width: 360px; text-align: center; margin: 0 auto; }
+    .foot-links { margin-top: 18px; display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; }
+    .foot-links a { font-size: 12.5px; color: var(--ink-mute); text-decoration: none; padding: 4px 0; }
+    .foot-links a:hover { color: var(--accent-dark); }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="nav-wrap">
+      <a href="index.html" class="logo">
+        <img src="/logo.png" alt="SCANNER 3.5" class="logo-icon">
+        <span class="logo-text">
+          <span class="logo-main">SCANNER</span>
+          <span class="logo-sub">3.5</span>
+        </span>
+      </a>
+      <a class="btn-voltar" href="index.html">
+        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        Voltar ao scanner
+      </a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <h1 class="titulo-pagina">Contato</h1>
+    <p class="subtitulo-pagina">Tem uma dúvida, sugestão ou encontrou um problema? Fale com a gente.</p>
+
+    <div class="grid-contato">
+      <div class="card">
+        <h2><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z" opacity="0"/><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg> Canais diretos</h2>
+        <div class="canal">
+          <span class="canal-icone"><svg viewBox="0 0 24 24"><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg></span>
+          <div>
+            <div class="canal-titulo">E-mail de suporte</div>
+            <div class="canal-valor"><a href="mailto:suporte@scanner35.com.br">suporte@scanner35.com.br</a></div>
+          </div>
+        </div>
+        <div class="canal">
+          <span class="canal-icone"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span>
+          <div>
+            <div class="canal-titulo">Tempo de resposta</div>
+            <div class="canal-valor">Normalmente em até 1 dia útil</div>
+          </div>
+        </div>
+        <div class="canal">
+          <span class="canal-icone"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></span>
+          <div>
+            <div class="canal-titulo">Dúvidas comuns</div>
+            <div class="canal-valor">Confira antes a <a href="ajuda.html">Central de Ajuda</a></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 013 3L7 19l-4 1 1-4 12.5-12.5z"/></svg> Envie uma mensagem</h2>
+        <form id="form-contato">
+          <div class="campo">
+            <label for="contato-nome">Nome</label>
+            <input type="text" id="contato-nome" name="nome" placeholder="Seu nome" required>
+          </div>
+          <div class="campo">
+            <label for="contato-email">E-mail</label>
+            <input type="email" id="contato-email" name="email" placeholder="voce@email.com" required>
+          </div>
+          <div class="campo">
+            <label for="contato-assunto">Assunto</label>
+            <select id="contato-assunto" name="assunto">
+              <option value="Duvida sobre identificacao">Dúvida sobre uma identificação</option>
+              <option value="Problema com pagamento">Problema com pagamento</option>
+              <option value="Remocao de foto/dados">Remoção de foto ou dados</option>
+              <option value="Sugestao">Sugestão</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+          <div class="campo">
+            <label for="contato-mensagem">Mensagem</label>
+            <textarea id="contato-mensagem" name="mensagem" placeholder="Escreva sua mensagem..." required></textarea>
+          </div>
+          <button type="submit" class="btn-enviar" id="btn-enviar-contato">Enviar mensagem</button>
+          <p class="msg-erro" id="contato-erro">Preencha todos os campos antes de enviar.</p>
+          <p class="msg-sucesso" id="contato-sucesso">Seu aplicativo de e-mail vai abrir com a mensagem pronta para envio.</p>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Identifique pedras, minerais e cristais com inteligência artificial. Faça parte da comunidade e descubra o valor das suas pedras.</p>
+    <div class="foot-links">
+      <a href="termos.html">Termos de uso</a>
+      <a href="privacidade.html">Privacidade</a>
+      <a href="contato.html">Contato</a>
+    </div>
+  </footer>
+
+  <script>
+    // ========================================================================
+    // SCRIPT EXCLUSIVO DA PÁGINA DE CONTATO — não compartilhado com index.html
+    // Envio é feito via "mailto:", já que esta página não tem backend próprio.
+    // ========================================================================
+    (function() {
+      var EMAIL_SUPORTE = 'suporte@scanner35.com.br';
+      var form = document.getElementById('form-contato');
+      var erroEl = document.getElementById('contato-erro');
+      var sucessoEl = document.getElementById('contato-sucesso');
+      var btnEnviar = document.getElementById('btn-enviar-contato');
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        erroEl.style.display = 'none';
+        sucessoEl.style.display = 'none';
+
+        var nome = document.getElementById('contato-nome').value.trim();
+        var email = document.getElementById('contato-email').value.trim();
+        var assunto = document.getElementById('contato-assunto').value;
+        var mensagem = document.getElementById('contato-mensagem').value.trim();
+
+        if (!nome || !email || !mensagem) {
+          erroEl.style.display = 'block';
+          return;
+        }
+
+        var corpo =
+          'Nome: ' + nome + '\n' +
+          'E-mail: ' + email + '\n\n' +
+          mensagem;
+
+        var linkMailto = 'mailto:' + EMAIL_SUPORTE +
+          '?subject=' + encodeURIComponent('[SCANNER 3.5] ' + assunto) +
+          '&body=' + encodeURIComponent(corpo);
+
+        window.location.href = linkMailto;
+        sucessoEl.style.display = 'block';
+      });
+    })();
+  </script>
+</body>
+</html>
