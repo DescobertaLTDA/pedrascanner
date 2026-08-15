@@ -1,8 +1,12 @@
 // /api/historico.js
 // Lista as identificações já feitas por essa conta (mais recentes primeiro),
-// pra montar a tela de "Histórico". Não devolve foto nem preço aqui — isso
-// só vem no /api/obter, quando a pessoa abre uma identificação específica.
-// Evita respostas pesadas quando a lista tem várias fotos.
+// pra montar a tela de "Histórico". Não devolve foto aqui — isso só vem no
+// /api/obter, quando a pessoa abre uma identificação específica. Evita
+// respostas pesadas quando a lista tem várias fotos.
+//
+// Também devolve um "valor_exibicao" numérico por item (extraído da faixa de
+// preço que a IA gerou), usado pelo front-end para somar o valor estimado
+// total da coleção do usuário (mostrado no header, ao lado do saldo).
 
 const { createClient } = require('@supabase/supabase-js');
 
@@ -17,6 +21,22 @@ function pegarToken(req) {
     return cabecalho.slice(7);
   }
   return null;
+}
+
+// Mesma lógica usada em /api/vitrine.js — extrai o maior número encontrado
+// no texto livre da faixa de preço (ex: "R$20 a R$150 por grama" → 150).
+// Mantém os dois endpoints consistentes quanto ao que "valor_exibicao" significa.
+function extrairValorExibicao(faixaTexto) {
+  if (!faixaTexto) return null;
+  const numeros = String(faixaTexto).match(/\d+[\.,]?\d*/g);
+  if (!numeros || !numeros.length) return null;
+
+  const maior = numeros
+    .map(function (n) { return parseFloat(n.replace(/\./g, '').replace(',', '.')); })
+    .filter(function (n) { return !isNaN(n); })
+    .sort(function (a, b) { return b - a; })[0];
+
+  return typeof maior === 'number' && !isNaN(maior) ? maior : null;
 }
 
 module.exports = async function handler(req, res) {
@@ -38,7 +58,7 @@ module.exports = async function handler(req, res) {
 
   const { data: linhas, error } = await supabase
     .from('identificacoes')
-    .select('id, nome_provavel, confianca, desbloqueada, criado_em')
+    .select('id, nome_provavel, confianca, desbloqueada, criado_em, faixa_preco_brasil')
     .eq('email', email)
     .order('criado_em', { ascending: false })
     .limit(30);
@@ -48,5 +68,16 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'Erro ao buscar seu histórico.' });
   }
 
-  return res.status(200).json({ itens: linhas || [] });
+  const itens = (linhas || []).map(function (item) {
+    return {
+      id: item.id,
+      nome_provavel: item.nome_provavel,
+      confianca: item.confianca,
+      desbloqueada: item.desbloqueada,
+      criado_em: item.criado_em,
+      valor_exibicao: extrairValorExibicao(item.faixa_preco_brasil)
+    };
+  });
+
+  return res.status(200).json({ itens: itens });
 };
