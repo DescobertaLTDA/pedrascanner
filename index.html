@@ -1824,30 +1824,6 @@
       <p class="aviso" id="vitrine-vazio" style="display:none;text-align:center;color:var(--ink-mute2);padding:10px 0;">Ainda não temos resultados para mostrar aqui.</p>
     </div>
 
-    <div class="card" style="margin-top:20px;" id="area-quiz">
-      <h2><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg> Adivinhe a Pedra</h2>
-      <p style="font-size:13px;color:var(--ink-mute);text-align:center;margin-top:4px;">Teste seu olho de garimpeiro com pedras reais identificadas pela comunidade</p>
-      <div id="quiz-area" style="margin-top:18px;">
-        <div id="quiz-carregando" style="text-align:center;padding:24px 0;color:var(--ink-mute);font-size:13.5px;">Preparando o desafio...</div>
-        <div id="quiz-conteudo" style="display:none;">
-          <div style="display:flex;justify-content:center;">
-            <div style="width:180px;height:180px;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--card-alt);">
-              <img id="quiz-foto" src="" alt="Pedra do quiz" style="width:100%;height:100%;object-fit:cover;display:block;">
-            </div>
-          </div>
-          <div id="quiz-opcoes" style="margin-top:18px;display:flex;flex-direction:column;gap:9px;max-width:340px;margin-left:auto;margin-right:auto;"></div>
-          <div id="quiz-resultado" style="display:none;text-align:center;margin-top:14px;font-size:14px;font-weight:600;"></div>
-          <div style="text-align:center;margin-top:16px;">
-            <button id="btn-quiz-proxima" style="display:none;background:var(--ink-light);color:#fff;border:none;border-radius:10px;padding:11px 22px;font-size:13.5px;font-weight:700;cursor:pointer;">Próxima pedra →</button>
-          </div>
-          <div style="text-align:center;margin-top:12px;font-size:12px;color:var(--ink-mute2);">
-            Acertos: <strong id="quiz-acertos" style="color:var(--ink);">0</strong> / <span id="quiz-total">0</span>
-          </div>
-        </div>
-        <p id="quiz-vazio" style="display:none;text-align:center;color:var(--ink-mute2);font-size:13px;padding:16px 0;">Ainda não temos pedras suficientes na comunidade para montar o quiz. Volte em breve!</p>
-      </div>
-    </div>
-
     <div class="card" style="margin-top:20px;" id="secao-rankings">
       <h2><svg viewBox="0 0 24 24"><path d="M12 2v20M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg> Rankings</h2>
       <p style="font-size:13px;color:var(--ink-mute);text-align:center;margin-top:4px;">As pedras mais comentadas e avaliadas pelos membros</p>
@@ -2001,16 +1977,6 @@
       <p class="observacao" id="res-observacao" style="margin-top:16px;font-size:12.5px;color:var(--ink-mute);"></p>
     </div>
 
-    <div class="card" style="margin-top:20px;" id="secao-lojas-proximas">
-      <h2><svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg> Lojas · Possíveis Compradores</h2>
-      <p style="font-size:13px;color:var(--ink-mute);text-align:center;margin-top:4px;">Encontre lojas de pedras, minerais e joalherias perto de você</p>
-      <div id="lojas-proximas-intro" style="text-align:center;margin-top:14px;">
-        <button class="btn btn-primary" id="btn-ver-lojas-proximas" style="padding:11px 20px;">📍 Ver lojas perto de mim</button>
-      </div>
-      <div id="lojas-proximas-lista" style="margin-top:14px;display:flex;flex-direction:column;gap:8px;"></div>
-      <div id="lojas-proximas-status" style="font-size:12.5px;color:var(--ink-mute2);text-align:center;margin-top:8px;"></div>
-    </div>
-
     <div class="card" style="margin-top:20px;" id="secao-catalogo">
       <h2><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg> Catálogo Geral</h2>
       <p style="font-size:13px;color:var(--ink-mute);text-align:center;margin-top:4px;">Todas as pedras avaliadas pela comunidade</p>
@@ -2148,7 +2114,6 @@
           catalogoDados = todos;
           catalogoDadosCarregados = true;
           gerarFeedReal(todos);
-          iniciarQuiz();
         })
         .catch(function(err) {
           console.error('Erro ao carregar dados públicos (vitrine/catálogo):', err);
@@ -2181,131 +2146,6 @@
         { nome: 'Sofia', acao: 'descobriu o valor de um <strong>Rubi</strong>', tempo: '1h' }
       ];
       renderizarFeed(fallback);
-    }
-
-    // ========================================================================
-    // QUIZ "ADIVINHE A PEDRA"
-    // ========================================================================
-    var quizPerguntas = [];
-    var quizIndiceAtual = 0;
-    var quizAcertos = 0;
-    var quizRespondeu = false;
-
-    function iniciarQuiz() {
-      var carregando = document.getElementById('quiz-carregando');
-      var conteudo = document.getElementById('quiz-conteudo');
-      var vazio = document.getElementById('quiz-vazio');
-      if (!carregando) return;
-
-      // só entram no quiz itens com foto e nome válidos, sem repetir nome
-      var vistos = {};
-      var candidatos = catalogoDados.filter(function(item) {
-        if (!item.foto || !item.nome || item.nome === 'Pedra não identificada') return false;
-        if (vistos[item.nome]) return false;
-        vistos[item.nome] = true;
-        return true;
-      });
-
-      if (candidatos.length < 4) {
-        carregando.style.display = 'none';
-        vazio.style.display = 'block';
-        return;
-      }
-
-      // embaralha e monta até 8 perguntas
-      var embaralhado = candidatos.slice().sort(function() { return Math.random() - 0.5; });
-      quizPerguntas = embaralhado.slice(0, Math.min(8, embaralhado.length)).map(function(certo) {
-        var nomesUnicos = [];
-        candidatos.forEach(function(c) { if (c.nome !== certo.nome && nomesUnicos.indexOf(c.nome) === -1) nomesUnicos.push(c.nome); });
-        var distratores = nomesUnicos.sort(function() { return Math.random() - 0.5; }).slice(0, 3);
-        var opcoes = distratores.concat([certo.nome]).sort(function() { return Math.random() - 0.5; });
-        return { foto: certo.foto, correta: certo.nome, opcoes: opcoes };
-      });
-
-      quizIndiceAtual = 0;
-      quizAcertos = 0;
-      carregando.style.display = 'none';
-      conteudo.style.display = 'block';
-      document.getElementById('quiz-total').textContent = quizPerguntas.length;
-      renderizarPerguntaQuiz();
-    }
-
-    function renderizarPerguntaQuiz() {
-      quizRespondeu = false;
-      var pergunta = quizPerguntas[quizIndiceAtual];
-      if (!pergunta) return;
-      document.getElementById('quiz-foto').src = pergunta.foto;
-      document.getElementById('quiz-resultado').style.display = 'none';
-      document.getElementById('btn-quiz-proxima').style.display = 'none';
-      document.getElementById('quiz-acertos').textContent = quizAcertos;
-
-      var opcoesEl = document.getElementById('quiz-opcoes');
-      opcoesEl.innerHTML = '';
-      pergunta.opcoes.forEach(function(nomeOpcao) {
-        var btn = document.createElement('button');
-        btn.textContent = nomeOpcao;
-        btn.style.cssText = 'padding:12px 16px;border-radius:9px;border:1.5px solid var(--line-strong);background:var(--card);color:var(--ink);font-size:13.5px;font-weight:600;cursor:pointer;text-align:left;transition:all .15s ease;';
-        btn.addEventListener('click', function() { responderQuiz(nomeOpcao, pergunta, btn, opcoesEl); });
-        opcoesEl.appendChild(btn);
-      });
-    }
-
-    function responderQuiz(escolha, pergunta, btnClicado, opcoesEl) {
-      if (quizRespondeu) return;
-      quizRespondeu = true;
-      var acertou = escolha === pergunta.correta;
-      if (acertou) quizAcertos++;
-
-      Array.prototype.forEach.call(opcoesEl.children, function(btn) {
-        btn.disabled = true;
-        if (btn.textContent === pergunta.correta) {
-          btn.style.borderColor = '#1a7a3c';
-          btn.style.background = 'rgba(26,122,60,0.08)';
-          btn.style.color = '#1a7a3c';
-        } else if (btn === btnClicado) {
-          btn.style.borderColor = 'var(--danger)';
-          btn.style.background = 'rgba(211,48,47,0.08)';
-          btn.style.color = 'var(--danger)';
-        } else {
-          btn.style.opacity = '0.55';
-        }
-      });
-
-      var resultadoEl2 = document.getElementById('quiz-resultado');
-      resultadoEl2.textContent = acertou ? '✅ Acertou! É mesmo ' + pergunta.correta + '.' : '❌ Essa era ' + pergunta.correta + '.';
-      resultadoEl2.style.color = acertou ? '#1a7a3c' : 'var(--danger)';
-      resultadoEl2.style.display = 'block';
-      document.getElementById('quiz-acertos').textContent = quizAcertos;
-
-      var btnProxima = document.getElementById('btn-quiz-proxima');
-      var ultima = quizIndiceAtual >= quizPerguntas.length - 1;
-      btnProxima.textContent = ultima ? 'Ver resultado final →' : 'Próxima pedra →';
-      btnProxima.style.display = 'inline-block';
-      btnProxima.onclick = function() {
-        if (ultima) {
-          finalizarQuiz();
-        } else {
-          quizIndiceAtual++;
-          renderizarPerguntaQuiz();
-        }
-      };
-    }
-
-    function finalizarQuiz() {
-      var conteudo = document.getElementById('quiz-conteudo');
-      var total = quizPerguntas.length;
-      var pct = Math.round((quizAcertos / total) * 100);
-      var mensagem = pct === 100 ? '🏆 Perfeito! Você tem olho de gemólogo profissional.' :
-        pct >= 70 ? '💎 Muito bom! Você entende bem de pedras.' :
-        pct >= 40 ? '⛏️ Nada mal! Continue praticando com o scanner.' :
-        '🪨 Você ainda está começando — use o scanner pra aprender mais!';
-      conteudo.innerHTML = '<div style="text-align:center;padding:20px 0;">' +
-        '<div style="font-size:40px;margin-bottom:10px;">' + (pct === 100 ? '🏆' : pct >= 70 ? '💎' : pct >= 40 ? '⛏️' : '🪨') + '</div>' +
-        '<div style="font-size:20px;font-weight:700;color:var(--ink);">' + quizAcertos + ' de ' + total + ' acertos</div>' +
-        '<p style="font-size:14px;color:var(--ink-mute);margin-top:8px;max-width:320px;margin-left:auto;margin-right:auto;">' + mensagem + '</p>' +
-        '<button id="btn-quiz-refazer" style="margin-top:16px;background:var(--ink-light);color:#fff;border:none;border-radius:10px;padding:11px 22px;font-size:13.5px;font-weight:700;cursor:pointer;">Jogar de novo</button>' +
-        '</div>';
-      document.getElementById('btn-quiz-refazer').addEventListener('click', iniciarQuiz);
     }
 
     function renderizarFeed(atividades) {
@@ -3244,157 +3084,6 @@
           analiseEmAndamento = false;
         });
     }
-
-    // ========================================================================
-    // LOJAS · POSSÍVEIS COMPRADORES (via /api/lojas-proximas, com cache no Supabase)
-    // ========================================================================
-    function obterLocalizacaoUsuario() {
-      return new Promise(function(resolve, reject) {
-        if (!navigator.geolocation) { reject(new Error('Geolocalização não suportada neste navegador')); return; }
-        navigator.geolocation.getCurrentPosition(function(pos) {
-          resolve({ lat: pos.coords.latitude, lng: pos.coords.longitude });
-        }, function(err) { reject(err); }, { timeout: 8000, maximumAge: 300000 });
-      });
-    }
-
-    function renderizarLojaProxima(lugar, lista) {
-      var item = document.createElement('a');
-      item.href = lugar.place_id ?
-        'https://www.google.com/maps/place/?q=place_id:' + lugar.place_id :
-        'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(lugar.nome + ' ' + (lugar.endereco || ''));
-      item.target = '_blank';
-      item.rel = 'noopener noreferrer';
-      item.style.display = 'flex';
-      item.style.flexDirection = 'row';
-      item.style.alignItems = 'center';
-      item.style.gap = '10px';
-      item.style.padding = '10px 12px';
-      item.style.borderRadius = '8px';
-      item.style.border = '1px solid var(--line)';
-      item.style.textDecoration = 'none';
-      item.style.color = 'var(--ink)';
-
-      var fotoWrap = document.createElement('div');
-      fotoWrap.style.width = '48px';
-      fotoWrap.style.height = '48px';
-      fotoWrap.style.flexShrink = '0';
-      fotoWrap.style.borderRadius = '6px';
-      fotoWrap.style.overflow = 'hidden';
-      fotoWrap.style.border = '1px solid var(--line)';
-      fotoWrap.style.background = 'var(--card-alt)';
-      fotoWrap.style.display = 'flex';
-      fotoWrap.style.alignItems = 'center';
-      fotoWrap.style.justifyContent = 'center';
-      if (lugar.foto_ref) {
-        var img = document.createElement('img');
-        img.src = '/api/lojas-proximas?ref=' + encodeURIComponent(lugar.foto_ref);
-        img.alt = lugar.nome || 'Loja';
-        img.loading = 'lazy';
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.objectFit = 'cover';
-        img.style.display = 'block';
-        img.onerror = function() { fotoWrap.innerHTML = '📷'; fotoWrap.style.fontSize = '16px'; fotoWrap.style.color = 'var(--ink-mute2)'; };
-        fotoWrap.appendChild(img);
-      } else {
-        fotoWrap.innerHTML = '📷';
-        fotoWrap.style.fontSize = '16px';
-        fotoWrap.style.color = 'var(--ink-mute2)';
-      }
-
-      var textoWrap = document.createElement('div');
-      textoWrap.style.display = 'flex';
-      textoWrap.style.flexDirection = 'column';
-      textoWrap.style.gap = '2px';
-      textoWrap.style.minWidth = '0';
-      var nomeEl = document.createElement('span');
-      nomeEl.style.fontWeight = '700';
-      nomeEl.style.fontSize = '13.5px';
-      nomeEl.textContent = lugar.nome || 'Loja';
-      var metaEl = document.createElement('span');
-      metaEl.style.fontSize = '11.5px';
-      metaEl.style.color = 'var(--ink-mute2)';
-      var avaliacao = lugar.rating ? ('⭐ ' + lugar.rating + (lugar.total_avaliacoes ? ' (' + lugar.total_avaliacoes +
-        ')' : '')) : '';
-      metaEl.textContent = [avaliacao, lugar.endereco].filter(Boolean).join(' · ');
-      textoWrap.appendChild(nomeEl);
-      textoWrap.appendChild(metaEl);
-
-      item.appendChild(fotoWrap);
-      item.appendChild(textoWrap);
-      lista.appendChild(item);
-    }
-
-    function buscarLojasProximas() {
-      var lista = document.getElementById('lojas-proximas-lista');
-      var status = document.getElementById('lojas-proximas-status');
-      var intro = document.getElementById('lojas-proximas-intro');
-      if (!lista || !status) return;
-      if (intro) intro.style.display = 'none';
-      lista.innerHTML = '';
-      status.textContent = 'Buscando lojas perto de você...';
-
-      obterLocalizacaoUsuario()
-        .then(function(coords) {
-          return fetch('/api/lojas-proximas', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ lat: coords.lat, lng: coords.lng })
-          });
-        })
-        .then(function(res) {
-          if (!res.ok) throw new Error('Resposta ' + res.status + ' do servidor');
-          return res.json();
-        })
-        .then(function(data) {
-          var lugares = data.lugares || [];
-          try {
-            localStorage.setItem('lojasProximasCache', JSON.stringify({ lugares: lugares, ts: Date.now() }));
-          } catch (e) {}
-          if (lugares.length === 0) {
-            status.textContent = 'Nenhuma loja encontrada perto de você.';
-            return;
-          }
-          status.textContent = '';
-          lista.innerHTML = '';
-          lugares.forEach(function(lugar) { renderizarLojaProxima(lugar, lista); });
-        })
-        .catch(function(erro) {
-          console.warn('Não foi possível buscar lojas próximas:', erro && erro.message);
-          if (erro && erro.code === 1) {
-            status.textContent = 'Ative a localização no navegador para ver lojas perto de você.';
-          } else {
-            status.textContent = 'Não foi possível buscar lojas agora. Tente novamente mais tarde.';
-          }
-          if (intro) intro.style.display = 'block';
-        });
-    }
-
-    var btnVerLojasProximas = document.getElementById('btn-ver-lojas-proximas');
-    if (btnVerLojasProximas) { btnVerLojasProximas.addEventListener('click', buscarLojasProximas); }
-
-    var LOJAS_CACHE_LOCAL_TTL_DIAS = 7;
-    function restaurarLojasProximasSeExistir() {
-      var lista = document.getElementById('lojas-proximas-lista');
-      var intro = document.getElementById('lojas-proximas-intro');
-      var status = document.getElementById('lojas-proximas-status');
-      if (!lista) return;
-      try {
-        var salvo = JSON.parse(localStorage.getItem('lojasProximasCache') || 'null');
-        if (!salvo || !salvo.lugares || !salvo.ts) return;
-        var idadeDias = (Date.now() - salvo.ts) / 86400000;
-        if (idadeDias > LOJAS_CACHE_LOCAL_TTL_DIAS) return;
-        if (intro) intro.style.display = 'none';
-        lista.innerHTML = '';
-        if (salvo.lugares.length === 0) {
-          if (status) status.textContent = 'Nenhuma loja encontrada perto de você.';
-          if (intro) intro.style.display = 'block';
-          return;
-        }
-        salvo.lugares.forEach(function(lugar) { renderizarLojaProxima(lugar, lista); });
-      } catch (e) {}
-    }
-    restaurarLojasProximasSeExistir();
 
     // ========================================================================
     // MOSTRAR RESULTADO
