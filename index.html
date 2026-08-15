@@ -1006,6 +1006,61 @@
       opacity: 0.5;
       cursor: not-allowed;
     }
+
+    /* PERGUNTAS PRÉ-SCAN — contexto que a foto sozinha não entrega
+       (onde achou, dureza, peso), enviado junto com a análise pra IA
+       ter mais sinal na hora de identificar a pedra. */
+    .pre-scan-perguntas {
+      margin-top: 16px;
+      padding: 16px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+    .pre-scan-titulo {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      text-align: center;
+      margin-bottom: 14px;
+    }
+    .pre-scan-grupo {
+      margin-bottom: 14px;
+    }
+    .pre-scan-grupo:last-child {
+      margin-bottom: 0;
+    }
+    .pre-scan-label {
+      display: block;
+      font-size: 12.5px;
+      color: var(--ink-mute);
+      margin-bottom: 8px;
+    }
+    .pre-scan-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+    .pre-scan-chip {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      background: var(--card-alt);
+      border: 1px solid var(--line-strong);
+      border-radius: 20px;
+      padding: 7px 13px;
+      cursor: pointer;
+      transition: background .15s ease, border-color .15s ease, color .15s ease;
+    }
+    .pre-scan-chip:hover {
+      background: var(--accent-light);
+    }
+    .pre-scan-chip.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--on-accent);
+    }
     .actions {
       display: flex;
       gap: 10px;
@@ -1754,6 +1809,103 @@
       font-family: 'Inter', sans-serif;
     }
 
+    /* MODAL DE CONFIRMAÇÃO / ALERTA — substitui window.confirm/alert nativos
+       (que no navegador aparecem como "seusite.com diz", quebrando a
+       sensação de app). Reaproveita o visual do modal-paywall. */
+    .modal-confirm-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 10000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      backdrop-filter: blur(8px);
+    }
+    .modal-confirm-overlay.active {
+      display: flex;
+    }
+    .modal-confirm {
+      background: var(--card);
+      border-radius: 20px;
+      max-width: 360px;
+      width: 100%;
+      position: relative;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.6);
+      padding: 28px 24px 24px;
+      text-align: center;
+    }
+    @media (max-width: 480px) {
+      .modal-confirm {
+        padding: 24px 20px 20px;
+        border-radius: 16px;
+      }
+    }
+    .modal-confirm-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--accent-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 14px;
+    }
+    .modal-confirm-icon.perigo {
+      background: rgba(211, 48, 47, 0.1);
+    }
+    .modal-confirm-icon svg {
+      width: 22px;
+      height: 22px;
+      stroke: var(--accent-dark);
+      stroke-width: 2;
+      fill: none;
+    }
+    .modal-confirm-icon.perigo svg {
+      stroke: var(--danger);
+    }
+    .modal-confirm-titulo {
+      font-size: 18px;
+      color: var(--ink);
+      text-align: center;
+    }
+    .modal-confirm-texto {
+      margin-top: 8px;
+      font-size: 13.5px;
+      color: var(--ink-mute);
+      line-height: 1.5;
+    }
+    .modal-confirm-botoes {
+      margin-top: 22px;
+      display: flex;
+      gap: 10px;
+    }
+    .modal-confirm-botoes button {
+      flex: 1;
+      border: none;
+      border-radius: 10px;
+      padding: 12px 10px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13.5px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .modal-confirm-cancelar {
+      background: var(--card-alt);
+      color: var(--ink-soft);
+    }
+    .modal-confirm-ok {
+      background: var(--accent);
+      color: var(--on-accent);
+    }
+    .modal-confirm-ok.perigo {
+      background: var(--danger);
+    }
+    .modal-confirm-botoes.somente-ok .modal-confirm-cancelar {
+      display: none;
+    }
+
     /* BOAS VINDAS */
     .painel-acesso {
       display: none;
@@ -2221,6 +2373,37 @@
         <p class="foto-tira-dica" style="font-size:12px;color:var(--ink-mute2);margin:4px 2px 0;">Dica: 2 ou 3 ângulos diferentes da mesma pedra deixam a análise mais precisa.</p>
       </div>
 
+      <div class="pre-scan-perguntas" id="pre-scan-perguntas" style="display:none;">
+        <p class="pre-scan-titulo">Responda rapidinho — isso ajuda a IA a acertar mais</p>
+        <div class="pre-scan-grupo">
+          <span class="pre-scan-label">Onde você encontrou essa pedra?</span>
+          <div class="pre-scan-chips" data-grupo="local">
+            <button type="button" class="pre-scan-chip" data-valor="praia_rio">Praia / rio</button>
+            <button type="button" class="pre-scan-chip" data-valor="mina_garimpo">Mina / garimpo</button>
+            <button type="button" class="pre-scan-chip" data-valor="quintal_terreno">Quintal / terreno</button>
+            <button type="button" class="pre-scan-chip" data-valor="comprei">Comprei</button>
+            <button type="button" class="pre-scan-chip" data-valor="nao_sei">Não sei</button>
+          </div>
+        </div>
+        <div class="pre-scan-grupo">
+          <span class="pre-scan-label">Ela risca vidro ou a unha risca ela fácil?</span>
+          <div class="pre-scan-chips" data-grupo="dureza">
+            <button type="button" class="pre-scan-chip" data-valor="risca_vidro">Risca o vidro</button>
+            <button type="button" class="pre-scan-chip" data-valor="unha_risca">A unha risca ela</button>
+            <button type="button" class="pre-scan-chip" data-valor="nao_testei">Não testei</button>
+          </div>
+        </div>
+        <div class="pre-scan-grupo">
+          <span class="pre-scan-label">Pelo tamanho, ela parece mais pesada ou mais leve do que o esperado?</span>
+          <div class="pre-scan-chips" data-grupo="peso">
+            <button type="button" class="pre-scan-chip" data-valor="mais_pesada">Mais pesada</button>
+            <button type="button" class="pre-scan-chip" data-valor="normal">Peso normal</button>
+            <button type="button" class="pre-scan-chip" data-valor="mais_leve">Mais leve</button>
+            <button type="button" class="pre-scan-chip" data-valor="nao_sei">Não sei</button>
+          </div>
+        </div>
+      </div>
+
       <input type="checkbox" id="check-permite-vitrine" checked style="display:none;">
 
       <div class="actions" id="actions" style="display:none;">
@@ -2490,6 +2673,20 @@
             <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#fff;stroke-width:2;fill:none;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
             Compartilhar essa descoberta
           </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-confirm-overlay" id="modal-confirm">
+      <div class="modal-confirm">
+        <div class="modal-confirm-icon" id="modal-confirm-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.9L2.8 17a2 2 0 001.7 3h15a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
+        </div>
+        <h3 class="modal-confirm-titulo" id="modal-confirm-titulo">Confirmar</h3>
+        <p class="modal-confirm-texto" id="modal-confirm-texto"></p>
+        <div class="modal-confirm-botoes" id="modal-confirm-botoes">
+          <button type="button" class="modal-confirm-cancelar" id="modal-confirm-cancelar">Cancelar</button>
+          <button type="button" class="modal-confirm-ok" id="modal-confirm-ok">OK</button>
         </div>
       </div>
     </div>
@@ -3657,13 +3854,19 @@
         btnExcluir.textContent = 'Excluir anúncio';
         btnExcluir.style.cssText = 'background:none;border:none;color:var(--danger);font-size:11.5px;font-weight:600;cursor:pointer;padding:4px 2px;text-decoration:underline;';
         btnExcluir.addEventListener('click', function() {
-          if (!window.confirm('Excluir esse anúncio? Essa ação não pode ser desfeita.')) return;
-          btnExcluir.disabled = true;
-          fetch('/api/remover-venda', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
-            body: JSON.stringify({ identificacao_id: item.id, acao: 'excluir' })
-          }).then(function() { abrirPainelVender(); invalidarCachePedrasVenda(); }).catch(function() { btnExcluir.disabled = false; });
+          confirmarPersonalizado('Excluir esse anúncio? Essa ação não pode ser desfeita.', {
+            titulo: 'Excluir anúncio',
+            textoOk: 'Excluir',
+            perigo: true
+          }).then(function(confirmou) {
+            if (!confirmou) return;
+            btnExcluir.disabled = true;
+            fetch('/api/remover-venda', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
+              body: JSON.stringify({ identificacao_id: item.id, acao: 'excluir' })
+            }).then(function() { abrirPainelVender(); invalidarCachePedrasVenda(); }).catch(function() { btnExcluir.disabled = false; });
+          });
         });
         linhaExcluir.appendChild(btnExcluir);
         card.appendChild(linhaExcluir);
@@ -3951,6 +4154,33 @@
     }
 
     // ========================================================================
+    // PERGUNTAS PRÉ-SCAN — contexto extra (não visível na foto) enviado
+    // junto com a identificação, pra IA ter mais sinal: onde a pedra foi
+    // encontrada, teste simples de dureza e uma noção de peso/densidade.
+    // ========================================================================
+    var preScanPerguntas = document.getElementById('pre-scan-perguntas');
+    var respostasPreScan = { local: null, dureza: null, peso: null };
+    preScanPerguntas.querySelectorAll('.pre-scan-chips').forEach(function(grupoEl) {
+      var grupo = grupoEl.dataset.grupo;
+      grupoEl.addEventListener('click', function(e) {
+        var chip = e.target.closest('.pre-scan-chip');
+        if (!chip) return;
+        var jaAtivo = chip.classList.contains('active');
+        grupoEl.querySelectorAll('.pre-scan-chip').forEach(function(c) { c.classList.remove('active'); });
+        if (jaAtivo) {
+          respostasPreScan[grupo] = null;
+        } else {
+          chip.classList.add('active');
+          respostasPreScan[grupo] = chip.dataset.valor;
+        }
+      });
+    });
+    function resetarRespostasPreScan() {
+      respostasPreScan = { local: null, dureza: null, peso: null };
+      preScanPerguntas.querySelectorAll('.pre-scan-chip').forEach(function(c) { c.classList.remove('active'); });
+    }
+
+    // ========================================================================
     // UPLOAD DE FOTO
     // ========================================================================
     function resetarUploadCompleto() {
@@ -3961,6 +4191,8 @@
       dropzone.style.display = 'flex';
       preview.style.display = 'none';
       actions.style.display = 'none';
+      preScanPerguntas.style.display = 'none';
+      resetarRespostasPreScan();
       pararFotoRecebida();
       fotoTira.innerHTML = '';
       fotoTiraWrap.style.display = 'none';
@@ -4152,6 +4384,7 @@
         dropzone.style.display = 'none';
         preview.style.display = 'block';
         actions.style.display = 'flex';
+        preScanPerguntas.style.display = 'block';
         animarFotoRecebida();
         renderizarTiraFotos();
       });
@@ -4357,7 +4590,8 @@
           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
           body: JSON.stringify({
             fotos: fotosSelecionadas.map(function(foto) { return { base64: foto.base64, mediaType: foto.mediaType }; }),
-            permitirVitrine: document.getElementById('check-permite-vitrine').checked
+            permitirVitrine: document.getElementById('check-permite-vitrine').checked,
+            contextoUsuario: respostasPreScan
           })
         })
         .then(function(res) {
@@ -4671,6 +4905,61 @@
     document.addEventListener('keydown', function(e) { if (e.key === 'Escape') { fecharDossie(); fecharPaywall(); fecharEscolhaFoto(); fecharCamera(); } });
 
     // ========================================================================
+    // MODAL DE CONFIRMAÇÃO / ALERTA — substitui window.confirm() e window.alert(),
+    // que no navegador aparecem com o domínio do site ("pedrascanner.vercel.app
+    // diz"), quebrando a sensação de app nativo.
+    // ========================================================================
+    var modalConfirm = document.getElementById('modal-confirm');
+    var modalConfirmIcon = document.getElementById('modal-confirm-icon');
+    var modalConfirmTitulo = document.getElementById('modal-confirm-titulo');
+    var modalConfirmTexto = document.getElementById('modal-confirm-texto');
+    var modalConfirmBotoes = document.getElementById('modal-confirm-botoes');
+    var modalConfirmCancelar = document.getElementById('modal-confirm-cancelar');
+    var modalConfirmOk = document.getElementById('modal-confirm-ok');
+
+    // Mostra o modal e devolve uma Promise que resolve:
+    // - true/false quando tem os dois botões (uso: confirmarPersonalizado)
+    // - undefined quando é só aviso, com um botão (uso: alertarPersonalizado)
+    function _abrirModalConfirm(mensagem, opcoes) {
+      opcoes = opcoes || {};
+      modalConfirmTitulo.textContent = opcoes.titulo || 'Confirmar';
+      modalConfirmTexto.textContent = mensagem || '';
+      modalConfirmOk.textContent = opcoes.textoOk || 'OK';
+      modalConfirmCancelar.textContent = opcoes.textoCancelar || 'Cancelar';
+      modalConfirmIcon.classList.toggle('perigo', !!opcoes.perigo);
+      modalConfirmOk.classList.toggle('perigo', !!opcoes.perigo);
+      modalConfirmBotoes.classList.toggle('somente-ok', !!opcoes.somenteOk);
+      document.body.classList.add('popup-aberto');
+      modalConfirm.classList.add('active');
+      return new Promise(function(resolve) {
+        function limpar(valor) {
+          modalConfirm.classList.remove('active');
+          document.body.classList.remove('popup-aberto');
+          modalConfirmOk.removeEventListener('click', onOk);
+          modalConfirmCancelar.removeEventListener('click', onCancelar);
+          modalConfirm.removeEventListener('click', onOverlay);
+          resolve(valor);
+        }
+        function onOk() { limpar(opcoes.somenteOk ? undefined : true); }
+        function onCancelar() { limpar(false); }
+        function onOverlay(e) { if (e.target === modalConfirm && !opcoes.somenteOk) limpar(false); }
+        modalConfirmOk.addEventListener('click', onOk);
+        modalConfirmCancelar.addEventListener('click', onCancelar);
+        modalConfirm.addEventListener('click', onOverlay);
+      });
+    }
+    // Substituto do window.confirm(). Resolve true (confirmou) ou false (cancelou).
+    // opcoes: { titulo, textoOk, textoCancelar, perigo: true para ação destrutiva }
+    function confirmarPersonalizado(mensagem, opcoes) {
+      return _abrirModalConfirm(mensagem, opcoes);
+    }
+    // Substituto do window.alert(). Resolve quando o usuário fecha o aviso.
+    function alertarPersonalizado(mensagem, opcoes) {
+      opcoes = Object.assign({ somenteOk: true }, opcoes || {});
+      return _abrirModalConfirm(mensagem, opcoes);
+    }
+
+    // ========================================================================
     // PAYWALL — popup de "avaliações grátis esgotadas"
     // ========================================================================
     var modalPaywall = document.getElementById('modal-paywall');
@@ -4938,34 +5227,40 @@
     // diferente de "pausar anúncio", que só tira da área de vendas.
     function excluirItemVitrine(item, botaoLixeira, cardEl) {
       if (!sessaoTokenGlobal) return;
-      if (!window.confirm('Apagar essa foto para sempre? Essa ação não pode ser desfeita.')) return;
-      botaoLixeira.disabled = true;
-      botaoLixeira.style.opacity = '0.5';
-      fetch('/api/excluir-identificacao', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sessaoTokenGlobal },
-        body: JSON.stringify({ identificacao_id: item.id })
-      })
-        .then(function(res) { return res.json().then(function(corpo) { return { ok: res.ok, corpo: corpo }; }); })
-        .then(function(resultado) {
-          if (!resultado.ok) {
-            window.alert((resultado.corpo && resultado.corpo.error) || 'Não foi possível apagar. Tente novamente.');
+      confirmarPersonalizado('Apagar essa foto para sempre? Essa ação não pode ser desfeita.', {
+        titulo: 'Apagar foto',
+        textoOk: 'Apagar',
+        perigo: true
+      }).then(function(confirmou) {
+        if (!confirmou) return;
+        botaoLixeira.disabled = true;
+        botaoLixeira.style.opacity = '0.5';
+        fetch('/api/excluir-identificacao', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sessaoTokenGlobal },
+          body: JSON.stringify({ identificacao_id: item.id })
+        })
+          .then(function(res) { return res.json().then(function(corpo) { return { ok: res.ok, corpo: corpo }; }); })
+          .then(function(resultado) {
+            if (!resultado.ok) {
+              alertarPersonalizado((resultado.corpo && resultado.corpo.error) || 'Não foi possível apagar. Tente novamente.', { titulo: 'Ops', perigo: true });
+              botaoLixeira.disabled = false;
+              botaoLixeira.style.opacity = '1';
+              return;
+            }
+            delete meusIdsIdentificacao[item.id];
+            catalogoDados = catalogoDados.filter(function(i) { return i.id !== item.id; });
+            if (cardEl && cardEl.parentNode) cardEl.parentNode.removeChild(cardEl);
+            carregarVitrine(paginaVitrineAtual || 1);
+            if (typeof carregarRankingColecionadores === 'function') carregarRankingColecionadores();
+            if (typeof atualizarValorColecao === 'function') atualizarValorColecao(sessaoTokenGlobal);
+          })
+          .catch(function() {
+            alertarPersonalizado('Não foi possível apagar agora. Tente novamente.', { titulo: 'Ops', perigo: true });
             botaoLixeira.disabled = false;
             botaoLixeira.style.opacity = '1';
-            return;
-          }
-          delete meusIdsIdentificacao[item.id];
-          catalogoDados = catalogoDados.filter(function(i) { return i.id !== item.id; });
-          if (cardEl && cardEl.parentNode) cardEl.parentNode.removeChild(cardEl);
-          carregarVitrine(paginaVitrineAtual || 1);
-          if (typeof carregarRankingColecionadores === 'function') carregarRankingColecionadores();
-          if (typeof atualizarValorColecao === 'function') atualizarValorColecao(sessaoTokenGlobal);
-        })
-        .catch(function() {
-          window.alert('Não foi possível apagar agora. Tente novamente.');
-          botaoLixeira.disabled = false;
-          botaoLixeira.style.opacity = '1';
-        });
+          });
+      });
     }
 
     function abrirDossiePorItem(item) {
