@@ -1657,6 +1657,72 @@
       background: var(--line);
       color: var(--ink);
     }
+    .termos-caixa {
+      max-height: 230px;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      background: var(--card-alt);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin: 4px 24px 0;
+    }
+    .termos-caixa h3 {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--ink);
+      margin: 14px 0 4px;
+    }
+    .termos-caixa h3:first-child { margin-top: 0; }
+    .termos-caixa p {
+      font-size: 12.5px;
+      line-height: 1.6;
+      color: var(--ink-mute);
+      margin: 0;
+    }
+    .termos-caixa p strong { color: var(--ink); font-weight: 600; }
+    .termos-check-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 14px 24px 0;
+    }
+    .termos-check-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      margin-top: 1px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .termos-check-row label {
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: var(--ink-soft);
+      cursor: pointer;
+    }
+    .termos-check-row label a { color: var(--accent-dark); text-decoration: underline; }
+    .termos-check-row.sub label {
+      font-size: 12px;
+      color: var(--ink-mute);
+    }
+    .btn-block:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .termos-sair {
+      display: block;
+      width: 100%;
+      margin-top: 10px;
+      padding: 6px;
+      font-size: 12px;
+      color: var(--ink-mute);
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+      font-family: 'Inter', sans-serif;
+    }
     .painel-tag {
       font-family: 'Space Mono', monospace;
       font-size: 10px;
@@ -1935,6 +2001,47 @@
         <span class="google-text">Entrar com Google</span>
       </button>
       <p class="erro" id="erro-login" style="display:none;text-align:center;font-size:13px;color:var(--danger);margin-top:12px;"></p>
+    </div>
+
+    <!-- PAINEL DE TERMOS DE USO (exibido após o primeiro login com Google) -->
+    <div class="card painel-acesso" id="painel-termos" style="padding:28px 0 24px;">
+      <div style="padding:0 24px;">
+        <div class="painel-tag" style="text-align:center;padding-right:0;">Antes de continuar</div>
+        <h2 style="font-size:20px;text-align:center;margin-top:4px;color:var(--ink);">Termos de Uso</h2>
+        <p style="font-size:13px;color:var(--ink-mute);text-align:center;margin:8px 0 0;">Leia e aceite para usar o SCANNER 3.5 com sua conta Google.</p>
+      </div>
+
+      <div class="termos-caixa" id="termos-caixa">
+        <h3>1. Sobre o serviço</h3>
+        <p>O SCANNER 3.5 usa inteligência artificial para identificar pedras e minerais a partir de fotos enviadas por você, estimando nome, características e faixa de preço de mercado.</p>
+
+        <h3>2. Autorização de uso de imagem</h3>
+        <p>Ao enviar uma foto, você autoriza que ela seja processada por IA para gerar a identificação e <strong>armazenada em nossos servidores</strong> para manter seu histórico e melhorar a precisão do serviço. Se você mantiver a opção de exibição pública ativada (abaixo), a foto e o resultado da identificação poderão aparecer de forma pública no catálogo, na vitrine e nos rankings da comunidade. Você pode desativar essa exibição a qualquer momento e pode solicitar a remoção de uma imagem enviada por você.</p>
+
+        <h3>3. Seus dados de conta</h3>
+        <p>Ao entrar com o Google, usamos seu <strong>nome, e-mail e foto de perfil</strong> apenas para criar e identificar sua conta, exibir seu histórico de avaliações e permitir a compra de leituras. Não compartilhamos esses dados com terceiros para fins de publicidade.</p>
+
+        <h3>4. Pagamentos</h3>
+        <p>Os pacotes de leituras são cobrados uma única vez, sem mensalidade ou renovação automática, e ficam disponíveis na sua conta até serem utilizados.</p>
+
+        <h3>5. Sobre os resultados da IA</h3>
+        <p>As identificações são estimativas geradas por IA e não substituem uma avaliação profissional, laudo geológico ou certificado de autenticidade.</p>
+      </div>
+
+      <div class="termos-check-row">
+        <input type="checkbox" id="check-aceita-termos">
+        <label for="check-aceita-termos">Li e aceito os <a href="#" id="link-termos-completo">Termos de Uso</a>, incluindo a autorização de uso de imagem descrita acima.</label>
+      </div>
+      <div class="termos-check-row sub">
+        <input type="checkbox" id="check-aceita-vitrine" checked>
+        <label for="check-aceita-vitrine">Permitir que minhas identificações apareçam publicamente no catálogo e rankings da comunidade (recomendado).</label>
+      </div>
+
+      <div style="padding:18px 24px 0;">
+        <button class="btn btn-primary btn-block" id="btn-aceitar-termos" style="font-size:15px;padding:14px;" disabled>Aceitar e continuar</button>
+        <button type="button" class="termos-sair" id="btn-recusar-termos">Não aceito, sair da conta</button>
+        <p class="erro" id="erro-termos" style="display:none;text-align:center;font-size:12.5px;color:var(--danger);margin-top:8px;"></p>
+      </div>
     </div>
 
     <!-- PAINEL DE BOAS-VINDAS -->
@@ -2359,6 +2466,12 @@
     var painelBoasVindas = document.getElementById('painel-boas-vindas');
     var btnFecharBoasVindas = document.getElementById('btn-fechar-boas-vindas');
     var btnContinuarBoasVindas = document.getElementById('btn-continuar-boas-vindas');
+    var painelTermos = document.getElementById('painel-termos');
+    var checkAceitaTermos = document.getElementById('check-aceita-termos');
+    var checkAceitaVitrine = document.getElementById('check-aceita-vitrine');
+    var btnAceitarTermos = document.getElementById('btn-aceitar-termos');
+    var btnRecusarTermos = document.getElementById('btn-recusar-termos');
+    var erroTermosEl = document.getElementById('erro-termos');
     var btnGoogleLogin = document.getElementById('btn-google-login');
     var erroLoginEl = document.getElementById('erro-login');
     var fotoTiraWrap = document.getElementById('foto-tira-wrap');
@@ -2436,6 +2549,60 @@
     }
     btnFecharBoasVindas.addEventListener('click', fecharBoasVindasEContinuar);
     btnContinuarBoasVindas.addEventListener('click', fecharBoasVindasEContinuar);
+
+    // ========================================================================
+    // TERMOS DE USO (exibidos após o primeiro login com Google)
+    // ========================================================================
+    var CHAVE_TERMOS = 'scanner35_termos_aceitos_v1';
+
+    function termosJaAceitos(userId) {
+      try { return localStorage.getItem(CHAVE_TERMOS + '_' + userId) === '1'; }
+      catch (e) { return false; }
+    }
+
+    function marcarTermosAceitos(userId) {
+      try { localStorage.setItem(CHAVE_TERMOS + '_' + userId, '1'); } catch (e) {}
+    }
+
+    checkAceitaTermos.addEventListener('change', function() {
+      btnAceitarTermos.disabled = !checkAceitaTermos.checked;
+    });
+
+    function abrirPainelTermos() {
+      checkAceitaTermos.checked = false;
+      btnAceitarTermos.disabled = true;
+      erroTermosEl.style.display = 'none';
+      abrirPopup(painelTermos);
+    }
+
+    btnAceitarTermos.addEventListener('click', function() {
+      if (!checkAceitaTermos.checked) return;
+      supa.auth.getSession().then(function(sessaoResp) {
+        var sessao = sessaoResp.data.session;
+        if (!sessao || !sessao.user) return;
+        var permiteVitrine = checkAceitaVitrine.checked;
+        var checkVitrineUpload = document.getElementById('check-permite-vitrine');
+        if (checkVitrineUpload) checkVitrineUpload.checked = permiteVitrine;
+        marcarTermosAceitos(sessao.user.id);
+        // Melhor esforço: registra a aceitação no backend, se o endpoint existir.
+        fetch('/api/aceitar-termos', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sessao.access_token },
+          body: JSON.stringify({ aceitou_termos: true, permite_vitrine: permiteVitrine })
+        }).catch(function() {});
+        painelTermos.classList.remove('active');
+        document.body.classList.remove('popup-aberto');
+        abrirPopup(painelBoasVindas);
+      });
+    });
+
+    btnRecusarTermos.addEventListener('click', function() {
+      supa.auth.signOut().then(function() {
+        window.location.reload();
+      }).catch(function() {
+        window.location.reload();
+      });
+    });
 
     btnSidebarToggle.addEventListener('click', abrirHistorico);
     btnSidebarClose.addEventListener('click', fecharSidebar);
@@ -2520,6 +2687,9 @@
             '</div>';
           var navUser = document.getElementById('nav-user');
           atualizarContadorGratis();
+          if (!termosJaAceitos(sessao.user.id) && !painelTermos.classList.contains('active')) {
+            abrirPainelTermos();
+          }
           document.getElementById('btn-nav-user-toggle').addEventListener('click', function(e) {
             e.stopPropagation();
             navUser.classList.toggle('active');
