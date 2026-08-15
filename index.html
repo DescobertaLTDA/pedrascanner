@@ -2669,7 +2669,8 @@
               negociavel: !!item.negociavel_venda,
               data: item.criado_em || null,
               avaliador: item.nome || 'cliente',
-              foto: item.foto || null
+              foto: item.foto || null,
+              telefone: item.telefone_venda || null
             };
           });
           pedrasVendaDados[tipo] = itens;
@@ -4689,11 +4690,28 @@
           (index + 1) + '</div>' +
           '<div class="rank-name" style="font-weight:600;font-size:13px;color:var(--ink);margin:2px 0 1px;">' + (item
             .nome || 'Pedra não identificada') + '</div>' +
-          '<div class="rank-meta" style="font-size:11px;color:var(--ink-mute2);">' + (item.valor ? item.valor +
-            (item.negociavel ? ' (negociável)' : '') + ' · ' : '') + 'por ' + (item.avaliador || 'cliente') + (item.data ?
+          (item.valor ? '<div class="rank-preco" style="font-family:\'Space Mono\',monospace;font-weight:700;font-size:15px;color:var(--accent-dark);margin:2px 0;">' +
+            item.valor + (item.negociavel ? ' <span style="font-weight:600;font-size:10px;color:var(--ink-mute2);">(negociável)</span>' : '') + '</div>' : '') +
+          '<div class="rank-meta" style="font-size:11px;color:var(--ink-mute2);">' + 'por ' + (item.avaliador || 'cliente') + (item.data ?
             ' · ' + tempoRelativo(item.data) : '') + '</div>' +
           '<span class="rank-badge" style="display:inline-flex;align-items:center;gap:3px;font-size:9px;font-weight:700;padding:1px 8px;border-radius:10px;background:var(--accent);color:#fff;margin-top:4px;">' +
           badgeIcon + badgeTexto + '</span>';
+        if (item.telefone) {
+          var telLimpoCard = String(item.telefone).replace(/\D/g, '');
+          if (telLimpoCard && telLimpoCard.length <= 11) { telLimpoCard = '55' + telLimpoCard; }
+          var msgWhatsCard = encodeURIComponent('Olá! Vi a ' + (item.nome || 'pedra') + ' à venda por ' +
+            (item.valor || 'esse valor') + ' no SCANNER 3.5. Ainda está disponível?');
+          var btnWhatsCard = document.createElement('a');
+          btnWhatsCard.href = 'https://wa.me/' + telLimpoCard + '?text=' + msgWhatsCard;
+          btnWhatsCard.target = '_blank';
+          btnWhatsCard.rel = 'noopener';
+          btnWhatsCard.style.cssText = 'width:100%;margin-top:8px;background:#25D366;color:#fff;border:none;border-radius:8px;padding:8px;font-size:11.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none;';
+          btnWhatsCard.innerHTML =
+            '<svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:#fff;"><path d="M17.6 6.3A8.9 8.9 0 0012 4a8.9 8.9 0 00-7.7 13.4L3 21l3.7-1.3A8.9 8.9 0 0012 20.9 8.9 8.9 0 0017.6 6.3zM12 19.1a7.1 7.1 0 01-3.6-1l-.3-.1-2.2.8.8-2.1-.2-.3A7.1 7.1 0 1119 12a7.1 7.1 0 01-7 7.1zm3.9-5.3c-.2-.1-1.2-.6-1.4-.7-.2-.1-.3-.1-.5.1-.1.2-.5.7-.6.8-.1.1-.2.1-.4 0-.2-.1-.9-.3-1.7-1a6.3 6.3 0 01-1.2-1.5c-.1-.2 0-.3.1-.4l.3-.4.2-.3v-.3c0-.1-.5-1.2-.7-1.6-.2-.4-.4-.4-.5-.4h-.4c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2 1 2.4c.1.1 1.6 2.5 3.9 3.4.5.2 1 .4 1.3.5.5.2 1 .1 1.4.1.4-.1 1.2-.5 1.4-1 .2-.4.2-.8.1-1z"/></svg>' +
+            'WhatsApp';
+          btnWhatsCard.addEventListener('click', function(e) { e.stopPropagation(); });
+          div.appendChild(btnWhatsCard);
+        }
         div.addEventListener('click', function() {
           abrirDossiePorItem(item);
         });
