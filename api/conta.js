@@ -143,7 +143,7 @@ async function handlerHistorico(req, res) {
 
   const { data: linhas, error } = await supabase
     .from('identificacoes')
-    .select('id, nome_provavel, confianca, desbloqueada, criado_em, faixa_preco_brasil')
+    .select('id, nome_provavel, confianca, desbloqueada, criado_em, faixa_preco_brasil, esta_a_venda, venda_status, valor_venda, telefone_venda, observacao_venda, negociavel_venda')
     .eq('email', email)
     .order('criado_em', { ascending: false })
     .limit(30);
@@ -160,7 +160,13 @@ async function handlerHistorico(req, res) {
       confianca: item.confianca,
       desbloqueada: item.desbloqueada,
       criado_em: item.criado_em,
-      valor_exibicao: extrairValorExibicao(item.faixa_preco_brasil)
+      valor_exibicao: extrairValorExibicao(item.faixa_preco_brasil),
+      esta_a_venda: !!item.esta_a_venda,
+      venda_status: item.venda_status || 'ativo',
+      valor_venda: item.valor_venda || null,
+      telefone_venda: item.telefone_venda || null,
+      observacao_venda: item.observacao_venda || null,
+      negociavel_venda: !!item.negociavel_venda
     };
   });
 
@@ -213,6 +219,7 @@ async function handlerObter(req, res) {
     foto_media_type: identificacao.foto_media_type,
     criado_em: identificacao.criado_em,
     esta_a_venda: !!identificacao.esta_a_venda,
+    venda_status: identificacao.venda_status || 'ativo',
     valor_venda: identificacao.valor_venda || null,
     telefone_venda: identificacao.telefone_venda || null,
     observacao_venda: identificacao.observacao_venda || null,
@@ -360,6 +367,7 @@ async function handlerColocarVenda(req, res) {
     .from('identificacoes')
     .update({
       esta_a_venda: true,
+      venda_status: 'ativo',
       valor_venda: valorLimpo,
       telefone_venda: telefoneLimpo,
       observacao_venda: (observacao || '').toString().trim().slice(0, 200) || null,
@@ -367,7 +375,7 @@ async function handlerColocarVenda(req, res) {
       venda_criada_em: new Date().toISOString()
     })
     .eq('id', identificacao_id)
-    .select('id, esta_a_venda, valor_venda, telefone_venda, observacao_venda, negociavel_venda, venda_criada_em')
+    .select('id, esta_a_venda, venda_status, valor_venda, telefone_venda, observacao_venda, negociavel_venda, venda_criada_em')
     .single();
 
   if (erroUpdate) {
@@ -382,15 +390,22 @@ async function handlerColocarVenda(req, res) {
 // /api/remover-venda — tira uma pedra da lista de "Pedras à venda" (marcar
 // como vendida ou apenas desistir do anúncio, sem apagar a identificação).
 // ============================================================================
+// ============================================================================
+// /api/remover-venda — gerencia o status de um anúncio já publicado.
+// Aceita { identificacao_id, acao } onde acao é 'pausar' (padrão), 'excluir'
+// ou 'vendida'. 'pausar' e 'vendida' só escondem o anúncio da vitrine pública
+// (esta_a_venda=false) mantendo os dados; 'excluir' apaga valor/telefone/obs.
+// ============================================================================
 async function handlerRemoverVenda(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método não permitido' });
   }
 
-  const { identificacao_id } = req.body || {};
+  const { identificacao_id, acao } = req.body || {};
   if (!identificacao_id) {
     return res.status(400).json({ error: 'identificacao_id não enviado' });
   }
+  const acaoValida = ['pausar', 'excluir', 'vendida'].indexOf(acao) !== -1 ? acao : 'pausar';
 
   const email = await autenticar(req, res);
   if (!email) return;
@@ -408,17 +423,34 @@ async function handlerRemoverVenda(req, res) {
     return res.status(403).json({ error: 'Essa identificação não pertence a essa conta.' });
   }
 
+  let camposUpdate;
+  if (acaoValida === 'excluir') {
+    camposUpdate = {
+      esta_a_venda: false,
+      venda_status: 'ativo',
+      valor_venda: null,
+      telefone_venda: null,
+      observacao_venda: null,
+      negociavel_venda: false,
+      venda_criada_em: null
+    };
+  } else if (acaoValida === 'vendida') {
+    camposUpdate = { esta_a_venda: false, venda_status: 'vendido' };
+  } else {
+    camposUpdate = { esta_a_venda: false, venda_status: 'pausado' };
+  }
+
   const { error: erroUpdate } = await supabase
     .from('identificacoes')
-    .update({ esta_a_venda: false })
+    .update(camposUpdate)
     .eq('id', identificacao_id);
 
   if (erroUpdate) {
     console.error('Erro Supabase (remover-venda):', erroUpdate);
-    return res.status(500).json({ error: 'Erro ao remover o anúncio. Tente novamente.' });
+    return res.status(500).json({ error: 'Erro ao atualizar o anúncio. Tente novamente.' });
   }
 
-  return res.status(200).json({ ok: true });
+  return res.status(200).json({ ok: true, venda_status: camposUpdate.venda_status });
 }
 
 // ============================================================================
