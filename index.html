@@ -346,6 +346,31 @@
       justify-content: center;
       flex-shrink: 0;
       text-transform: uppercase;
+      overflow: hidden;
+    }
+    .nav-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .nav-dropdown button.editar-perfil {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .nav-dropdown button.editar-perfil svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--ink-mute);
+      stroke-width: 2;
+      fill: none;
+      flex-shrink: 0;
+    }
+    .nav-dropdown hr.nav-dropdown-sep {
+      border: none;
+      border-top: 1px solid var(--line);
+      margin: 4px 0;
     }
     .nav-name {
       font-size: 12.5px;
@@ -1896,6 +1921,107 @@
         font-size: 13px;
       }
     }
+
+    /* PAINEL DE EDIÇÃO DE PERFIL */
+    .perfil-avatar-wrap {
+      display: flex;
+      justify-content: center;
+      margin: 4px 0 22px;
+    }
+    .perfil-avatar-botao {
+      position: relative;
+      width: 84px;
+      height: 84px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+      padding: 0;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    .perfil-avatar-foto {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      background: var(--accent);
+    }
+    .perfil-avatar-inicial {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--on-accent);
+      font-family: 'Space Mono', monospace;
+      font-size: 30px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .perfil-avatar-editar {
+      position: absolute;
+      bottom: -2px;
+      right: -2px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--ink);
+      border: 2px solid var(--card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .perfil-avatar-editar svg {
+      width: 13px;
+      height: 13px;
+      stroke: #fff;
+      stroke-width: 2;
+      fill: none;
+    }
+    .perfil-campo {
+      padding: 0 24px;
+      margin-bottom: 16px;
+    }
+    .perfil-campo label {
+      display: block;
+      font-size: 11.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--ink-mute);
+      margin-bottom: 6px;
+    }
+    .perfil-campo input[type="text"] {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: 1px solid var(--line-strong);
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'Inter', sans-serif;
+      font-size: 14.5px;
+    }
+    .perfil-campo input[type="text"]:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .perfil-campo-email {
+      font-size: 12.5px;
+      color: var(--ink-mute2);
+    }
+    .perfil-acoes {
+      padding: 4px 24px 28px;
+    }
+    .perfil-status {
+      text-align: center;
+      font-size: 12.5px;
+      margin-top: 10px;
+      min-height: 16px;
+    }
+    .perfil-status.erro { color: var(--danger); }
+    .perfil-status.sucesso { color: var(--accent-dark); }
   </style>
 </head>
 <body>
@@ -2126,6 +2252,36 @@
         <span class="google-text">Entrar com Google</span>
       </button>
       <p class="erro" id="erro-login" style="display:none;text-align:center;font-size:13px;color:var(--danger);margin-top:12px;"></p>
+    </div>
+
+    <!-- PAINEL DE EDIÇÃO DE PERFIL -->
+    <div class="card painel-acesso" id="painel-perfil" style="padding:32px 0 0;">
+      <button type="button" class="painel-fechar" id="btn-fechar-perfil">&times;</button>
+      <div class="painel-tag" style="text-align:center;padding-right:0;">Sua conta</div>
+      <h2 style="font-size:20px;text-align:center;margin-top:4px;color:var(--ink);">Editar perfil</h2>
+
+      <div class="perfil-avatar-wrap">
+        <button type="button" class="perfil-avatar-botao" id="btn-perfil-avatar">
+          <img class="perfil-avatar-foto" id="perfil-avatar-foto" style="display:none;">
+          <div class="perfil-avatar-inicial" id="perfil-avatar-inicial">?</div>
+          <span class="perfil-avatar-editar"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
+        </button>
+        <input type="file" id="input-perfil-foto" accept="image/*" style="display:none;">
+      </div>
+
+      <div class="perfil-campo">
+        <label for="input-perfil-nome">Nome de exibição</label>
+        <input type="text" id="input-perfil-nome" maxlength="60" placeholder="Seu nome">
+      </div>
+      <div class="perfil-campo">
+        <label>E-mail</label>
+        <div class="perfil-campo-email" id="perfil-email-atual">···</div>
+      </div>
+
+      <div class="perfil-acoes">
+        <button class="btn btn-primary btn-block" id="btn-salvar-perfil" style="font-size:15px;padding:14px;">Salvar alterações</button>
+        <p class="perfil-status" id="perfil-status"></p>
+      </div>
     </div>
 
     <!-- PAINEL DE TERMOS DE USO (exibido após o primeiro login com Google) -->
@@ -2630,6 +2786,18 @@
     var headerAuthArea = document.getElementById('header-auth-area');
     var painelLogin = document.getElementById('painel-login');
     var btnFecharLogin = document.getElementById('btn-fechar-login');
+    var painelPerfil = document.getElementById('painel-perfil');
+    var btnFecharPerfil = document.getElementById('btn-fechar-perfil');
+    var btnPerfilAvatar = document.getElementById('btn-perfil-avatar');
+    var inputPerfilFoto = document.getElementById('input-perfil-foto');
+    var perfilAvatarFoto = document.getElementById('perfil-avatar-foto');
+    var perfilAvatarInicial = document.getElementById('perfil-avatar-inicial');
+    var inputPerfilNome = document.getElementById('input-perfil-nome');
+    var perfilEmailAtual = document.getElementById('perfil-email-atual');
+    var btnSalvarPerfil = document.getElementById('btn-salvar-perfil');
+    var perfilStatusEl = document.getElementById('perfil-status');
+    var perfilArquivoFotoSelecionado = null;
+    var perfilUsuarioAtual = null;
     var painelBoasVindas = document.getElementById('painel-boas-vindas');
     var btnFecharBoasVindas = document.getElementById('btn-fechar-boas-vindas');
     var btnContinuarBoasVindas = document.getElementById('btn-continuar-boas-vindas');
@@ -2695,8 +2863,15 @@
     function esconderPaineis() {
       painelLogin.classList.remove('active');
       painelBoasVindas.classList.remove('active');
+      painelPerfil.classList.remove('active');
       document.body.classList.remove('popup-aberto');
       fecharSidebar();
+    }
+
+    function escapeHtml(texto) {
+      var d = document.createElement('div');
+      d.textContent = texto == null ? '' : String(texto);
+      return d.innerHTML;
     }
 
     function fecharSidebar() { sidebar.classList.remove('active');
@@ -2709,6 +2884,122 @@
     function abrirPainelLogin() { abrirPopup(painelLogin); }
 
     btnFecharLogin.addEventListener('click', function() { esconderPaineis(); });
+
+    // ========================================================================
+    // PAINEL DE EDIÇÃO DE PERFIL
+    // ========================================================================
+    function abrirPainelPerfil(usuario) {
+      perfilUsuarioAtual = usuario;
+      perfilArquivoFotoSelecionado = null;
+      perfilStatusEl.textContent = '';
+      perfilStatusEl.className = 'perfil-status';
+      var nomeAtual = (usuario.user_metadata && usuario.user_metadata.full_name) ||
+                       (usuario.user_metadata && usuario.user_metadata.name) || '';
+      var fotoAtual = usuario.user_metadata && usuario.user_metadata.avatar_url;
+      inputPerfilNome.value = nomeAtual;
+      perfilEmailAtual.textContent = usuario.email || '';
+      if (fotoAtual) {
+        perfilAvatarFoto.src = fotoAtual;
+        perfilAvatarFoto.style.display = 'block';
+        perfilAvatarInicial.style.display = 'none';
+      } else {
+        perfilAvatarFoto.style.display = 'none';
+        perfilAvatarInicial.style.display = 'flex';
+        perfilAvatarInicial.textContent = (nomeAtual || usuario.email || '?').trim().charAt(0) || '?';
+      }
+      abrirPopup(painelPerfil);
+    }
+
+    btnFecharPerfil.addEventListener('click', function() { esconderPaineis(); });
+
+    btnPerfilAvatar.addEventListener('click', function() { inputPerfilFoto.click(); });
+
+    inputPerfilFoto.addEventListener('change', function() {
+      var arquivo = inputPerfilFoto.files && inputPerfilFoto.files[0];
+      if (!arquivo) return;
+      if (!arquivo.type || arquivo.type.indexOf('image/') !== 0) {
+        perfilStatusEl.textContent = 'Escolha um arquivo de imagem.';
+        perfilStatusEl.className = 'perfil-status erro';
+        return;
+      }
+      if (arquivo.size > 5 * 1024 * 1024) {
+        perfilStatusEl.textContent = 'A imagem deve ter até 5MB.';
+        perfilStatusEl.className = 'perfil-status erro';
+        return;
+      }
+      perfilArquivoFotoSelecionado = arquivo;
+      perfilStatusEl.textContent = '';
+      perfilStatusEl.className = 'perfil-status';
+      var leitor = new FileReader();
+      leitor.onload = function(e) {
+        perfilAvatarFoto.src = e.target.result;
+        perfilAvatarFoto.style.display = 'block';
+        perfilAvatarInicial.style.display = 'none';
+      };
+      leitor.readAsDataURL(arquivo);
+    });
+
+    function salvarPerfil() {
+      if (!perfilUsuarioAtual) return;
+      var novoNome = inputPerfilNome.value.trim();
+      if (!novoNome) {
+        perfilStatusEl.textContent = 'Digite um nome de exibição.';
+        perfilStatusEl.className = 'perfil-status erro';
+        return;
+      }
+      btnSalvarPerfil.disabled = true;
+      btnSalvarPerfil.textContent = 'Salvando...';
+      perfilStatusEl.textContent = '';
+      perfilStatusEl.className = 'perfil-status';
+
+      function aplicarAtualizacao(fotoUrl) {
+        var dadosAtualizados = { full_name: novoNome, name: novoNome };
+        if (fotoUrl) dadosAtualizados.avatar_url = fotoUrl;
+        supa.auth.updateUser({ data: dadosAtualizados }).then(function(resultado) {
+          btnSalvarPerfil.disabled = false;
+          btnSalvarPerfil.textContent = 'Salvar alterações';
+          if (resultado.error) {
+            perfilStatusEl.textContent = 'Erro ao salvar: ' + resultado.error.message;
+            perfilStatusEl.className = 'perfil-status erro';
+            return;
+          }
+          perfilStatusEl.textContent = 'Perfil atualizado!';
+          perfilStatusEl.className = 'perfil-status sucesso';
+          atualizarHeader();
+          setTimeoutSeguro(function() { esconderPaineis(); }, 900);
+        }).catch(function(erro) {
+          btnSalvarPerfil.disabled = false;
+          btnSalvarPerfil.textContent = 'Salvar alterações';
+          perfilStatusEl.textContent = 'Erro ao salvar: ' + erro.message;
+          perfilStatusEl.className = 'perfil-status erro';
+        });
+      }
+
+      if (perfilArquivoFotoSelecionado) {
+        var extensao = (perfilArquivoFotoSelecionado.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+        var caminhoArquivo = perfilUsuarioAtual.id + '/avatar-' + Date.now() + '.' + extensao;
+        supa.storage.from('avatars').upload(caminhoArquivo, perfilArquivoFotoSelecionado, { upsert: true }).then(function(resultadoUpload) {
+          if (resultadoUpload.error) {
+            btnSalvarPerfil.disabled = false;
+            btnSalvarPerfil.textContent = 'Salvar alterações';
+            perfilStatusEl.textContent = 'Erro ao enviar foto: ' + resultadoUpload.error.message;
+            perfilStatusEl.className = 'perfil-status erro';
+            return;
+          }
+          var urlPublica = supa.storage.from('avatars').getPublicUrl(caminhoArquivo).data.publicUrl;
+          aplicarAtualizacao(urlPublica);
+        }).catch(function(erroUpload) {
+          btnSalvarPerfil.disabled = false;
+          btnSalvarPerfil.textContent = 'Salvar alterações';
+          perfilStatusEl.textContent = 'Erro ao enviar foto: ' + erroUpload.message;
+          perfilStatusEl.className = 'perfil-status erro';
+        });
+      } else {
+        aplicarAtualizacao(null);
+      }
+    }
+
+    btnSalvarPerfil.addEventListener('click', salvarPerfil);
 
     function fecharBoasVindasEContinuar() {
       painelBoasVindas.classList.remove('active');
@@ -2836,12 +3127,16 @@
           var nomeExibido = (sessao.user.user_metadata && sessao.user.user_metadata.full_name) || 
                             (sessao.user.user_metadata && sessao.user.user_metadata.name) || 
                             sessao.user.email || 'Usuário';
+          var fotoUrl = sessao.user.user_metadata && sessao.user.user_metadata.avatar_url;
           var inicial = nomeExibido.trim().charAt(0) || '?';
+          var avatarHtml = fotoUrl ?
+            '<img src="' + escapeHtml(fotoUrl) + '" alt="">' :
+            escapeHtml(inicial);
           headerAuthArea.innerHTML =
             '<div class="nav-user" id="nav-user">' +
             '<button class="nav-user-btn" id="btn-nav-user-toggle">' +
-            '<span class="nav-avatar">' + inicial + '</span>' +
-            '<span class="nav-name">' + nomeExibido + '</span>' +
+            '<span class="nav-avatar">' + avatarHtml + '</span>' +
+            '<span class="nav-name">' + escapeHtml(nomeExibido) + '</span>' +
             '<span class="nav-colecao-pill" id="nav-colecao" title="Valor estimado total das suas pedras escaneadas">💎 ···</span>' +
             '<span class="nav-saldo-pill" id="nav-saldo">···</span>' +
             '<svg class="nav-chevron" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>' +
@@ -2850,11 +3145,16 @@
             '<div class="nav-dropdown-colecao" id="nav-dropdown-colecao"><svg viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z"/></svg> <span>Coleção: <strong id="nav-dropdown-colecao-valor">···</strong></span></div>' +
             '<div class="nav-dropdown-saldo" id="nav-dropdown-saldo">···</div>' +
             '<div class="nav-dropdown-gratis" id="nav-dropdown-gratis" style="display:none;"></div>' +
+            '<button class="editar-perfil" id="btn-header-editar-perfil"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Editar perfil</button>' +
+            '<hr class="nav-dropdown-sep">' +
             '<button class="sair" id="btn-header-sair">Sair</button>' +
             '</div>' +
             '</div>';
           var navUser = document.getElementById('nav-user');
           atualizarContadorGratis();
+          document.getElementById('btn-header-editar-perfil').addEventListener('click', function() {
+            abrirPainelPerfil(sessao.user);
+          });
           document.getElementById('btn-nav-user-toggle').addEventListener('click', function(e) {
             e.stopPropagation();
             navUser.classList.toggle('active');
@@ -4437,6 +4737,20 @@
     supa.auth.getSession().then(function(sessaoResp) {
       if (sessaoResp.data.session) { atualizarHeader(); }
       restaurarFotosPendentesSeExistir();
+      // Abre o histórico automaticamente quando chega aqui vindo de outra página
+      // (ex: header.js das páginas secundárias linka para /index.html?abrir=historico).
+      var paramsUrl = new URLSearchParams(window.location.search);
+      if (paramsUrl.get('abrir') === 'historico') {
+        var sessaoAtual = sessaoResp.data.session;
+        if (sessaoAtual) {
+          abrirHistorico();
+        } else {
+          abrirPainelLogin();
+        }
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, '', window.location.pathname);
+        }
+      }
     }).catch(function(erroInit) { console.error('Falha ao checar sessão na inicialização:', erroInit); });
 
     window.addEventListener('beforeunload', function() { limparTimeouts(); });
