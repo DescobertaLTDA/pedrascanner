@@ -4198,9 +4198,19 @@
         btnConfirmarVenda.textContent = 'Publicando...';
         var controladorTempoLimite = (typeof AbortController !== 'undefined') ? new AbortController() : null;
         var timeoutId = controladorTempoLimite ? setTimeout(function() { controladorTempoLimite.abort(); }, 15000) : null;
-        fetch('/api/colocar-venda', {
+        supa.auth.getSession().then(function(sessaoResp) {
+          var sessao = sessaoResp.data.session;
+          if (!sessao || !sessao.access_token) {
+            erroVenda.textContent = 'Sua sessão expirou. Faça login novamente.';
+            erroVenda.style.display = 'block';
+            btnConfirmarVenda.disabled = false;
+            btnConfirmarVenda.textContent = 'Confirmar';
+            if (timeoutId) clearTimeout(timeoutId);
+            return null;
+          }
+          return fetch('/api/colocar-venda', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + sessao.access_token },
             body: JSON.stringify({
               identificacao_id: identificacaoIdAtual,
               valor: valor,
@@ -4209,8 +4219,10 @@
               negociavel: negociavel
             }),
             signal: controladorTempoLimite ? controladorTempoLimite.signal : undefined
-          })
+          });
+        })
           .then(function(res) {
+            if (!res) return null; // sessão expirada, já tratado acima
             return res.json().catch(function() {
               // Resposta não veio em JSON (ex: rota /api/colocar-venda ainda não
               // publicada no servidor) — trata como erro genérico em vez de travar.
@@ -4220,7 +4232,8 @@
               return d;
             });
           })
-          .then(function() {
+          .then(function(resultado) {
+            if (resultado === null) return; // sessão expirada, já tratado acima
             document.getElementById('form-colocar-venda').style.display = 'none';
             document.getElementById('confirmacao-venda').style.display = 'block';
             invalidarCachePedrasVenda();
