@@ -2220,8 +2220,8 @@
     </div>
 
     <div class="card" style="margin-top:20px;" id="secao-rankings">
-      <h2><svg viewBox="0 0 24 24"><path d="M12 2v20M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg> Rankings</h2>
-      <p style="font-size:13px;color:var(--ink-mute);text-align:center;margin-top:4px;">As pedras mais comentadas e avaliadas pelos membros</p>
+      <h2><svg viewBox="0 0 24 24"><path d="M12 2v20M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg> Pedras à venda</h2>
+      <p style="font-size:13px;color:var(--ink-mute);text-align:center;margin-top:4px;">Pedras que os membros da comunidade colocaram à venda</p>
       <div class="rankings-tabs" id="rankings-tabs" style="display:flex;gap:8px;margin-top:14px;border-bottom:1px solid var(--line);padding-bottom:12px;overflow-x:auto;">
         <button class="active" data-rank="recentes"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;"><path d="M12 2v6l3-3-3-3zM12 22v-6l3 3-3 3zM2 12h6l-3-3-3 3zM22 12h-6l3-3 3 3z"/></svg> Mais recentes</button>
         <button data-rank="baratas"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;"><circle cx="12" cy="12" r="10"/><path d="M8 8l8 8M8 16l8-8"/></svg> Mais baratas</button>
@@ -2394,6 +2394,50 @@
             <div class="dossie-onde-texto" id="modal-dossie-onde" style="font-size:14px;color:var(--ink);margin-top:2px;">🔒 Desbloqueie para ver</div>
           </div>
           <div class="dossie-observacao" id="modal-dossie-observacao" style="margin-top:16px;font-size:12.5px;color:var(--ink-mute);padding-top:12px;border-top:1px solid var(--line);"></div>
+
+          <!-- VENDA: pedra já catalogada pelo usuário, ele pode colocá-la à venda -->
+          <div class="dossie-venda" id="bloco-colocar-venda" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line);display:none;">
+            <button id="btn-colocar-venda" style="width:100%;background:var(--emerald);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+              <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#fff;stroke-width:2;fill:none;"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+              Colocar essa pedra à venda
+            </button>
+
+            <div id="form-colocar-venda" style="display:none;margin-top:12px;">
+              <label for="input-venda-valor" style="font-size:12px;font-weight:600;color:var(--ink-mute);display:block;margin-bottom:6px;">Valor de venda</label>
+              <input type="text" id="input-venda-valor" inputmode="decimal" placeholder="Ex: 150,00" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line-strong);font-size:14px;font-family:inherit;box-sizing:border-box;">
+
+              <label for="input-venda-telefone" style="font-size:12px;font-weight:600;color:var(--ink-mute);display:block;margin:12px 0 6px;">Telefone de contato (WhatsApp)</label>
+              <input type="tel" id="input-venda-telefone" placeholder="Ex: (18) 99999-9999" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line-strong);font-size:14px;font-family:inherit;box-sizing:border-box;">
+
+              <label for="input-venda-obs" style="font-size:12px;font-weight:600;color:var(--ink-mute);display:block;margin:12px 0 6px;">Observações (opcional)</label>
+              <textarea id="input-venda-obs" rows="2" maxlength="200" placeholder="Ex: aceito negociar, retirada em mãos, etc." style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line-strong);font-size:14px;font-family:inherit;box-sizing:border-box;resize:vertical;"></textarea>
+
+              <div class="termos-check-row sub" style="margin-top:10px;">
+                <input type="checkbox" id="check-venda-negociavel">
+                <label for="check-venda-negociavel">Valor negociável</label>
+              </div>
+
+              <button id="btn-confirmar-venda" style="width:100%;margin-top:12px;background:var(--emerald);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;">Publicar anúncio</button>
+              <p class="erro" id="erro-venda" style="display:none;text-align:center;font-size:12.5px;color:var(--danger);margin-top:8px;"></p>
+            </div>
+
+            <div id="confirmacao-venda" style="display:none;margin-top:12px;text-align:center;">
+              <p style="font-size:13px;color:var(--ink);font-weight:600;">✅ Pedra publicada à venda!</p>
+              <p style="font-size:12.5px;color:var(--ink-mute);margin-top:2px;">Ela já aparece em "Pedras à venda" para a comunidade.</p>
+            </div>
+          </div>
+
+          <!-- VENDA: pedra de outro membro que já está à venda -->
+          <div class="dossie-venda-contato" id="bloco-contato-venda" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line);display:none;">
+            <div style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent-dark);">À venda por</div>
+            <div id="texto-valor-venda" style="font-size:18px;font-weight:700;color:var(--ink);margin-top:2px;"></div>
+            <p id="texto-obs-venda" style="font-size:12.5px;color:var(--ink-mute);margin-top:4px;"></p>
+            <a id="btn-whatsapp-venda" href="#" target="_blank" rel="noopener" style="width:100%;margin-top:10px;background:#25D366;color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
+              <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#fff;"><path d="M17.6 6.3A8.9 8.9 0 0012 4a8.9 8.9 0 00-7.7 13.4L3 21l3.7-1.3A8.9 8.9 0 0012 20.9 8.9 8.9 0 0017.6 6.3zM12 19.1a7.1 7.1 0 01-3.6-1l-.3-.1-2.2.8.8-2.1-.2-.3A7.1 7.1 0 1119 12a7.1 7.1 0 01-7 7.1zm3.9-5.3c-.2-.1-1.2-.6-1.4-.7-.2-.1-.3-.1-.5.1-.1.2-.5.7-.6.8-.1.1-.2.1-.4 0-.2-.1-.9-.3-1.7-1a6.3 6.3 0 01-1.2-1.5c-.1-.2 0-.3.1-.4l.3-.4.2-.3v-.3c0-.1-.5-1.2-.7-1.6-.2-.4-.4-.4-.5-.4h-.4c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2 1 2.4c.1.1 1.6 2.5 3.9 3.4.5.2 1 .4 1.3.5.5.2 1 .1 1.4.1.4-.1 1.2-.5 1.4-1 .2-.4.2-.8.1-1z"/></svg>
+              Falar no WhatsApp
+            </a>
+          </div>
+
           <button id="btn-compartilhar-dossie" style="width:100%;margin-top:18px;background:var(--ink-light);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
             <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#fff;stroke-width:2;fill:none;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
             Compartilhar essa descoberta
@@ -3977,13 +4021,13 @@
       // modal caía no fallback "Pedra não identificada" mesmo quando a
       // IA tinha identificado a pedra com confiança alta.
       data.nome = data.nome || data.nome_provavel;
-      abrirDossie(data, fotoUrl);
+      abrirDossie(data, fotoUrl, { podeColocarVenda: true });
     }
 
     // ========================================================================
     // DOSSIÊ MODAL
     // ========================================================================
-    function abrirDossie(data, fotoUrl) {
+    function abrirDossie(data, fotoUrl, opts) {
       var modal = document.getElementById('modal-dossie');
       var img = document.getElementById('modal-dossie-img');
       var nome = document.getElementById('modal-dossie-nome');
@@ -4017,6 +4061,41 @@
       if (desbloqueado && data.onde_vender) { onde.textContent = data.onde_vender; } else { onde.textContent =
           '🔒 Desbloqueie para ver onde vender essa pedra'; }
       observacao.textContent = data.observacao || '';
+
+      // ---- Bloco de venda (colocar à venda / falar no WhatsApp) ----
+      var blocoColocarVenda = document.getElementById('bloco-colocar-venda');
+      var blocoContatoVenda = document.getElementById('bloco-contato-venda');
+      var btnColocarVenda = document.getElementById('btn-colocar-venda');
+      var formVenda = document.getElementById('form-colocar-venda');
+      var confirmacaoVenda = document.getElementById('confirmacao-venda');
+      var erroVendaEl = document.getElementById('erro-venda');
+      formVenda.style.display = 'none';
+      confirmacaoVenda.style.display = 'none';
+      erroVendaEl.style.display = 'none';
+      btnColocarVenda.style.display = 'flex';
+      document.getElementById('input-venda-valor').value = '';
+      document.getElementById('input-venda-telefone').value = '';
+      document.getElementById('input-venda-obs').value = '';
+      document.getElementById('check-venda-negociavel').checked = false;
+      if (data.valor_venda) {
+        blocoContatoVenda.style.display = 'block';
+        blocoColocarVenda.style.display = 'none';
+        document.getElementById('texto-valor-venda').textContent = data.valor_venda +
+          (data.negociavel_venda ? ' (negociável)' : '');
+        document.getElementById('texto-obs-venda').textContent = data.observacao_venda || '';
+        var telLimpo = (data.telefone_venda || '').replace(/\D/g, '');
+        if (telLimpo && telLimpo.length <= 11) { telLimpo = '55' + telLimpo; }
+        var msgWhats = encodeURIComponent('Olá! Vi a ' + (data.nome || 'pedra') + ' à venda por ' + data.valor_venda +
+          ' no SCANNER 3.5. Ainda está disponível?');
+        document.getElementById('btn-whatsapp-venda').href = 'https://wa.me/' + telLimpo + '?text=' + msgWhats;
+      } else if (opts && opts.podeColocarVenda) {
+        blocoColocarVenda.style.display = 'block';
+        blocoContatoVenda.style.display = 'none';
+      } else {
+        blocoColocarVenda.style.display = 'none';
+        blocoContatoVenda.style.display = 'none';
+      }
+
       dossieCompartilhamentoAtual = {
         nome: data.nome || 'uma pedra misteriosa',
         preco: data.faixa_preco_brasil || '',
@@ -4057,6 +4136,77 @@
     if (btnCertificadoDossie) {
       btnCertificadoDossie.addEventListener('click', function() {
         gerarCertificadoPDF(dossieCompartilhamentoAtual || {});
+      });
+    }
+
+    // ========================================================================
+    // COLOCAR PEDRA À VENDA
+    // ========================================================================
+    var btnColocarVendaEl = document.getElementById('btn-colocar-venda');
+    if (btnColocarVendaEl) {
+      btnColocarVendaEl.addEventListener('click', function() {
+        document.getElementById('form-colocar-venda').style.display = 'block';
+        btnColocarVendaEl.style.display = 'none';
+      });
+    }
+
+    var btnConfirmarVenda = document.getElementById('btn-confirmar-venda');
+    if (btnConfirmarVenda) {
+      btnConfirmarVenda.addEventListener('click', function() {
+        var erroVenda = document.getElementById('erro-venda');
+        erroVenda.style.display = 'none';
+        var valor = document.getElementById('input-venda-valor').value.trim();
+        var telefone = document.getElementById('input-venda-telefone').value.trim();
+        var obs = document.getElementById('input-venda-obs').value.trim();
+        var negociavel = document.getElementById('check-venda-negociavel').checked;
+        if (!valor) {
+          erroVenda.textContent = 'Informe o valor de venda.';
+          erroVenda.style.display = 'block';
+          return;
+        }
+        var telefoneDigitos = telefone.replace(/\D/g, '');
+        if (!telefoneDigitos || telefoneDigitos.length < 10) {
+          erroVenda.textContent = 'Informe um telefone de contato válido, com DDD.';
+          erroVenda.style.display = 'block';
+          return;
+        }
+        if (!identificacaoIdAtual) {
+          erroVenda.textContent = 'Não foi possível identificar essa pedra. Tente novamente.';
+          erroVenda.style.display = 'block';
+          return;
+        }
+        btnConfirmarVenda.disabled = true;
+        btnConfirmarVenda.textContent = 'Publicando...';
+        fetch('/api/colocar-venda', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + accessToken },
+            body: JSON.stringify({
+              identificacao_id: identificacaoIdAtual,
+              valor: valor,
+              telefone: telefoneDigitos,
+              observacao: obs,
+              negociavel: negociavel
+            })
+          })
+          .then(function(res) {
+            return res.json().then(function(d) {
+              if (!res.ok || d.error) { throw new Error(d.error || 'Falha ao publicar o anúncio.'); }
+              return d;
+            });
+          })
+          .then(function() {
+            document.getElementById('form-colocar-venda').style.display = 'none';
+            document.getElementById('confirmacao-venda').style.display = 'block';
+            renderizarRankings(rankingAtual);
+          })
+          .catch(function(err) {
+            erroVenda.textContent = err.message || 'Não foi possível publicar o anúncio agora. Tente novamente.';
+            erroVenda.style.display = 'block';
+          })
+          .finally(function() {
+            btnConfirmarVenda.disabled = false;
+            btnConfirmarVenda.textContent = 'Publicar anúncio';
+          });
       });
     }
 
