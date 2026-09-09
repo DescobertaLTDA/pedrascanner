@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+  <title>SCANNER 3.5 — Identificador de Pedras com IA</title>
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="SCANNER 3.5">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/img/logo.png?v=2">
+  <link rel="icon" type="image/png" sizes="16x16" href="/assets/img/logo.png?v=2">
+  <link rel="shortcut icon" type="image/png" href="/assets/img/logo.png?v=2">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/img/logo.png?v=2">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Inter:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js">
+  </script>
+  <link rel="stylesheet" href="/assets/css/index.css">
+</head>
+<body>
+  <div id="modal-navegador-interno" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;padding:20px;">
+    <div style="background:var(--bg);color:var(--ink-light);max-width:380px;width:100%;border-radius:16px;padding:28px 24px 24px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <div style="font-size:38px;margin-bottom:10px;">🌐</div>
+      <h3 style="font-size:18px;font-weight:700;margin-bottom:6px;">Abra no navegador pra continuar</h3>
+      <p style="font-size:13.5px;color:var(--ink-mute);line-height:1.5;margin-bottom:18px;">
+        O navegador interno do app não permite carregar fotos — por isso não é possível enviar a foto da sua pedra por aqui. Siga os passos abaixo pra abrir no navegador:
+      </p>
+      <div style="text-align:left;background:var(--card);border-radius:12px;padding:14px 16px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px;">
+          <div style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--ink-light);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;">1</div>
+          <div style="font-size:13.5px;line-height:1.4;">
+            Toque no ícone <strong style="font-size:16px;letter-spacing:1px;">⋯</strong> (três pontinhos), geralmente no canto superior direito da tela
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:var(--ink-light);color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;">2</div>
+          <div style="font-size:13.5px;line-height:1.4;">
+            Toque em <strong>"Abrir no navegador"</strong>
+          </div>
+        </div>
+      </div>
+      <button id="btn-copiar-link-modal" style="width:100%;background:var(--ink-light);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14.5px;font-weight:600;cursor:pointer;margin-bottom:10px;">Copiar link</button>
+      <button id="btn-fechar-modal-navinterno" style="width:100%;background:none;border:none;color:var(--ink-mute);font-size:13px;cursor:pointer;padding:6px;">Entendi, continuar mesmo assim</button>
+    </div>
+  </div>
+
+  <!-- ESCOLHA: LIGAR CÂMERA OU ENVIAR FOTO JÁ EXISTENTE -->
+  <div id="modal-escolha-foto" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.6);align-items:center;justify-content:center;padding:20px;">
+    <div style="background:var(--card);max-width:340px;width:100%;border-radius:16px;padding:26px 24px 22px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.3);">
+      <h3 style="font-family:'Fraunces',serif;font-size:18px;color:var(--ink);margin-bottom:6px;">Como quer enviar a foto?</h3>
+      <p style="font-size:13px;color:var(--ink-mute);line-height:1.5;margin-bottom:20px;">Ligue a câmera e escaneie a pedra na hora, ou envie uma foto que já tem salva.</p>
+      <button type="button" id="btn-escolha-camera" style="width:100%;background:var(--accent);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <svg viewBox="0 0 24 24" style="width:18px;height:18px;stroke:#fff;stroke-width:2;fill:none;"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Ligar câmera
+      </button>
+      <button type="button" id="btn-escolha-galeria" style="width:100%;background:var(--card-alt);color:var(--ink);border:1px solid var(--line-strong);border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;">Fazer upload de foto</button>
+      <button type="button" id="btn-escolha-cancelar" style="width:100%;background:none;border:none;color:var(--ink-mute);font-size:13px;cursor:pointer;padding:6px;">Cancelar</button>
+    </div>
+  </div>
+
+  <!-- CÂMERA AO VIVO — "sensor" escaneando a pedra em tempo real -->
+  <div id="modal-camera" style="display:none;position:fixed;inset:0;z-index:9999;background:#000;align-items:center;justify-content:center;">
+    <div style="position:relative;width:100%;height:100%;max-width:520px;margin:0 auto;overflow:hidden;">
+      <video id="camera-video" autoplay playsinline muted style="width:100%;height:100%;object-fit:cover;display:block;background:#000;"></video>
+      <div class="scanner-grid"></div>
+      <div class="scanner-line"></div>
+      <span class="dz-scan-corner tl" style="border-color:#fff;opacity:0.9;width:22px;height:22px;top:18px;left:18px;"></span>
+      <span class="dz-scan-corner tr" style="border-color:#fff;opacity:0.9;width:22px;height:22px;top:18px;right:18px;"></span>
+      <span class="dz-scan-corner bl" style="border-color:#fff;opacity:0.9;width:22px;height:22px;bottom:110px;left:18px;"></span>
+      <span class="dz-scan-corner br" style="border-color:#fff;opacity:0.9;width:22px;height:22px;bottom:110px;right:18px;"></span>
+      <button type="button" id="btn-camera-fechar" style="position:absolute;top:16px;right:16px;width:38px;height:38px;border-radius:50%;background:rgba(0,0,0,0.5);border:none;color:#fff;font-size:20px;line-height:1;cursor:pointer;">&times;</button>
+      <p style="position:absolute;bottom:112px;left:0;right:0;text-align:center;color:#fff;font-size:12.5px;font-family:'Space Mono',monospace;text-shadow:0 1px 3px rgba(0,0,0,0.6);padding:0 20px;">Centralize a pedra no quadro e toque para escanear</p>
+      <div style="position:absolute;bottom:28px;left:0;right:0;display:flex;justify-content:center;">
+        <button type="button" id="btn-camera-capturar" aria-label="Escanear pedra" style="width:68px;height:68px;border-radius:50%;background:#fff;border:4px solid rgba(255,255,255,0.45);cursor:pointer;"></button>
+      </div>
+    </div>
+  </div>
+  <canvas id="camera-canvas" style="display:none;"></canvas>
+
+  <header>
+    <div class="nav-wrap">
+      <div class="nav-left">
+        <a href="#" class="logo">
+          <img src="/assets/img/logo.png" alt="SCANNER 3.5" class="logo-icon">
+          <span class="logo-text">
+            <span class="logo-main">SCANNER</span>
+            <span class="logo-sub">3.5</span>
+          </span>
+        </a>
+      </div>
+      <div class="nav-right">
+        <a class="nav-link" id="nav-link-minhas-pedras">
+          <svg viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z"/></svg>
+          Minhas Pedras
+        </a>
+        <a class="nav-link" id="nav-link-vender">
+          <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          Vender
+        </a>
+        <a class="nav-link" id="nav-link-catalogo" style="display:none;">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
+          Catálogo
+        </a>
+        <a class="nav-link" id="nav-link-rankings" style="display:none;">
+          <svg viewBox="0 0 24 24"><path d="M12 2v20M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg>
+          Rankings
+        </a>
+        <a class="nav-link" id="nav-link-ajuda" href="ajuda.html">
+          <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;stroke-width:1.8;fill:none;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+          Ajuda
+        </a>
+        <div id="header-auth-area">
+          <button class="nav-cta" id="btn-header-entrar"><span class="full">Entrar / Registrar</span><span class="short">Entrar</span></button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-head">
+      <h2><svg viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z"/></svg> Minhas Pedras</h2>
+      <button class="btn-sidebar-close" id="btn-sidebar-close" aria-label="Fechar histórico"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="sidebar-body">
+      <div id="nivel-colecionador" style="display:none;background:var(--card-alt);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:14px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <div>
+            <div id="nivel-colecionador-titulo" style="font-size:13.5px;font-weight:700;color:var(--ink);"></div>
+            <div id="nivel-colecionador-sub" style="font-size:11.5px;color:var(--ink-mute);margin-top:2px;"></div>
+          </div>
+          <div id="nivel-colecionador-emoji" style="font-size:26px;"></div>
+        </div>
+        <div style="margin-top:9px;height:6px;border-radius:3px;background:var(--line);overflow:hidden;">
+          <div id="nivel-colecionador-barra" style="height:100%;background:var(--accent-dark);width:0%;transition:width .4s ease;"></div>
+        </div>
+      </div>
+      <div id="badges-colecionador" style="display:none;margin-bottom:16px;">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-mute2);margin-bottom:8px;">Conquistas</div>
+        <div id="badges-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;"></div>
+        <div id="badge-detalhe" style="margin-top:8px;font-size:11.5px;color:var(--ink-mute);min-height:14px;"></div>
+      </div>
+      <div class="historico-lista" id="historico-lista"></div>
+      <p class="aviso" id="historico-vazio" style="display:none;text-align:center;color:var(--ink-mute);padding:10px 0;">Você ainda não fez nenhuma avaliação.</p>
+    </div>
+  </aside>
+
+  <div class="wrap">
+    <div class="head">
+      <div class="eyebrow">Comunidade de avaliação de pedras</div>
+      <h1>SCANNER 3.5</h1>
+      <p class="sub-tag">— descubra, avalie e compartilhe —</p>
+      <p class="hero-sub"><strong>Identifique sua pedra com IA</strong> e veja como ela se compara com as descobertas da comunidade.</p>
+      <div class="social-proof">
+        <div class="social-proof-avatars">
+          <span class="sp-avatar" style="background:#2f6d54;">M</span>
+          <span class="sp-avatar" style="background:#d98a6b;">A</span>
+          <span class="sp-avatar" style="background:#d4a94a;">R</span>
+          <span class="sp-avatar" style="background:#8fada5;">C</span>
+          <span class="sp-avatar" style="background:#a58fc4;">J</span>
+          <span class="sp-avatar sp-avatar-more" id="sp-avatar-more">+1.2k</span>
+        </div>
+        <p class="social-proof-text">
+          <span class="social-proof-stars" aria-hidden="true">
+            <svg viewBox="0 0 20 20"><path d="M10 1l2.6 5.9 6.4.6-4.8 4.3 1.4 6.2L10 14.9 4.4 18l1.4-6.2L1 7.5l6.4-.6z"/></svg>
+            <svg viewBox="0 0 20 20"><path d="M10 1l2.6 5.9 6.4.6-4.8 4.3 1.4 6.2L10 14.9 4.4 18l1.4-6.2L1 7.5l6.4-.6z"/></svg>
+            <svg viewBox="0 0 20 20"><path d="M10 1l2.6 5.9 6.4.6-4.8 4.3 1.4 6.2L10 14.9 4.4 18l1.4-6.2L1 7.5l6.4-.6z"/></svg>
+            <svg viewBox="0 0 20 20"><path d="M10 1l2.6 5.9 6.4.6-4.8 4.3 1.4 6.2L10 14.9 4.4 18l1.4-6.2L1 7.5l6.4-.6z"/></svg>
+            <svg viewBox="0 0 20 20"><path d="M10 1l2.6 5.9 6.4.6-4.8 4.3 1.4 6.2L10 14.9 4.4 18l1.4-6.2L1 7.5l6.4-.6z"/></svg>
+          </span>
+          Usado e provado por <strong id="social-proof-count">1.2k</strong> usuários
+        </p>
+      </div>
+    </div>
+
+    <div class="upload-hint">
+      Carregue a foto abaixo e veja o resultado na hora
+      <svg viewBox="0 0 24 24"><path d="M12 5v14m0 0l-6-6m6 6l6-6"/></svg>
+    </div>
+
+    <div class="card" id="area-principal" style="margin-top:12px;">
+      <div class="dropzone" id="dropzone">
+        <div class="dz-icon" id="dz-icon-desktop"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg></div>
+        <div class="dz-scan-demo" id="dz-scan-demo" aria-hidden="true">
+          <div class="dz-scan-frame">
+            <img class="dz-scan-photo" id="dz-scan-photo" alt="Jaspe Bumble Bee (Jaspe Abelha)" src="">
+            <div class="dz-scan-grid"></div>
+          </div>
+          <span class="dz-scan-corner tl"></span>
+          <span class="dz-scan-corner tr"></span>
+          <span class="dz-scan-corner bl"></span>
+          <span class="dz-scan-corner br"></span>
+          <div class="dz-scan-line"></div>
+          <div class="dz-scan-badge"><svg viewBox="0 0 24 24"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 21h16"/></svg></div>
+        </div>
+        <strong id="dz-titulo">Envie a foto da sua pedra</strong>
+        <span>Imagens nítidas e bem iluminadas ajudam a IA a identificar com mais precisão. Você pode enviar até 3 fotos da mesma pedra em ângulos diferentes.</span>
+        <input type="file" id="input-foto" accept="image/*">
+      </div>
+
+      <div class="preview" id="preview" style="display:none;">
+        <img id="preview-img" alt="Foto da pedra enviada">
+        <div class="preview-grid" id="preview-grid"></div>
+        <div class="preview-sensor-line" id="preview-sensor-line"></div>
+        <div class="scanner-overlay" id="scanner-overlay">
+          <div class="scanner-grid"></div>
+          <div class="scanner-line"></div>
+        </div>
+      </div>
+
+      <div class="foto-tira-wrap" id="foto-tira-wrap" style="display:none;">
+        <div class="foto-tira" id="foto-tira"></div>
+        <div class="foto-tira-footer">
+          <span class="foto-contador" id="foto-contador">0/3 fotos</span>
+          <button type="button" class="btn-adicionar-angulo" id="btn-adicionar-angulo">+ Adicionar outro ângulo</button>
+        </div>
+        <p class="foto-tira-dica" style="font-size:12px;color:var(--ink-mute2);margin:4px 2px 0;">Dica: 2 ou 3 ângulos diferentes da mesma pedra deixam a análise mais precisa.</p>
+      </div>
+
+      <div class="pre-scan-perguntas" id="pre-scan-perguntas" style="display:none;">
+        <p class="pre-scan-titulo">Responda rapidinho — isso ajuda a IA a acertar mais</p>
+        <div class="pre-scan-grupo">
+          <span class="pre-scan-label">Onde você encontrou essa pedra?</span>
+          <div class="pre-scan-chips" data-grupo="local">
+            <button type="button" class="pre-scan-chip" data-valor="praia_rio">Praia / rio</button>
+            <button type="button" class="pre-scan-chip" data-valor="mina_garimpo">Mina / garimpo</button>
+            <button type="button" class="pre-scan-chip" data-valor="quintal_terreno">Quintal / terreno</button>
+            <button type="button" class="pre-scan-chip" data-valor="comprei">Comprei</button>
+            <button type="button" class="pre-scan-chip" data-valor="nao_sei">Não sei</button>
+          </div>
+        </div>
+        <div class="pre-scan-grupo">
+          <span class="pre-scan-label">Ela risca vidro ou a unha risca ela fácil?</span>
+          <div class="pre-scan-chips" data-grupo="dureza">
+            <button type="button" class="pre-scan-chip" data-valor="risca_vidro">Risca o vidro</button>
+            <button type="button" class="pre-scan-chip" data-valor="unha_risca">A unha risca ela</button>
+            <button type="button" class="pre-scan-chip" data-valor="nao_testei">Não testei</button>
+          </div>
+        </div>
+        <div class="pre-scan-grupo">
+          <span class="pre-scan-label">Pelo tamanho, ela parece mais pesada ou mais leve do que o esperado?</span>
+          <div class="pre-scan-chips" data-grupo="peso">
+            <button type="button" class="pre-scan-chip" data-valor="mais_pesada">Mais pesada</button>
+            <button type="button" class="pre-scan-chip" data-valor="normal">Peso normal</button>
+            <button type="button" class="pre-scan-chip" data-valor="mais_leve">Mais leve</button>
+            <button type="button" class="pre-scan-chip" data-valor="nao_sei">Não sei</button>
+          </div>
+        </div>
+      </div>
+
+      <input type="checkbox" id="check-permite-vitrine" checked style="display:none;">
+
+      <div class="actions" id="actions" style="display:none;">
+        <button class="btn btn-secondary" id="btn-trocar">Trocar foto</button>
+        <button class="btn btn-primary" id="btn-ver-resultado">
+          <span class="btn-progress-fill" id="btn-progress-fill"></span>
+          <span class="btn-label" id="btn-ver-resultado-label">Ver resultado</span>
+        </button>
+      </div>
+      <p class="erro" id="erro" style="display:none;text-align:center;font-size:13.5px;color:var(--danger);margin-top:16px;"></p>
+    </div>
+
+    <div class="card" style="margin-top:20px;background:var(--accent-light);border-color:var(--line);display:none;">
+      <h2 style="font-size:18px;"><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M7 6H4a2 2 0 0 0 0 4h3M17 6h3a2 2 0 0 1 0 4h-3"/></svg> Top Colecionadores</h2>
+      <p style="font-size:12.5px;color:var(--ink-mute);text-align:center;margin-top:4px;">Quem já catalogou mais valor em pedras na comunidade</p>
+      <div class="colecionadores-mini-stats">
+        <span><strong id="stat-membros">···</strong> membros</span>
+        <span><strong id="stat-pedras">···</strong> pedras avaliadas</span>
+        <span><strong id="stat-hoje">···</strong> hoje</span>
+      </div>
+      <div class="colecionadores-lista" id="colecionadores-lista"></div>
+      <p class="aviso" id="colecionadores-vazio" style="display:none;text-align:center;color:var(--ink-mute2);padding:14px 0 4px;font-size:13px;">Ainda não temos colecionadores suficientes pra montar o ranking.</p>
+    </div>
+
+    <div class="card" id="area-vitrine" style="display:none;">
+      <h2><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg> Descobertas da comunidade</h2>
+      <p class="vitrine-sub" style="text-align:center;font-size:13px;color:var(--ink-mute);">Resultados reais de quem já descobriu o valor da própria pedra.</p>
+      <div class="vitrine-scroll">
+        <div class="vitrine-grid" id="vitrine-grid"></div>
+      </div>
+      <div class="vitrine-paginacao" id="vitrine-paginacao"></div>
+      <p class="aviso" id="vitrine-vazio" style="display:none;text-align:center;color:var(--ink-mute2);padding:10px 0;">Ainda não temos resultados para mostrar aqui.</p>
+    </div>
+
+    <div class="card" style="margin-top:20px;display:none;" id="secao-rankings">
+      <h2><svg viewBox="0 0 24 24"><path d="M12 2v20M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg> Pedras à venda</h2>
+      <p style="font-size:13px;color:var(--ink-mute);text-align:center;margin-top:4px;">Pedras que os membros da comunidade colocaram à venda</p>
+      <div class="rankings-tabs" id="rankings-tabs" style="display:flex;gap:8px;margin-top:14px;border-bottom:1px solid var(--line);padding-bottom:12px;overflow-x:auto;">
+        <button class="active" data-rank="recentes"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;"><path d="M12 2v6l3-3-3-3zM12 22v-6l3 3-3 3zM2 12h6l-3-3-3 3zM22 12h-6l3-3 3 3z"/></svg> Mais recentes</button>
+        <button data-rank="baratas"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;"><circle cx="12" cy="12" r="10"/><path d="M8 8l8 8M8 16l8-8"/></svg> Mais baratas</button>
+        <button data-rank="caras"><svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;stroke-width:2;fill:none;"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg> Mais caras</button>
+      </div>
+      <div class="rankings-grid" id="rankings-grid"></div>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <h2><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Atividade recente</h2>
+      <div class="community-feed" id="community-feed"></div>
+    </div>
+
+    <!-- PAINEL DE LOGIN COM GOOGLE (substitui o de e-mail/senha) -->
+    <div class="card painel-acesso" id="painel-login" style="padding:32px 28px;">
+      <button type="button" class="painel-fechar" id="btn-fechar-login">&times;</button>
+      <div class="painel-tag" style="text-align:center;padding-right:0;">Entrar na comunidade</div>
+      <h2 style="font-size:20px;text-align:center;margin-top:4px;color:var(--ink);">Acesse com sua conta Google</h2>
+      <p style="font-size:13.5px;color:var(--ink-mute);text-align:center;margin:8px 0 24px;">Use sua conta Google para entrar e salvar seu histórico</p>
+      
+      <button class="btn-google" id="btn-google-login">
+        <svg width="20" height="20" viewBox="0 0 48 48">
+          <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24c0,11.045,8.955,20,20,20c11.045,0,20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"/>
+          <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"/>
+          <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"/>
+          <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571c0.001-0.001,0.002-0.001,0.003-0.002l6.19,5.238C36.971,39.205,44,34,44,24C44,22.659,43.862,21.35,43.611,20.083z"/>
+        </svg>
+        <span class="google-text">Entrar com Google</span>
+      </button>
+      <p class="erro" id="erro-login" style="display:none;text-align:center;font-size:13px;color:var(--danger);margin-top:12px;"></p>
+    </div>
+
+    <!-- PAINEL DE GESTÃO DOS ANÚNCIOS ("Vender") -->
+    <div class="card painel-acesso" id="painel-vender" style="padding:28px 0 24px;max-width:520px;">
+      <button type="button" class="painel-fechar" id="btn-fechar-vender">&times;</button>
+      <div style="padding:0 24px;">
+        <div class="painel-tag" style="text-align:center;padding-right:0;">Seus anúncios</div>
+        <h2 style="font-size:20px;text-align:center;margin-top:4px;color:var(--ink);">Gerenciar vendas</h2>
+        <p style="font-size:13px;color:var(--ink-mute);text-align:center;margin:8px 0 0;">Edite valor, pause, marque como vendida ou remova seus anúncios.</p>
+      </div>
+      <div id="lista-vender" style="padding:18px 24px 0;display:flex;flex-direction:column;gap:12px;max-height:56vh;overflow-y:auto;"></div>
+      <p style="text-align:center;color:var(--ink-mute2);padding:20px 24px 0;font-size:13px;" id="vender-vazio">Carregando...</p>
+    </div>
+
+    <!-- PAINEL DE EDIÇÃO DE PERFIL -->
+    <div class="card painel-acesso" id="painel-perfil" style="padding:32px 0 0;">
+      <button type="button" class="painel-fechar" id="btn-fechar-perfil">&times;</button>
+      <div class="painel-tag" style="text-align:center;padding-right:0;">Sua conta</div>
+      <h2 style="font-size:20px;text-align:center;margin-top:4px;color:var(--ink);">Editar perfil</h2>
+
+      <div class="perfil-avatar-wrap">
+        <button type="button" class="perfil-avatar-botao" id="btn-perfil-avatar">
+          <img class="perfil-avatar-foto" id="perfil-avatar-foto" style="display:none;">
+          <div class="perfil-avatar-inicial" id="perfil-avatar-inicial">?</div>
+          <span class="perfil-avatar-editar"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></span>
+        </button>
+        <input type="file" id="input-perfil-foto" accept="image/*" style="display:none;">
+      </div>
+
+      <div class="perfil-campo">
+        <label for="input-perfil-nome">Nome de exibição</label>
+        <input type="text" id="input-perfil-nome" maxlength="60" placeholder="Seu nome">
+      </div>
+      <div class="perfil-campo">
+        <label>E-mail</label>
+        <div class="perfil-campo-email" id="perfil-email-atual">···</div>
+      </div>
+
+      <div class="perfil-acoes">
+        <button class="btn btn-primary btn-block" id="btn-salvar-perfil" style="font-size:15px;padding:14px;">Salvar alterações</button>
+        <p class="perfil-status" id="perfil-status"></p>
+      </div>
+    </div>
+
+    <!-- PAINEL DE TERMOS DE USO (exibido após o primeiro login com Google) -->
+    <div class="card painel-acesso" id="painel-termos" style="padding:28px 0 24px;">
+      <div style="padding:0 24px;">
+        <div class="painel-tag" style="text-align:center;padding-right:0;">Antes de continuar</div>
+        <h2 style="font-size:20px;text-align:center;margin-top:4px;color:var(--ink);">Termos de Uso</h2>
+        <p style="font-size:13px;color:var(--ink-mute);text-align:center;margin:8px 0 0;">Leia e aceite para usar o SCANNER 3.5 com sua conta Google.</p>
+      </div>
+
+      <div class="termos-caixa" id="termos-caixa">
+        <h3>1. Sobre o serviço</h3>
+        <p>O SCANNER 3.5 usa inteligência artificial para identificar pedras e minerais a partir de fotos enviadas por você, estimando nome, características e faixa de preço de mercado.</p>
+
+        <h3>2. Autorização de uso de imagem</h3>
+        <p>Ao enviar uma foto, você autoriza que ela seja processada por IA para gerar a identificação e <strong>armazenada em nossos servidores</strong> para manter seu histórico e melhorar a precisão do serviço. Se você mantiver a opção de exibição pública ativada (abaixo), a foto e o resultado da identificação poderão aparecer de forma pública no catálogo, na vitrine e nos rankings da comunidade. Você pode desativar essa exibição a qualquer momento e pode solicitar a remoção de uma imagem enviada por você.</p>
+
+        <h3>3. Seus dados de conta</h3>
+        <p>Ao entrar com o Google, usamos seu <strong>nome, e-mail e foto de perfil</strong> apenas para criar e identificar sua conta, exibir seu histórico de avaliações e permitir a compra de leituras. Não compartilhamos esses dados com terceiros para fins de publicidade.</p>
+
+        <h3>4. Pagamentos</h3>
+        <p>Os pacotes de leituras são cobrados uma única vez, sem mensalidade ou renovação automática, e ficam disponíveis na sua conta até serem utilizados.</p>
+
+        <h3>5. Sobre os resultados da IA</h3>
+        <p>As identificações são estimativas geradas por IA e não substituem uma avaliação profissional, laudo geológico ou certificado de autenticidade.</p>
+      </div>
+
+      <div class="termos-check-row">
+        <input type="checkbox" id="check-aceita-termos">
+        <label for="check-aceita-termos">Li e aceito os <a href="termos.html" id="link-termos-completo" target="_blank" rel="noopener">Termos de Uso</a>, incluindo a autorização de uso de imagem descrita acima.</label>
+      </div>
+      <div class="termos-check-row sub">
+        <input type="checkbox" id="check-aceita-vitrine" checked>
+        <label for="check-aceita-vitrine">Permitir que minhas identificações apareçam publicamente no catálogo e rankings da comunidade (recomendado).</label>
+      </div>
+
+      <div style="padding:18px 24px 0;">
+        <button class="btn btn-primary btn-block" id="btn-aceitar-termos" style="font-size:15px;padding:14px;" disabled>Aceitar e continuar</button>
+        <button type="button" class="termos-sair" id="btn-recusar-termos">Não aceito, sair da conta</button>
+        <p class="erro" id="erro-termos" style="display:none;text-align:center;font-size:12.5px;color:var(--danger);margin-top:8px;"></p>
+      </div>
+    </div>
+
+    <!-- PAINEL DE NOME DO PERFIL (exibido após aceitar os Termos, opcional) -->
+    <div class="card painel-acesso" id="painel-nome-perfil" style="padding:28px 0 24px;">
+      <div style="padding:0 24px;">
+        <div class="painel-tag" style="text-align:center;padding-right:0;">Quase lá</div>
+        <h2 style="font-size:20px;text-align:center;margin-top:4px;color:var(--ink);">Como quer aparecer na comunidade?</h2>
+        <p style="font-size:13px;color:var(--ink-mute);text-align:center;margin:8px 0 0;">Esse nome aparece no catálogo e nos rankings públicos, se você permitir exibição. Pode deixar em branco e escolher depois em "Editar perfil".</p>
+      </div>
+      <div style="padding:18px 24px 0;">
+        <label for="input-nome-perfil-onboarding" style="font-size:12px;font-weight:600;color:var(--ink-mute);display:block;margin-bottom:6px;">Nome de exibição (opcional)</label>
+        <input type="text" id="input-nome-perfil-onboarding" maxlength="60" placeholder="Ex: seu primeiro nome" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line-strong);font-size:14px;font-family:inherit;">
+        <p class="erro" id="erro-nome-perfil-onboarding" style="display:none;text-align:center;font-size:12.5px;color:var(--danger);margin-top:8px;"></p>
+      </div>
+      <div style="padding:18px 24px 0;">
+        <button class="btn btn-primary btn-block" id="btn-salvar-nome-onboarding" style="font-size:15px;padding:14px;">Salvar e continuar</button>
+        <button type="button" class="termos-sair" id="btn-pular-nome-onboarding" style="margin-top:10px;">Pular por agora</button>
+      </div>
+    </div>
+
+    <!-- PAINEL DE BOAS-VINDAS -->
+    <div class="card painel-acesso" id="painel-boas-vindas" style="padding:0;overflow:hidden;border-radius:20px;">
+      <button type="button" class="painel-fechar" id="btn-fechar-boas-vindas" style="top:12px;right:12px;background:rgba(0,0,0,0.06);width:32px;height:32px;font-size:18px;">&times;</button>
+      <div class="boas-vindas-header" style="padding:28px 24px 16px;background:linear-gradient(135deg, var(--accent-light) 0%, var(--card) 100%);border-bottom:1px solid var(--line);">
+        <div class="boas-vindas-icon" style="text-align:center;margin-bottom:4px;"><svg viewBox="0 0 24 24" style="width:32px;height:32px;stroke:var(--accent);stroke-width:1.5;fill:none;"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+        <div class="painel-tag" style="text-align:center;padding-right:0;">Bem-vindo à comunidade!</div>
+        <h2 style="font-size:20px;text-align:center;margin-top:4px;color:var(--ink);">Identifique suas pedras com IA</h2>
+      </div>
+      <div class="boas-vindas-destaque" style="padding:0 24px;margin-top:16px;">
+        <p style="font-size:14px;color:var(--ink);text-align:center;line-height:1.5;">Você tem <strong style="color:var(--accent-dark);">1 avaliação gratuita</strong> para testar. Depois, desbloqueie o valor real da sua pedra.</p>
+      </div>
+      <div style="margin-top:20px;display:flex;flex-direction:column;gap:14px;padding:0 24px;">
+        <div class="boas-vindas-card" style="display:flex;align-items:flex-start;gap:14px;padding:14px 18px;background:var(--card-alt);border-radius:12px;border:1px solid var(--line);">
+          <div class="boas-vindas-card-icon" style="flex-shrink:0;margin-top:1px;width:34px;text-align:center;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--accent);stroke-width:1.6;fill:none;"><path d="M12 2a10 10 0 0 0 0 20 10 10 0 0 0 0-20z"/><path d="M12 2v20"/><path d="M2 12h20"/></svg></div>
+          <div><div class="boas-vindas-card-title" style="font-weight:700;font-size:14px;color:var(--ink);margin-bottom:2px;">IA da Anthropic (Claude)</div><div class="boas-vindas-card-desc" style="font-size:12.5px;color:var(--ink-mute);line-height:1.4;">A IA mais precisa do mercado para identificar pedras e minerais.</div></div>
+        </div>
+        <div class="boas-vindas-card" style="display:flex;align-items:flex-start;gap:14px;padding:14px 18px;background:var(--card-alt);border-radius:12px;border:1px solid var(--line);">
+          <div class="boas-vindas-card-icon" style="flex-shrink:0;margin-top:1px;width:34px;text-align:center;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--accent);stroke-width:1.6;fill:none;"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg></div>
+          <div><div class="boas-vindas-card-title" style="font-weight:700;font-size:14px;color:var(--ink);margin-bottom:2px;">Identificação confiável</div><div class="boas-vindas-card-desc" style="font-size:12.5px;color:var(--ink-mute);line-height:1.4;">Não é um chute — é uma análise com alto índice de precisão.</div></div>
+        </div>
+        <div class="boas-vindas-card" style="display:flex;align-items:flex-start;gap:14px;padding:14px 18px;background:var(--card-alt);border-radius:12px;border:1px solid var(--line);">
+          <div class="boas-vindas-card-icon" style="flex-shrink:0;margin-top:1px;width:34px;text-align:center;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--accent);stroke-width:1.6;fill:none;"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg></div>
+          <div><div class="boas-vindas-card-title" style="font-weight:700;font-size:14px;color:var(--ink);margin-bottom:2px;">Venda pelo valor justo</div><div class="boas-vindas-card-desc" style="font-size:12.5px;color:var(--ink-mute);line-height:1.4;">Descubra o preço de mercado e onde vender sua pedra.</div></div>
+        </div>
+      </div>
+      <div class="boas-vindas-cta" style="padding:18px 24px 24px;border-top:1px solid var(--line);margin-top:4px;">
+        <button class="btn btn-primary btn-block" id="btn-continuar-boas-vindas" style="font-size:15px;padding:14px;">Começar agora →</button>
+        <p style="font-size:11.5px;color:var(--ink-mute2);text-align:center;margin-top:8px;">Gratuito • Sem compromisso • Cadastro em 1 minuto</p>
+      </div>
+    </div>
+
+    <!-- MODAL DOSSIÊ -->
+    <div class="modal-dossie-overlay" id="modal-dossie">
+      <div class="modal-dossie">
+        <button class="modal-dossie-close" id="modal-dossie-close">✕</button>
+        <div class="modal-dossie-foto"><img id="modal-dossie-img" src="/assets/img/stone-placeholder.png" alt="Pedra"></div>
+        <div class="modal-dossie-body">
+          <div class="dossie-tag" style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--emerald);">Dossiê da pedra</div>
+          <h2 id="modal-dossie-nome" style="font-size:24px;margin-top:4px;text-align:left;">Nome da Pedra</h2>
+          <span class="dossie-confianca" id="modal-dossie-confianca" style="display:inline-block;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;border:1px solid currentColor;margin-top:6px;">confiança alta</span>
+          <p class="dossie-alternativos" id="modal-dossie-alternativos" style="display:none;margin-top:8px;font-size:13px;color:var(--ink-mute);"></p>
+          <ul class="dossie-caracteristicas" id="modal-dossie-caracteristicas" style="margin-top:14px;padding-left:20px;font-size:14px;color:var(--ink-soft);"></ul>
+          <div class="dossie-preco" style="margin-top:18px;padding-top:16px;border-top:1px solid var(--line);">
+            <div class="dossie-preco-label" style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent-dark);">Faixa de preço estimada</div>
+            <div class="dossie-preco-valor" id="modal-dossie-preco" style="font-size:18px;font-weight:700;color:var(--ink);margin-top:2px;">R$ 100 - R$ 200</div>
+          </div>
+          <div class="dossie-onde" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line);">
+            <div class="dossie-onde-label" style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent-dark);">Onde vender</div>
+            <div class="dossie-onde-texto" id="modal-dossie-onde" style="font-size:14px;color:var(--ink);margin-top:2px;">🔒 Desbloqueie para ver</div>
+          </div>
+          <div class="dossie-observacao" id="modal-dossie-observacao" style="margin-top:16px;font-size:12.5px;color:var(--ink-mute);padding-top:12px;border-top:1px solid var(--line);"></div>
+
+          <!-- VENDA: pedra já catalogada pelo usuário, ele pode colocá-la à venda -->
+          <div class="dossie-venda" id="bloco-colocar-venda" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line);display:none;">
+            <button id="btn-colocar-venda" style="width:100%;background:var(--emerald);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+              <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#fff;stroke-width:2;fill:none;"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+              Colocar essa pedra à venda
+            </button>
+
+            <div id="form-colocar-venda" style="display:none;margin-top:12px;">
+              <label for="input-venda-valor" style="font-size:12px;font-weight:600;color:var(--ink-mute);display:block;margin-bottom:6px;">Valor de venda</label>
+              <input type="text" id="input-venda-valor" inputmode="decimal" placeholder="Ex: 150,00" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line-strong);font-size:14px;font-family:inherit;box-sizing:border-box;">
+
+              <label for="input-venda-telefone" style="font-size:12px;font-weight:600;color:var(--ink-mute);display:block;margin:12px 0 6px;">Telefone de contato (WhatsApp)</label>
+              <input type="tel" id="input-venda-telefone" placeholder="Ex: (18) 99999-9999" style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line-strong);font-size:14px;font-family:inherit;box-sizing:border-box;">
+
+              <label for="input-venda-obs" style="font-size:12px;font-weight:600;color:var(--ink-mute);display:block;margin:12px 0 6px;">Observações (opcional)</label>
+              <textarea id="input-venda-obs" rows="2" maxlength="200" placeholder="Ex: aceito negociar, retirada em mãos, etc." style="width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line-strong);font-size:14px;font-family:inherit;box-sizing:border-box;resize:vertical;"></textarea>
+
+              <div class="termos-check-row sub" style="margin-top:10px;">
+                <input type="checkbox" id="check-venda-negociavel">
+                <label for="check-venda-negociavel">Valor negociável</label>
+              </div>
+
+              <button id="btn-confirmar-venda" style="width:100%;margin-top:12px;background:var(--emerald);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;">Publicar anúncio</button>
+              <p class="erro" id="erro-venda" style="display:none;text-align:center;font-size:12.5px;color:var(--danger);margin-top:8px;"></p>
+            </div>
+
+            <div id="confirmacao-venda" style="display:none;margin-top:12px;text-align:center;">
+              <p style="font-size:13px;color:var(--ink);font-weight:600;">✅ Pedra publicada à venda!</p>
+              <p style="font-size:12.5px;color:var(--ink-mute);margin-top:2px;">Ela já aparece em "Pedras à venda" para a comunidade.</p>
+            </div>
+          </div>
+
+          <!-- VENDA: pedra de outro membro que já está à venda -->
+          <div class="dossie-venda-contato" id="bloco-contato-venda" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--line);display:none;">
+            <div style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent-dark);">À venda por</div>
+            <div id="texto-valor-venda" style="font-size:18px;font-weight:700;color:var(--ink);margin-top:2px;"></div>
+            <p id="texto-obs-venda" style="font-size:12.5px;color:var(--ink-mute);margin-top:4px;"></p>
+            <a id="btn-whatsapp-venda" href="#" target="_blank" rel="noopener" style="width:100%;margin-top:10px;background:#25D366;color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
+              <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#fff;"><path d="M17.6 6.3A8.9 8.9 0 0012 4a8.9 8.9 0 00-7.7 13.4L3 21l3.7-1.3A8.9 8.9 0 0012 20.9 8.9 8.9 0 0017.6 6.3zM12 19.1a7.1 7.1 0 01-3.6-1l-.3-.1-2.2.8.8-2.1-.2-.3A7.1 7.1 0 1119 12a7.1 7.1 0 01-7 7.1zm3.9-5.3c-.2-.1-1.2-.6-1.4-.7-.2-.1-.3-.1-.5.1-.1.2-.5.7-.6.8-.1.1-.2.1-.4 0-.2-.1-.9-.3-1.7-1a6.3 6.3 0 01-1.2-1.5c-.1-.2 0-.3.1-.4l.3-.4.2-.3v-.3c0-.1-.5-1.2-.7-1.6-.2-.4-.4-.4-.5-.4h-.4c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2 1 2.4c.1.1 1.6 2.5 3.9 3.4.5.2 1 .4 1.3.5.5.2 1 .1 1.4.1.4-.1 1.2-.5 1.4-1 .2-.4.2-.8.1-1z"/></svg>
+              Falar no WhatsApp
+            </a>
+          </div>
+
+          <button id="btn-compartilhar-dossie" style="width:100%;margin-top:18px;background:var(--ink-light);color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:#fff;stroke-width:2;fill:none;"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+            Compartilhar essa descoberta
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-confirm-overlay" id="modal-confirm">
+      <div class="modal-confirm">
+        <div class="modal-confirm-icon" id="modal-confirm-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.3 3.9L2.8 17a2 2 0 001.7 3h15a2 2 0 001.7-3L13.7 3.9a2 2 0 00-3.4 0z"/></svg>
+        </div>
+        <h3 class="modal-confirm-titulo" id="modal-confirm-titulo">Confirmar</h3>
+        <p class="modal-confirm-texto" id="modal-confirm-texto"></p>
+        <div class="modal-confirm-botoes" id="modal-confirm-botoes">
+          <button type="button" class="modal-confirm-cancelar" id="modal-confirm-cancelar">Cancelar</button>
+          <button type="button" class="modal-confirm-ok" id="modal-confirm-ok">OK</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-paywall-overlay" id="modal-paywall">
+      <div class="modal-paywall">
+        <button class="modal-paywall-close" id="modal-paywall-close">✕</button>
+        <div class="modal-paywall-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <h2 class="modal-paywall-titulo">Suas avaliações grátis acabaram</h2>
+        <p class="modal-paywall-texto" id="modal-paywall-texto">Você já usou suas avaliações gratuitas. Para continuar identificando pedras, desbloqueie um pacote de leituras.</p>
+        <div class="modal-paywall-oferta">
+          <span class="modal-paywall-oferta-qtd">10 identificações de pedras</span>
+          <span class="modal-paywall-oferta-preco">R$ 5,99</span>
+          <span class="modal-paywall-oferta-desc">sem mensalidade, sem prazo de expiração</span>
+        </div>
+        <button class="btn btn-primary btn-block" id="btn-paywall-adquirir">Adquirir agora</button>
+        <button class="modal-paywall-depois" id="btn-paywall-depois">Agora não</button>
+      </div>
+    </div>
+
+    <div class="resultado" id="resultado">
+      <div class="resultado-head">
+        <div><div class="resultado-tag" style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--emerald);">Resultado da análise</div><h2 id="res-nome" style="margin-top:6px;font-size:22px;text-align:left;color:var(--ink);"></h2></div>
+        <span class="confianca" id="res-confianca"></span>
+      </div>
+      <p class="alternativos" id="res-alternativos" style="display:none;margin-top:10px;font-size:13.5px;color:var(--ink-mute);"></p>
+      <ul class="caracteristicas" id="res-caracteristicas" style="margin-top:16px;padding-left:18px;font-size:14px;color:var(--ink-soft);"></ul>
+      <div class="premium-section" style="position:relative;margin-top:22px;padding-top:22px;border-top:1px solid var(--line);">
+        <div class="premium-conteudo">
+          <div class="preco-box"><div class="preco-label" style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent-dark);">Faixa de preço estimada</div><p class="preco-valor" id="res-preco" style="margin-top:6px;font-size:15px;color:var(--ink);"></p></div>
+          <div class="preco-box" id="onde-vender-box"><div class="preco-label" style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent-dark);">Onde vender</div><p class="preco-valor" id="res-onde" style="margin-top:6px;font-size:15px;color:var(--ink);"><span style="color:var(--ink-mute2);">🔒 Desbloqueie para ver onde vender essa pedra</span></p><div style="margin-top:8px;display:flex;gap:10px;flex-wrap:wrap;"><span class="bloqueado-badge" style="display:inline-block;background:var(--accent-light);color:var(--accent-dark);font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;">🔒 bloqueado</span><span style="font-size:12px;color:var(--accent-dark);font-weight:600;" id="mensagem-upsell"></span></div><button class="btn btn-primary btn-block" id="btn-desbloquear-onde" style="margin-top:12px;flex:none;">Desbloquear onde vender — R$ 5,99</button></div>
+          <div class="canais-venda" id="canais-venda" style="display:none;margin-top:16px;">
+            <a class="canal-destaque" id="canal-mfrural" href="#" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;justify-content:space-between;gap:14px;background:var(--accent-light);border:1.5px solid var(--accent);border-radius:11px;padding:14px 16px;text-decoration:none;transition:background .15s ease;">
+              <div class="canal-destaque-info" style="display:flex;flex-direction:column;gap:2px;"><span class="canal-tag" style="font-family:'Space Mono',monospace;font-size:9.5px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:var(--accent-dark);">⭐ Mais recomendado</span><strong style="font-family:'Fraunces',serif;font-size:16.5px;color:var(--ink);">MF Rural</strong><span style="font-size:12.5px;color:var(--ink-soft);">O maior marketplace de pedras e minerais do Brasil</span></div><span class="canal-seta" style="font-size:20px;color:var(--accent-dark);flex-shrink:0;">→</span>
+            </a>
+            <div class="canal-secundarios" style="display:flex;gap:10px;margin-top:10px;">
+              <a class="canal-link" id="canal-ml" href="#" target="_blank" rel="noopener noreferrer" style="flex:1;text-align:center;padding:11px;border:1px solid var(--line-strong);border-radius:8px;font-size:13px;font-weight:700;color:var(--ink-soft);text-decoration:none;">Mercado Livre</a>
+              <a class="canal-link" id="canal-olx" href="#" target="_blank" rel="noopener noreferrer" style="flex:1;text-align:center;padding:11px;border:1px solid var(--line-strong);border-radius:8px;font-size:13px;font-weight:700;color:var(--ink-soft);text-decoration:none;">OLX</a>
+            </div>
+          </div>
+        </div>
+        <div class="premium-preview" id="premium-preview" style="display:none;background:var(--card-alt);border:1px solid var(--line);border-radius:12px;padding:24px;margin-top:16px;">
+          <div class="premium-preview-tag" style="font-family:'Space Mono',monospace;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent-dark);display:flex;align-items:center;gap:8px;"><svg viewBox="0 0 24 24" style="width:15px;height:15px;stroke:var(--accent-dark);stroke-width:2;fill:none;"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg> O que você ainda não viu sobre essa pedra</div>
+          <ul class="premium-preview-lista" style="list-style:none;margin-top:14px;display:flex;flex-direction:column;gap:11px;">
+            <li style="display:flex;align-items:center;gap:10px;font-size:14.5px;color:var(--ink-soft);line-height:1.4;flex-wrap:wrap;"><span class="cadeado" style="flex-shrink:0;width:20px;height:20px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:var(--accent-dark);stroke-width:2.2;fill:none;"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg></span><strong style="font-weight:800;color:var(--ink);">Onde vender</strong> essa pedra pelo melhor preço <em style="font-style:normal;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:var(--accent-dark);background:var(--card);border:1px solid var(--line-strong);border-radius:20px;padding:2px 7px;margin-left:2px;white-space:nowrap;">PREMIUM</em></li>
+            <li style="display:flex;align-items:center;gap:10px;font-size:14.5px;color:var(--ink-soft);line-height:1.4;flex-wrap:wrap;"><span class="cadeado" style="flex-shrink:0;width:20px;height:20px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:var(--accent-dark);stroke-width:2.2;fill:none;"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg></span><strong style="font-weight:800;color:var(--ink);">Onde encontrar</strong> mais compradores para esse tipo de pedra <em style="font-style:normal;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:var(--accent-dark);background:var(--card);border:1px solid var(--line-strong);border-radius:20px;padding:2px 7px;margin-left:2px;white-space:nowrap;">PREMIUM</em></li>
+            <li style="display:flex;align-items:center;gap:10px;font-size:14.5px;color:var(--ink-soft);line-height:1.4;flex-wrap:wrap;"><span class="cadeado" style="flex-shrink:0;width:20px;height:20px;border-radius:50%;background:var(--accent-light);display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:var(--accent-dark);stroke-width:2.2;fill:none;"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 018 0v3"/></svg></span><strong style="font-weight:800;color:var(--ink);">Como negociar</strong> o melhor valor nessa venda <em style="font-style:normal;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;color:var(--accent-dark);background:var(--card);border:1px solid var(--line-strong);border-radius:20px;padding:2px 7px;margin-left:2px;white-space:nowrap;">PREMIUM</em></li>
+          </ul>
+          <div class="preco-destaque" style="font-size:28px;margin:20px 0 0;font-family:'Fraunces',serif;color:var(--ink);">R$ 5,99</div>
+          <div class="preco-sub" style="font-size:11.5px;color:var(--ink-mute2);margin-bottom:12px;">10 leituras · sem assinatura</div>
+          <button class="btn btn-primary btn-block" id="btn-pagar" style="padding:13px 22px;">Comprar acesso</button>
+          <button class="troca-modo" id="btn-ja-paguei" style="margin-top:2px;font-size:12.5px;color:var(--ink-mute);text-align:center;cursor:pointer;text-decoration:underline;padding:8px;background:none;border:none;">Já comprei, atualizar resultado</button>
+        </div>
+      </div>
+      <p class="observacao" id="res-observacao" style="margin-top:16px;font-size:12.5px;color:var(--ink-mute);"></p>
+    </div>
+
+    <div class="card" style="margin-top:20px;display:none;" id="secao-catalogo">
+      <h2><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg> Catálogo Geral</h2>
+      <p style="font-size:13px;color:var(--ink-mute);text-align:center;margin-top:4px;">Todas as pedras avaliadas pela comunidade</p>
+      <div class="catalogo-header" style="display:flex;gap:12px;margin-top:14px;flex-wrap:wrap;align-items:center;">
+        <div class="catalogo-busca" style="flex:1;min-width:160px;display:flex;align-items:center;gap:8px;background:var(--card-alt);border:1px solid var(--line-strong);border-radius:8px;padding:0 12px;"><svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:var(--ink-mute2);stroke-width:1.8;fill:none;flex-shrink:0;"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><input type="text" id="catalogo-busca-input" placeholder="Buscar pedra..." style="border:none;background:transparent;padding:10px 0;font-size:13px;color:var(--ink);width:100%;font-family:'Inter',sans-serif;outline:none;"></div>
+        <div class="catalogo-filtro" id="catalogo-filtros" style="display:flex;gap:6px;flex-wrap:wrap;"><button class="active" data-filtro="todos" style="background:transparent;border:1px solid var(--line-strong);border-radius:20px;padding:6px 14px;font-size:11.5px;font-weight:600;color:var(--ink-mute2);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s ease;white-space:nowrap;">Todos</button><button data-filtro="recentes" style="background:transparent;border:1px solid var(--line-strong);border-radius:20px;padding:6px 14px;font-size:11.5px;font-weight:600;color:var(--ink-mute2);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s ease;white-space:nowrap;">Recentes</button><button data-filtro="baratos" style="background:transparent;border:1px solid var(--line-strong);border-radius:20px;padding:6px 14px;font-size:11.5px;font-weight:600;color:var(--ink-mute2);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s ease;white-space:nowrap;">Baratos</button><button data-filtro="caros" style="background:transparent;border:1px solid var(--line-strong);border-radius:20px;padding:6px 14px;font-size:11.5px;font-weight:600;color:var(--ink-mute2);cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s ease;white-space:nowrap;">Caros</button></div>
+        <div class="catalogo-tipo" style="flex-shrink:0;"><select id="catalogo-filtro-tipo" style="background:var(--card-alt);border:1px solid var(--line-strong);border-radius:8px;padding:9px 30px 9px 12px;font-size:12.5px;font-weight:600;color:var(--ink);font-family:'Inter',sans-serif;outline:none;cursor:pointer;max-width:170px;appearance:none;-webkit-appearance:none;background-image:url(&quot;data:image/svg+xml;utf8,&lt;svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238a8a8a' stroke-width='2'&gt;&lt;path d='M6 9l6 6 6-6'/&gt;&lt;/svg&gt;&quot;);background-repeat:no-repeat;background-position:right 10px center;background-size:14px;"><option value="">Todos os tipos de pedra</option></select></div>
+      </div>
+      <div class="catalogo-grid" id="catalogo-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(200px,1fr));gap:14px;margin-top:16px;"></div>
+      <div class="catalogo-paginacao" id="catalogo-paginacao" style="display:flex;justify-content:center;gap:6px;margin-top:16px;flex-wrap:wrap;"></div>
+    </div>
+
+    <div id="secao-institucional">
+    <div class="oferta" style="margin-top:28px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:0;overflow:hidden;display:flex;flex-direction:column;">
+      <div class="oferta-img" style="background:linear-gradient(135deg,var(--accent-light),var(--card-alt));padding:26px;display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 24 24" style="width:64px;height:64px;stroke:var(--accent);stroke-width:1.5;fill:none;"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M8 12l3 3 5-6"/></svg></div>
+      <div class="oferta-body" style="padding:26px;">
+        <h2 style="font-size:23px;text-align:left;">Desbloqueie o valor <em style="font-style:normal;color:var(--accent);">real</em> da sua pedra</h2>
+        <ul class="oferta-lista" style="list-style:none;margin-top:16px;display:flex;flex-direction:column;gap:10px;"><li style="display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink-soft);"><span class="ico" style="width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;">✓</span>Faixa de preço estimada de mercado</li><li style="display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink-soft);"><span class="ico" style="width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;">✓</span>Sugestões de onde vender</li><li style="display:flex;align-items:center;gap:10px;font-size:14px;color:var(--ink-soft);"><span class="ico" style="width:22px;height:22px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;">✓</span>Histórico salvo na sua conta</li></ul>
+        <div class="oferta-preco" style="margin-top:20px;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;"><span class="valor" style="font-family:'Fraunces',serif;font-size:28px;font-weight:600;color:var(--ink);white-space:nowrap;">R$ 5,99</span><span class="desc" style="font-size:12.5px;color:var(--ink-mute);">10 leituras · sem mensalidade, sem prazo de expiração</span></div>
+        <button class="btn btn-primary btn-block" id="btn-comprar-early" style="margin-top:16px;">Comprar acesso</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg> Como Usar o Identificador</h2>
+      <ul class="passos" style="list-style:none;margin-top:20px;display:flex;flex-direction:column;">
+        <li class="passo" style="display:flex;gap:16px;padding-bottom:22px;position:relative;"><span class="passo-num" style="width:29px;height:29px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-family:'Space Mono',monospace;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</span><div class="passo-txt"><h3 style="font-size:15.5px;margin-bottom:4px;">Envie uma foto nítida</h3><p style="font-size:13.8px;color:var(--ink-mute);">Toque em "Envie a foto da sua pedra" e escolha uma imagem bem focada. Luz natural ajuda a mostrar as cores reais e a translucidez, especialmente em pedras semipreciosas.</p></div></li>
+        <li class="passo" style="display:flex;gap:16px;padding-bottom:22px;position:relative;"><span class="passo-num" style="width:29px;height:29px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-family:'Space Mono',monospace;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</span><div class="passo-txt"><h3 style="font-size:15.5px;margin-bottom:4px;">Veja a identificação na hora</h3><p style="font-size:13.8px;color:var(--ink-mute);">Em segundos você recebe o nome provável da pedra, o nível de confiança da análise e as características observadas.</p></div></li>
+        <li class="passo" style="display:flex;gap:16px;padding-bottom:22px;position:relative;"><span class="passo-num" style="width:29px;height:29px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-family:'Space Mono',monospace;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</span><div class="passo-txt"><h3 style="font-size:15.5px;margin-bottom:4px;">Compre acesso quando quiser mais</h3><p style="font-size:13.8px;color:var(--ink-mute);">Por R$ 5,99 você desbloqueia 10 leituras completas — com valor de mercado estimado e onde vender. Sem mensalidade, sem prazo de expiração.</p></div></li>
+        <li class="passo" style="display:flex;gap:16px;padding-bottom:22px;position:relative;"><span class="passo-num" style="width:29px;height:29px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-family:'Space Mono',monospace;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</span><div class="passo-txt"><h3 style="font-size:15.5px;margin-bottom:4px;">Descubra o valor e onde vender</h3><p style="font-size:13.8px;color:var(--ink-mute);">Cada leitura desbloqueada mostra a faixa de preço estimada e sugestões de onde negociar sua pedra.</p></div></li>
+        <li class="passo" style="display:flex;gap:16px;padding-bottom:0;position:relative;"><span class="passo-num" style="width:29px;height:29px;border-radius:50%;background:var(--accent);color:var(--on-accent);font-family:'Space Mono',monospace;font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">5</span><div class="passo-txt"><h3 style="font-size:15.5px;margin-bottom:4px;">Guarde tudo na sua conta</h3><p style="font-size:13.8px;color:var(--ink-mute);">Crie uma conta gratuita para salvar seu histórico e revisitar identificações anteriores sem gastar uma nova leitura.</p></div></li>
+      </ul>
+    </div>
+
+    <div class="conteudo" style="margin-top:28px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px;">
+      <h2 style="font-size:21px;margin-bottom:14px;display:flex;align-items:center;gap:10px;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--ink);stroke-width:1.8;fill:none;"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg> Pedra ou Rocha? Existe Diferença?</h2>
+      <p style="font-size:14px;color:var(--ink-mute);margin-bottom:12px;">No dia a dia, usamos as duas palavras como sinônimos, mas há uma distinção que ajuda na identificação. <strong style="color:var(--ink);">Rocha</strong> é o termo geológico para o material sólido da crosta terrestre — pense em montanhas e afloramentos. <strong style="color:var(--ink);">Pedra</strong> costuma se referir a um fragmento menor, muitas vezes removido do seu local de origem e desgastado pela água, pelo tempo ou por mãos humanas.</p>
+      <p style="font-size:14px;color:var(--ink-mute);margin-bottom:0;">Nosso identificador reconhece as duas coisas: seja um pedaço bruto de granito encontrado numa trilha ou uma gema já lapidada, a IA analisa cor, brilho, transparência e textura para sugerir a composição mineral mais provável.</p>
+    </div>
+
+    <div class="conteudo" style="margin-top:28px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px;">
+      <h2 style="font-size:21px;margin-bottom:14px;display:flex;align-items:center;gap:10px;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--ink);stroke-width:1.8;fill:none;"><path d="M12 2v4M12 22v-4M4 12H2M22 12h-2M19.07 4.93l-2.83 2.83M4.93 19.07l2.83-2.83M19.07 19.07l-2.83-2.83M4.93 4.93l2.83 2.83"/></svg> Como a IA Analisa a Sua Pedra</h2>
+      <p style="font-size:14px;color:var(--ink-mute);margin-bottom:12px;"><strong style="color:var(--ink);">Cor e transparência:</strong> a pedra é opaca, translúcida ou transparente? Esse é o primeiro critério observado — mas isoladamente não basta, já que um mesmo mineral pode aparecer em várias cores.</p>
+      <p style="font-size:14px;color:var(--ink-mute);margin-bottom:12px;"><strong style="color:var(--ink);">Brilho e efeitos ópticos:</strong> reflexos como o "olho de gato" ou o brilho azulado de certas pedras luares são pistas importantes que a IA foi treinada para reconhecer.</p>
+      <p style="font-size:14px;color:var(--ink-mute);margin-bottom:0;"><strong style="color:var(--ink);">Textura e inclusões:</strong> superfícies lisas, ásperas, vítreas ou foscas, além de padrões internos, ajudam a diferenciar pedras que à primeira vista parecem semelhantes.</p>
+    </div>
+
+    <div class="conteudo" style="margin-top:28px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px;">
+      <h2 style="font-size:21px;margin-bottom:14px;display:flex;align-items:center;gap:10px;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--ink);stroke-width:1.8;fill:none;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg> Perguntas Frequentes</h2>
+      <div class="faq-item" style="background:var(--card-alt);border:1px solid var(--line);border-radius:9px;padding:16px 18px;margin-bottom:10px;"><h3 style="font-size:14.5px;margin-bottom:6px;">O identificador de pedras é gratuito?</h3><p style="font-size:13.5px;color:var(--ink-mute);margin:0;">Sim, você tem <strong style="color:var(--ink);">1 avaliação gratuita</strong> para testar. Nela, você vê o nome, características, confiança e faixa de preço da pedra. Para ver <strong style="color:var(--ink);">onde vender</strong> e continuar avaliando, é preciso comprar o pacote de 10 leituras por R$ 5,99.</p></div>
+      <div class="faq-item" style="background:var(--card-alt);border:1px solid var(--line);border-radius:9px;padding:16px 18px;margin-bottom:10px;"><h3 style="font-size:14.5px;margin-bottom:6px;">Como funciona o pacote de 10 leituras?</h3><p style="font-size:13.5px;color:var(--ink-mute);margin:0;">Ao comprar, você desbloqueia o campo "onde vender" em até 10 identificações. As leituras ficam disponíveis na sua conta até você usá-las, sem cobrança recorrente.</p></div>
+      <div class="faq-item" style="background:var(--card-alt);border:1px solid var(--line);border-radius:9px;padding:16px 18px;margin-bottom:10px;"><h3 style="font-size:14.5px;margin-bottom:6px;">Preciso de conta para usar?</h3><p style="font-size:13.5px;color:var(--ink-mute);margin:0;">Sim, é necessário criar uma conta gratuita com e-mail e senha para ver os resultados e comprar acesso. Isso também permite salvar seu histórico de identificações.</p></div>
+      <div class="faq-item" style="background:var(--card-alt);border:1px solid var(--line);border-radius:9px;padding:16px 18px;margin-bottom:10px;"><h3 style="font-size:14.5px;margin-bottom:6px;">A ferramenta funciona em celulares?</h3><p style="font-size:13.5px;color:var(--ink-mute);margin:0;">Sim. É uma aplicação web otimizada para navegadores móveis — basta tirar a foto ou carregá-la direto do seu telefone.</p></div>
+      <div class="faq-item" style="background:var(--card-alt);border:1px solid var(--line);border-radius:9px;padding:16px 18px;margin-bottom:0;"><h3 style="font-size:14.5px;margin-bottom:6px;">Qual a diferença entre um cristal e uma pedra?</h3><p style="font-size:13.5px;color:var(--ink-mute);margin:0;">Pedra é um termo geral para um fragmento de rocha. Cristal é um material sólido cujos átomos estão organizados numa estrutura ordenada. Muitas pedras, como o quartzo, são de fato cristais — e nossa ferramenta identifica ambos.</p></div>
+    </div>
+
+    <div class="cta-final" style="margin-top:28px;background:var(--card-alt);border:1px solid var(--line);border-radius:14px;padding:30px 24px;text-align:center;">
+      <h2 style="font-size:20px;">Tudo pronto para identificar sua pedra?</h2>
+      <p style="margin-top:8px;font-size:13.5px;color:var(--ink-mute);">Envie uma foto nítida e receba a identificação em segundos.</p>
+      <button class="btn btn-primary" id="btn-cta-final" style="margin-top:16px;">Identifique sua pedra</button>
+    </div>
+    </div>
+  </div>
+
+  <footer>
+    <a href="#" class="logo">
+      <img src="/assets/img/logo.png" alt="SCANNER 3.5" class="logo-icon">
+      <span class="logo-text">
+        <span class="logo-main">SCANNER</span>
+        <span class="logo-sub">3.5</span>
+      </span>
+    </a>
+    <p>Identifique pedras, minerais e cristais com inteligência artificial. Faça parte da comunidade e descubra o valor das suas pedras.</p>
+    <div class="foot-links">
+      <a href="termos.html" id="foot-link-termos">Termos de uso</a>
+      <a href="privacidade.html" id="foot-link-privacidade">Privacidade</a>
+      <a href="contato.html" id="foot-link-contato">Contato</a>
+    </div>
+  </footer>
+
+  <script src="/assets/js/index.js" defer></script>
+</body>
+</html>
