@@ -1,8 +1,8 @@
     // ========================================================================
     // CONFIGURAÇÃO
     // ========================================================================
-    var SUPABASE_URL = 'https://lflqjmbygghuikwuoimd.supabase.co';
-    var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxmbHFqbWJ5Z2dodWlrd3VvaW1kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyNjU1NTMsImV4cCI6MjEwMTg0MTU1M30.tMrllUj-s0ZxahNbrazuGlWq6bT16o2E6hpbchhxqFU';
+    var SUPABASE_URL = 'https://yztcocshrimzwxoxsyhx.supabase.co';
+    var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl6dGNvY3Nocmltend4b3hzeWh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg5NTM2NjIsImV4cCI6MjEwNDUyOTY2Mn0.QjiBXngULPu7YzCAmxvBLvpS9svDBgWM5wEfVDhqQBE';
     var LINK_CHECKOUT_CAKTO = 'https://pay.cakto.com.br/jfotn5o_1030574';
     var catalogoDados = [];
     var catalogoDadosCarregados = false;
