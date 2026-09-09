@@ -82,6 +82,46 @@
         font-size: clamp(26px, 7.5vw, 34px);
       }
     }
+    @media (max-width: 767px) {
+      .head {
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        border-radius: 20px;
+        padding: 28px 20px 24px;
+      }
+      .head::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -2;
+        background-image: url('/assets/img/hero-bg-mobile.png');
+        background-size: cover;
+        background-position: center top;
+      }
+      .head::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background: linear-gradient(180deg, rgba(15,51,38,.68) 0%, rgba(15,51,38,.5) 55%, rgba(15,51,38,.7) 100%);
+      }
+      .head .eyebrow,
+      .head h1,
+      .head .sub-tag,
+      .head .hero-sub,
+      .head .hero-sub strong,
+      .head .social-proof-text {
+        color: #ffffff;
+      }
+      .head .eyebrow::before,
+      .head .eyebrow::after {
+        background: rgba(255,255,255,.7);
+      }
+      .head .social-proof-text strong {
+        color: #ffffff;
+      }
+    }
 
     /* HEADER */
     header {
