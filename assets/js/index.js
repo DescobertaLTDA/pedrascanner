@@ -75,7 +75,13 @@
       var diffH = Math.round(diffMin / 60);
       if (diffH < 24) return 'há ' + diffH + 'h';
       var diffD = Math.round(diffH / 24);
-      return 'há ' + diffD + 'd';
+      if (diffD < 7) return 'há ' + diffD + 'd';
+      var diffSem = Math.round(diffD / 7);
+      if (diffD < 30) return 'há ' + diffSem + (diffSem === 1 ? ' semana' : ' semanas');
+      var diffMes = Math.round(diffD / 30);
+      if (diffD < 365) return 'há ' + diffMes + (diffMes === 1 ? ' mês' : ' meses');
+      var diffAno = Math.round(diffD / 365);
+      return 'há ' + diffAno + (diffAno === 1 ? ' ano' : ' anos');
     }
 
     var MAX_PAGINAS_API = 15;
@@ -2820,6 +2826,25 @@
       demoImg.src = FOTO_DEMO_SCAN_FIXA;
       if (demoImg.complete && demoImg.naturalWidth > 0) { demoImg.classList.add('loaded'); }
     }
+
+    // Header agora é position:fixed (fica fixo ao rolar a página), então
+    // precisamos reservar no topo do body o mesmo espaço que a altura real
+    // do header ocupa — recalculado sempre que o tamanho do header mudar
+    // (rotação de tela, fontes carregando, etc.) para nunca sobrepor o conteúdo.
+    function ajustarEspacoHeaderFixo() {
+      var headerEl = document.querySelector('header');
+      if (!headerEl) return;
+      document.body.style.paddingTop = headerEl.offsetHeight + 'px';
+    }
+    (function iniciarAjusteHeaderFixo() {
+      var headerEl = document.querySelector('header');
+      ajustarEspacoHeaderFixo();
+      window.addEventListener('resize', ajustarEspacoHeaderFixo);
+      window.addEventListener('load', ajustarEspacoHeaderFixo);
+      if (headerEl && window.ResizeObserver) {
+        new ResizeObserver(ajustarEspacoHeaderFixo).observe(headerEl);
+      }
+    })();
 
     // ========================================================================
     // INICIALIZAÇÃO

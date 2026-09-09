@@ -85,8 +85,11 @@
 
     /* HEADER */
     header {
-      position: sticky;
+      position: fixed;
       top: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
       z-index: 50;
       background: rgba(255, 255, 255, 0.92);
       backdrop-filter: blur(10px);
@@ -854,9 +857,14 @@
     }
     .preview img {
       width: 100%;
-      aspect-ratio: 1 / 1;
+      height: 380px;
       object-fit: cover;
       display: block;
+    }
+    @media (max-width: 480px) {
+      .preview img {
+        height: 300px;
+      }
     }
     /* Feedback de "carregando/recebendo a foto" — toca em loop assim que a
        imagem é selecionada, até o usuário clicar em "ver resultado" (quando

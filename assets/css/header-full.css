@@ -22,8 +22,11 @@ body { font-family: 'Inter', sans-serif; }
 
 /* HEADER / NAV */
 header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
   z-index: 50;
   background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(10px);

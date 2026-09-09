@@ -20,6 +20,24 @@
     return 'R$ ' + valor.toFixed(2).replace('.', ',');
   }
 
+  // Header agora é position:fixed (fica fixo ao rolar a página), então
+  // precisamos reservar no topo do body o mesmo espaço que a altura real
+  // do header ocupa — recalculado sempre que ela mudar (rotação de tela,
+  // fontes carregando, etc.) para nunca sobrepor o conteúdo da página.
+  function ajustarEspacoHeaderFixo() {
+    var headerEl = document.querySelector('header');
+    if (!headerEl) return;
+    document.body.style.paddingTop = headerEl.offsetHeight + 'px';
+    window.addEventListener('resize', function () {
+      document.body.style.paddingTop = headerEl.offsetHeight + 'px';
+    });
+    if (window.ResizeObserver) {
+      new ResizeObserver(function () {
+        document.body.style.paddingTop = headerEl.offsetHeight + 'px';
+      }).observe(headerEl);
+    }
+  }
+
   fetch('/header-full.html')
     .then(function (res) {
       if (!res.ok) throw new Error('Falha ao carregar header-full.html: ' + res.status);
@@ -33,6 +51,7 @@
       }
       placeholder.innerHTML = html;
       iniciar();
+      ajustarEspacoHeaderFixo();
     })
     .catch(function (err) {
       console.error('Erro ao carregar o header:', err);

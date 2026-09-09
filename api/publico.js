@@ -211,7 +211,8 @@ async function handlerVitrine(req, res) {
         whatsapp: item.whatsapp || null,
         pedra: item.nome_provavel,
         valor_exibicao: extrairValorExibicao(item.faixa_preco_brasil),
-        foto: 'data:' + (item.foto_media_type || 'image/jpeg') + ';base64,' + item.foto_base64
+        foto: 'data:' + (item.foto_media_type || 'image/jpeg') + ';base64,' + item.foto_base64,
+        criado_em: item.criado_em || null
       };
     });
 
