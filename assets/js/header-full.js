@@ -93,6 +93,16 @@
     }
     btnGoogleLogin.addEventListener('click', loginComGoogle);
 
+    // Delegação de evento: o clique é escutado no container (que já existe
+    // desde o carregamento da página), então "Entrar / Registrar" funciona
+    // imediatamente, sem depender do fim da checagem assíncrona de sessão
+    // (supa.auth.getSession()) que recria o botão dentro de atualizarHeader().
+    headerAuthArea.addEventListener('click', function (e) {
+      if (e.target.closest && e.target.closest('#btn-header-entrar')) {
+        abrirPainelLogin();
+      }
+    });
+
     // Botão de histórico: leva ao index.html com o histórico já pronto para abrir.
     if (btnSidebarToggle) {
       btnSidebarToggle.addEventListener('click', function () {
@@ -181,7 +191,6 @@
           atualizarValorColecao(sessao.access_token);
         } else {
           headerAuthArea.innerHTML = '<button class="nav-cta" id="btn-header-entrar"><span class="full">Entrar / Registrar</span><span class="short">Entrar</span></button>';
-          document.getElementById('btn-header-entrar').addEventListener('click', abrirPainelLogin);
         }
       });
     }

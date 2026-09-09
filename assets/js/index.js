@@ -726,6 +726,16 @@
 
     btnGoogleLogin.addEventListener('click', loginComGoogle);
 
+    // Delegação de evento: o clique é escutado no container (que já existe
+    // desde o carregamento da página), então "Entrar / Registrar" funciona
+    // imediatamente, sem depender do fim da checagem assíncrona de sessão
+    // (supa.auth.getSession()) que recria o botão dentro de atualizarHeader().
+    headerAuthArea.addEventListener('click', function(e) {
+      if (e.target.closest && e.target.closest('#btn-header-entrar')) {
+        abrirPainelLogin();
+      }
+    });
+
     function atualizarHeader() {
       supa.auth.getSession().then(function(sessaoResp) {
         return sessaoResp;
@@ -811,7 +821,6 @@
           if (secaoInstitucional) secaoInstitucional.style.display = 'none';
         } else {
           headerAuthArea.innerHTML = '<button class="nav-cta" id="btn-header-entrar"><span class="full">Entrar / Registrar</span><span class="short">Entrar</span></button>';
-          document.getElementById('btn-header-entrar').addEventListener('click', abrirPainelLogin);
           if (areaOferta) areaOferta.style.display = '';
           if (secaoInstitucional) secaoInstitucional.style.display = '';
           avaliacoesGratisRestantes = 0;
