@@ -1,4 +1,4 @@
-    // ========================================================================
+// ========================================================================
     // CONFIGURAÇÃO
     // ========================================================================
     var SUPABASE_URL = 'https://yztcocshrimzwxoxsyhx.supabase.co';
@@ -166,7 +166,7 @@
         } else {
           acao = 'descobriu <strong>' + item.nome + '</strong>';
         }
-        return { nome: item.avaliador || 'Cliente', acao: acao, tempo: tempoRelativo(item.data) || 'agora' };
+        return { nome: item.avaliador || 'Cliente', acao: acao, tempo: tempoRelativo(item.data) || 'agora', foto: item.foto || null };
       });
       renderizarFeed(feedDados);
     }
@@ -193,40 +193,65 @@
         var div = document.createElement('div');
         div.className = 'feed-item';
         div.style.display = 'flex';
-        div.style.alignItems = 'center';
-        div.style.gap = '10px';
-        div.style.padding = '8px 0';
+        div.style.alignItems = 'flex-start';
+        div.style.gap = '12px';
+        div.style.padding = '10px 0';
         div.style.borderBottom = '1px solid var(--line)';
-        var avatar = document.createElement('div');
-        avatar.className = 'feed-avatar';
-        avatar.style.width = '28px';
-        avatar.style.height = '28px';
-        avatar.style.borderRadius = '50%';
-        avatar.style.background = 'var(--accent-light)';
-        avatar.style.display = 'flex';
-        avatar.style.alignItems = 'center';
-        avatar.style.justifyContent = 'center';
-        avatar.style.fontSize = '12px';
-        avatar.style.fontWeight = '700';
-        avatar.style.color = 'var(--accent-dark)';
-        avatar.style.flexShrink = '0';
-        avatar.style.fontFamily = "'Space Mono',monospace";
-        avatar.textContent = (a.nome || '?').charAt(0).toUpperCase();
+
+        var avatar;
+        if (a.foto) {
+          avatar = document.createElement('img');
+          avatar.className = 'feed-avatar';
+          avatar.src = a.foto;
+          avatar.alt = a.nome || 'Foto da pedra avaliada';
+          avatar.style.width = '36px';
+          avatar.style.height = '36px';
+          avatar.style.borderRadius = '10px';
+          avatar.style.objectFit = 'cover';
+          avatar.style.flexShrink = '0';
+        } else {
+          avatar = document.createElement('div');
+          avatar.className = 'feed-avatar';
+          avatar.style.width = '36px';
+          avatar.style.height = '36px';
+          avatar.style.borderRadius = '50%';
+          avatar.style.background = 'var(--accent-light)';
+          avatar.style.display = 'flex';
+          avatar.style.alignItems = 'center';
+          avatar.style.justifyContent = 'center';
+          avatar.style.fontSize = '13px';
+          avatar.style.fontWeight = '700';
+          avatar.style.color = 'var(--accent-dark)';
+          avatar.style.flexShrink = '0';
+          avatar.style.fontFamily = "'Space Mono',monospace";
+          avatar.textContent = (a.nome || '?').charAt(0).toUpperCase();
+        }
+
+        var conteudo = document.createElement('div');
+        conteudo.style.display = 'flex';
+        conteudo.style.flexDirection = 'column';
+        conteudo.style.gap = '3px';
+        conteudo.style.minWidth = '0';
+        conteudo.style.flex = '1';
+
         var text = document.createElement('div');
         text.className = 'feed-text';
         text.style.fontSize = '13px';
+        text.style.lineHeight = '1.4';
         text.style.color = 'var(--ink-soft)';
+        text.style.wordBreak = 'break-word';
         text.innerHTML = '<strong style="color:var(--ink);">' + (a.nome || 'Cliente') + '</strong> ' + (a.acao || 'avaliou uma pedra');
+
         var time = document.createElement('span');
         time.className = 'feed-time';
-        time.style.fontSize = '10.5px';
+        time.style.fontSize = '11px';
         time.style.color = 'var(--ink-mute2)';
-        time.style.marginLeft = 'auto';
-        time.style.whiteSpace = 'nowrap';
         time.textContent = a.tempo || 'agora';
+
+        conteudo.appendChild(text);
+        conteudo.appendChild(time);
         div.appendChild(avatar);
-        div.appendChild(text);
-        div.appendChild(time);
+        div.appendChild(conteudo);
         feed.appendChild(div);
       });
     }
