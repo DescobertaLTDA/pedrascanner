@@ -53,10 +53,32 @@ Imagens já existentes e reaproveitadas: `assets/img/amethyst-hero.png`, `assets
 ## Parte 4 — Card de upload como CTA principal
 **Onde:** `.card#area-principal` e `#dropzone` (mantendo tudo que já existe dentro).
 
+**Status:** ainda não implementada (verificado em `index.html` — `#dz-titulo` continua com o texto antigo "Envie a foto da sua pedra", sem ícone de câmera em círculo, sem texto auxiliar "JPG, PNG • até 10 MB" e sem a restilização do CTA).
+
 - Reformular a casca visual do card: título "IDENTIFIQUE SUA PEDRA", texto "Tire uma foto ou envie até 3 imagens para uma análise mais precisa.", ícone de câmera grande em círculo verde-claro, texto auxiliar "JPG, PNG • até 10 MB".
 - O botão principal deve continuar sendo o mecanismo real de upload já existente (`#dropzone` / `#input-foto` / fluxo de `#modal-escolha-foto`) — apenas restilizar visualmente (largura quase total, fundo verde escuro, texto branco, ícone de câmera + seta), sem criar um botão novo desconectado da lógica.
 - Não alterar `#preview`, `#foto-tira-wrap`, `#pre-scan-perguntas`, `#actions`, `#erro` — só o "invólucro" visual do estado inicial (antes de escolher foto).
 - Critério de pronto: clicar em qualquer parte do card abre o mesmo fluxo de sempre (câmera/galeria); nada do JS de upload muda de nome ou comportamento.
+
+### Subdivisão da Parte 4 (aplicar nesta ordem)
+
+**Parte 4a — Textos e estrutura HTML do estado inicial**
+- Trocar o texto de `#dz-titulo` para "IDENTIFIQUE SUA PEDRA".
+- Trocar o parágrafo de ajuda para "Tire uma foto ou envie até 3 imagens para uma análise mais precisa.".
+- Adicionar o texto auxiliar "JPG, PNG • até 10 MB" (novo elemento HTML, sem estilo ainda).
+- Não mexer em CSS nesta etapa, só marcação/texto.
+- Critério de pronto: novo texto aparece na tela (mesmo que ainda com estilo antigo), sem quebrar layout nem remover nenhum `id`/listener existente.
+
+**Parte 4b — Ícone de câmera em círculo verde-claro**
+- Criar/restilizar o ícone de câmera grande dentro de um círculo verde-claro (reaproveitando ou adaptando `#dz-icon-desktop`, sem remover o elemento do DOM caso o JS dependa dele).
+- Ajustar tamanho e posicionamento do círculo+ícone nas 4 larguras de teste (375px, 390px, 393px, 414px).
+- Critério de pronto: ícone centralizado, proporcional, sem overflow horizontal em nenhuma das larguras.
+
+**Parte 4c — Restilização do CTA/botão principal + QA funcional**
+- Restilizar a área clicável principal: largura quase total do card, fundo verde escuro, texto branco, ícone de câmera + seta.
+- Garantir que a restilização é só visual — o clique continua no mesmo `#dropzone`/`#input-foto`, sem criar elemento novo desconectado da lógica.
+- QA específico desta sub-parte: clicar em qualquer ponto do card abre `#modal-escolha-foto` normalmente; upload por câmera e por galeria continuam funcionando; nada do JS muda de nome/comportamento.
+- Critério de pronto: card visualmente pronto conforme a Parte 4 original, com todo o fluxo de upload intacto.
 
 ## Parte 5 — "Veja o que você recebe" (prévia estática de resultado)
 **Onde:** nova seção logo abaixo do card de upload, antes da faixa de benefícios.
