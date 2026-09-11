@@ -595,10 +595,11 @@
       position: relative;
       overflow: hidden;
       isolation: isolate;
-      /* Céu branco: pinta o .head de branco pra esconder o cinza do
-         .wrap::after nessa área. Como o .head é full-bleed, cobre de
-         borda a borda lateralmente. */
-      background: var(--bg);
+      /* O próprio .head faz a transição vertical: branco no topo (céu)
+         e --mountains-base embaixo (mesmo tom que o .wrap::after usa).
+         Assim não precisa de "background branco" — o gradiente já cobre
+         os dois extremos sem criar faixas. */
+      background: linear-gradient(to bottom, var(--bg) 0%, var(--bg) 55%, var(--mountains-base) 100%);
     }
     /* No desktop, o .head vira full-bleed (mesma técnica do mobile) pra
        as montanhas irem de borda a borda. */
