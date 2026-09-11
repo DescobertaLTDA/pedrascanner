@@ -568,12 +568,21 @@
       overflow: hidden;
       isolation: isolate;
     }
-    /* NOVO: no desktop, o .head deixa de cortar o full-bleed do .hero-mountains.
-       O próprio .hero-mountains já tem overflow:hidden e corta o excesso
-       vertical (top/bottom) sozinho, exatamente como antes. */
+    /* NOVO: no desktop, o .head também vira full-bleed (mesma técnica já usada
+       no mobile), mas o overflow:hidden continua ativo — então o
+       .hero-mountains preenche 100% da largura da viewport sem vazar pra
+       fora da caixa do .head (que é o que estava cobrindo o texto abaixo).
+       O conteúdo interno (texto) segue limitado a 820px, centralizado. */
     @media (min-width: 601px) {
       .head {
-        overflow: visible;
+        margin-left: calc(50% - 50vw);
+        margin-right: calc(50% - 50vw);
+        width: 100vw;
+      }
+      .head > *:not(.hero-mountains) {
+        max-width: 820px;
+        margin-left: auto;
+        margin-right: auto;
       }
     }
     .head > *:not(.hero-mountains) {
@@ -582,14 +591,7 @@
     }
     .hero-mountains {
       position: absolute;
-      /* NOVO: full-bleed horizontal — estica até as bordas laterais da
-         viewport, independente da largura do .wrap (820px). O top/bottom
-         continuam iguais, então a altura das montanhas não muda. */
-      top: -24px;
-      bottom: -40px;
-      left: 50%;
-      width: 100vw;
-      margin-left: -50vw;
+      inset: -24px -32px -40px;
       z-index: 0;
       pointer-events: none;
       overflow: hidden;
