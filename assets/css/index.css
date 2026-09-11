@@ -71,7 +71,8 @@
     /* A "extensão" das montanhas. Full-bleed lateral (left: calc(50% - 50vw)
        + width: 100vw) pra ir de borda a borda, atrás de todos os cards.
        A cor bate exatamente com o tom que a base das montanhas tem no fim
-       do .head (que agora também termina em --mountains-base) — sem degrau. */
+       do .head (que agora também termina em --mountains-base sólido) —
+       sem degrau, sem rampa. */
     .wrap::after {
       content: '';
       position: absolute;
@@ -631,17 +632,17 @@
     .hm-front { opacity: 0.28; }
     .hm-front path { fill: #a9b6ac; }
     /* O .hm-fog dissolve as montanhas na cor do site (--mountains-base),
-       não em branco puro. Assim o fim do .head termina EXATAMENTE na
-       mesma cor do .wrap::after, sem degrau entre os dois. A parte de
-       cima do gradiente continua transparente, então o céu branco do
-       .head é preservado. */
+       não em branco puro. Agora ele ATINGE --mountains-base sólido aos
+       80% da própria altura — então os últimos 20% do fog (antes do corte
+       do .head) já estão na cor exata do site, sem resíduo de gradiente.
+       A parte de cima continua transparente, preservando o céu branco. */
     .hm-fog {
       position: absolute;
       inset: 0;
       background:
         radial-gradient(ellipse 60% 42% at 18% 68%, rgba(255,255,255,0.9), transparent 62%),
         radial-gradient(ellipse 55% 38% at 78% 58%, rgba(255,255,255,0.85), transparent 65%),
-        linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(243,245,243,0.55) 60%, var(--mountains-base) 96%);
+        linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(243,245,243,0.55) 55%, var(--mountains-base) 80%);
     }
     @media (max-width:600px) {
       .hero-mountains { inset: -20px -20px -30px; }
