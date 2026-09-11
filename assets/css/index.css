@@ -32,10 +32,10 @@
       max-width: 100%;
     }
     body {
-      /* NOVO: cor de fundo que estende a base das montanhas até o fim
-         do site. Começa no mesmo tom da base das montanhas (#eaeeeb) e
-         desce suavemente para um tom levemente mais claro no rodapé,
-         evitando uma faixa chapada com "degrau" no fim. */
+      /* Fundo cinza que estende a base das montanhas até o fim do site.
+         Importante: o .head tem fundo branco próprio (ver regra .head abaixo),
+         então esse cinza só aparece a partir do fim do .head — o céu das
+         montanhas continua branco e mantém o contraste. */
       background: linear-gradient(to bottom, var(--mountains-base) 0%, #f2f3f1 100%);
       background-attachment: fixed;
       color: var(--ink);
@@ -573,12 +573,15 @@
       position: relative;
       overflow: hidden;
       isolation: isolate;
+      /* O céu das montanhas é branco. Como o body tem fundo cinza, é
+         preciso pintar o .head de branco pra manter o contraste das
+         montanhas. */
+      background: var(--bg);
     }
-    /* NOVO: no desktop, o .head também vira full-bleed (mesma técnica já usada
-       no mobile), mas o overflow:hidden continua ativo — então o
-       .hero-mountains preenche 100% da largura da viewport sem vazar pra
-       fora da caixa do .head (que é o que estava cobrindo o texto abaixo).
-       O conteúdo interno (texto) segue limitado a 820px, centralizado. */
+    /* No desktop, o .head vira full-bleed (mesma técnica do mobile) pra
+       as montanhas irem de borda a borda. O overflow:hidden continua
+       ativo, então as montanhas não vazam pra fora do .head — o texto
+       logo abaixo (CARREGUE A FOTO...) não é coberto. */
     @media (min-width: 601px) {
       .head {
         margin-left: calc(50% - 50vw);
@@ -617,18 +620,16 @@
     .hm-mid path { fill: #c2ccc5; }
     .hm-front { opacity: 0.28; }
     .hm-front path { fill: #a9b6ac; }
-    /* O .hm-fog originalmente terminava em branco puro (#ffffff), o que
-       criava a linha de corte entre o cinza das montanhas e o resto da
-       página. Agora ele termina na mesma cor do fundo do body
-       (--mountains-base), então a base das montanhas se funde
-       perfeitamente com o fundo contínuo que desce até o fim do site. */
+    /* O .hm-fog volta a terminar em branco puro (#ffffff) porque agora ele
+       se funde com o fundo branco do .head (o "céu"). A transição pro
+       cinza do body acontece depois, fora do .head. */
     .hm-fog {
       position: absolute;
       inset: 0;
       background:
         radial-gradient(ellipse 60% 42% at 18% 68%, rgba(255,255,255,0.9), transparent 62%),
         radial-gradient(ellipse 55% 38% at 78% 58%, rgba(255,255,255,0.85), transparent 65%),
-        linear-gradient(to bottom, rgba(234,238,235,0) 0%, rgba(234,238,235,0.55) 60%, var(--mountains-base) 96%);
+        linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.55) 60%, #ffffff 96%);
     }
     @media (max-width:600px) {
       .hero-mountains { inset: -20px -20px -30px; }
