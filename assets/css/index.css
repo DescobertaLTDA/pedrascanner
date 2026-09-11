@@ -30,14 +30,14 @@
       overscroll-behavior-y: none;
       overflow-x: hidden;
       max-width: 100%;
-      /* Fundo branco no html também, pra qualquer sobra/overscroll acima do
-         header não mostrar cinza. */
-      background: var(--bg);
+      /* Fundo cinza: é a cor da base das montanhas, que se estende por
+         todo o site. O céu branco fica só dentro do .head. */
+      background: var(--mountains-base);
     }
     body {
-      /* Body branco: é o céu das montanhas. O cinza que estende a base
-         das montanhas pelo resto do site vem do .wrap::after. */
-      background: var(--bg);
+      /* Body cinza: a mesma cor da base das montanhas. O céu branco
+         fica apenas dentro do .head, que tem fundo próprio. */
+      background: var(--mountains-base);
       color: var(--ink);
       font-family: 'Inter', sans-serif;
       line-height: 1.6;
@@ -73,21 +73,6 @@
          do .wrap e cobre o .wrap::after desde o primeiro pixel. O respiro
          abaixo do header agora vem do padding-top do .head. */
       padding: 0 32px 0;
-    }
-    /* A "extensão" das montanhas. Full-bleed lateral (left: calc(50% - 50vw)
-       + width: 100vw) pra ir de borda a borda, atrás de todos os cards.
-       A cor bate exatamente com o tom que a base das montanhas tem no fim
-       do .head — sem degrau, sem rampa. */
-    .wrap::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: calc(50% - 50vw);
-      width: 100vw;
-      background: var(--mountains-base);
-      z-index: -1;
-      pointer-events: none;
     }
     @media (max-width:480px) {
       .wrap {
@@ -587,19 +572,20 @@
     /* HEAD */
     .head {
       text-align: center;
-      /* Respiro abaixo do header fixed. Era o padding-top do .wrap; agora
-         vive aqui, porque o .head é quem começa no topo do .wrap (sem
-         gap acima) — assim ele cobre o .wrap::after desde o primeiro
-         pixel e nenhuma faixa cinza aparece atrás do hero. */
+      /* Respiro abaixo do header fixed. */
       padding-top: 48px;
       position: relative;
       overflow: hidden;
       isolation: isolate;
-      /* O próprio .head faz a transição vertical: branco no topo (céu)
-         e --mountains-base embaixo (mesmo tom que o .wrap::after usa).
-         Assim não precisa de "background branco" — o gradiente já cobre
-         os dois extremos sem criar faixas. */
-      background: linear-gradient(to bottom, var(--bg) 0%, var(--bg) 55%, var(--mountains-base) 100%);
+      /* O .head é o céu: branco no topo. Embaixo, ele vai ficando
+         transparente para deixar o cinza do body aparecer suavemente
+         atrás das montanhas. */
+      background: linear-gradient(
+        to bottom,
+        var(--bg) 0%,
+        var(--bg) 50%,
+        rgba(255, 255, 255, 0) 100%
+      );
     }
     /* No desktop, o .head vira full-bleed (mesma técnica do mobile) pra
        as montanhas irem de borda a borda. */
@@ -641,18 +627,19 @@
     .hm-mid path { fill: #c2ccc5; }
     .hm-front { opacity: 0.28; }
     .hm-front path { fill: #a9b6ac; }
-    /* O .hm-fog dissolve as montanhas na cor do site (--mountains-base),
-       não em branco puro. Agora ele ATINGE --mountains-base sólido aos
-       80% da própria altura — então os últimos 20% do fog (antes do corte
-       do .head) já estão na cor exata do site, sem resíduo de gradiente.
-       A parte de cima continua transparente, preservando o céu branco. */
+    /* O .hm-fog dissolve as montanhas suavemente para o cinza do body.
+       Sem círculos brancos — só um gradiente vertical que vai de
+       transparente (céu) até o cinza da base. */
     .hm-fog {
       position: absolute;
       inset: 0;
-      background:
-        radial-gradient(ellipse 60% 42% at 18% 68%, rgba(255,255,255,0.9), transparent 62%),
-        radial-gradient(ellipse 55% 38% at 78% 58%, rgba(255,255,255,0.85), transparent 65%),
-        linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(243,245,243,0.55) 55%, var(--mountains-base) 80%);
+      background: linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0) 45%,
+        rgba(243, 245, 243, 0.6) 75%,
+        var(--mountains-base) 100%
+      );
     }
     @media (max-width:600px) {
       .hero-mountains { inset: -20px -20px -30px; }
