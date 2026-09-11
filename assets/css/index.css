@@ -564,6 +564,8 @@
       margin-left: calc(50% - 50vw);
       margin-right: calc(50% - 50vw);
       padding: 28px 32px 24px;
+      max-height: 620px;
+      min-height: 340px;
     }
     .head > *:not(.hero-mountains) {
       position: relative;
