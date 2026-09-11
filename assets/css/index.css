@@ -32,12 +32,12 @@
       max-width: 100%;
     }
     body {
-      /* Fundo cinza que estende a base das montanhas até o fim do site.
-         Importante: o .head tem fundo branco próprio (ver regra .head abaixo),
-         então esse cinza só aparece a partir do fim do .head — o céu das
-         montanhas continua branco e mantém o contraste. */
-      background: linear-gradient(to bottom, var(--mountains-base) 0%, #f2f3f1 100%);
-      background-attachment: fixed;
+      /* Body branco: é o "céu" das montanhas. O cinza que estende a base
+         das montanhas até o fim do site é pintado no .wrap::after (abaixo),
+         que começa exatamente depois do .head — assim o céu do hero fica
+         branco puro (contraste correto) e o cinza só aparece do fim do
+         hero pra baixo. */
+      background: var(--bg);
       color: var(--ink);
       font-family: 'Inter', sans-serif;
       line-height: 1.6;
@@ -70,6 +70,21 @@
       margin: 0 auto;
       position: relative;
       padding: 48px 32px 0;
+    }
+    /* O cinza que estende as montanhas: fica atrás de TODO o conteúdo do
+       .wrap (que já começa depois do .head), cobrindo 100vw de largura
+       pra ir de borda a borda lateralmente. z-index: -1 coloca atrás dos
+       cards, que continuam sólidos. */
+    .wrap::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: calc(50% - 50vw);
+      width: 100vw;
+      background: linear-gradient(to bottom, var(--mountains-base) 0%, #f2f3f1 100%);
+      z-index: -1;
+      pointer-events: none;
     }
     @media (max-width:480px) {
       .wrap {
@@ -573,15 +588,12 @@
       position: relative;
       overflow: hidden;
       isolation: isolate;
-      /* O céu das montanhas é branco. Como o body tem fundo cinza, é
-         preciso pintar o .head de branco pra manter o contraste das
-         montanhas. */
-      background: var(--bg);
+      /* Sem background aqui: o branco vem do body. O cinza começa só
+         depois do .head, no .wrap::after. */
     }
     /* No desktop, o .head vira full-bleed (mesma técnica do mobile) pra
        as montanhas irem de borda a borda. O overflow:hidden continua
-       ativo, então as montanhas não vazam pra fora do .head — o texto
-       logo abaixo (CARREGUE A FOTO...) não é coberto. */
+       ativo, então as montanhas não vazam pra fora do .head. */
     @media (min-width: 601px) {
       .head {
         margin-left: calc(50% - 50vw);
@@ -620,9 +632,6 @@
     .hm-mid path { fill: #c2ccc5; }
     .hm-front { opacity: 0.28; }
     .hm-front path { fill: #a9b6ac; }
-    /* O .hm-fog volta a terminar em branco puro (#ffffff) porque agora ele
-       se funde com o fundo branco do .head (o "céu"). A transição pro
-       cinza do body acontece depois, fora do .head. */
     .hm-fog {
       position: absolute;
       inset: 0;
