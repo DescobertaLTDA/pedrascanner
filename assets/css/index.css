@@ -30,6 +30,9 @@
       overscroll-behavior-y: none;
       overflow-x: hidden;
       max-width: 100%;
+      /* Fundo branco no html também, pra qualquer sobra/overscroll acima do
+         header não mostrar cinza. */
+      background: var(--bg);
     }
     body {
       /* Body branco: é o céu das montanhas. O cinza que estende a base
@@ -66,13 +69,15 @@
       max-width: 820px;
       margin: 0 auto;
       position: relative;
-      padding: 48px 32px 0;
+      /* Sem padding-top: o .head (primeiro filho) começa no topo absoluto
+         do .wrap e cobre o .wrap::after desde o primeiro pixel. O respiro
+         abaixo do header agora vem do padding-top do .head. */
+      padding: 0 32px 0;
     }
     /* A "extensão" das montanhas. Full-bleed lateral (left: calc(50% - 50vw)
        + width: 100vw) pra ir de borda a borda, atrás de todos os cards.
        A cor bate exatamente com o tom que a base das montanhas tem no fim
-       do .head (que agora também termina em --mountains-base sólido) —
-       sem degrau, sem rampa. */
+       do .head — sem degrau, sem rampa. */
     .wrap::after {
       content: '';
       position: absolute;
@@ -86,7 +91,7 @@
     }
     @media (max-width:480px) {
       .wrap {
-        padding: 36px 20px 0;
+        padding: 0 20px 0;
       }
     }
     @media (max-width:600px) {
@@ -107,7 +112,7 @@
         isolation: isolate;
         overflow: hidden;
         border-radius: 0;
-        padding: 28px 20px 24px;
+        padding: 36px 20px 24px;
         margin-left: calc(50% - 50vw);
         margin-right: calc(50% - 50vw);
         width: 100vw;
@@ -582,7 +587,11 @@
     /* HEAD */
     .head {
       text-align: center;
-      padding-top: 4px;
+      /* Respiro abaixo do header fixed. Era o padding-top do .wrap; agora
+         vive aqui, porque o .head é quem começa no topo do .wrap (sem
+         gap acima) — assim ele cobre o .wrap::after desde o primeiro
+         pixel e nenhuma faixa cinza aparece atrás do hero. */
+      padding-top: 48px;
       position: relative;
       overflow: hidden;
       isolation: isolate;
