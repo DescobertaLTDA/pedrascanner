@@ -22,7 +22,7 @@
       --danger: #d3302f;
       --line: rgba(0, 0, 0, 0.10);
       --line-strong: rgba(0, 0, 0, 0.20);
-      --mountains-base: #f3f5f3;
+      --mountains-base: #EDEFED;
     }
     html {
       -webkit-text-size-adjust: 100%;
@@ -637,7 +637,7 @@
         to bottom,
         rgba(255, 255, 255, 0) 0%,
         rgba(255, 255, 255, 0) 45%,
-        rgba(243, 245, 243, 0.6) 75%,
+        rgba(237, 239, 237, 0.6) 75%,
         var(--mountains-base) 100%
       );
     }
