@@ -2728,6 +2728,33 @@
     });
 
     // ========================================================================
+    // PARALLAX DAS MONTANHAS NO HERO
+    // ========================================================================
+    (function() {
+      var camadas = document.querySelectorAll('.hm-layer');
+      if (!camadas.length) return;
+      var reduzMovimento = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduzMovimento) return;
+
+      var ticking = false;
+      function atualizarParallax() {
+        var scrollY = window.scrollY || window.pageYOffset;
+        camadas.forEach(function(camada) {
+          var velocidade = parseFloat(camada.dataset.speed) || 0.1;
+          camada.style.transform = 'translateY(' + (scrollY * velocidade) + 'px)';
+        });
+        ticking = false;
+      }
+      window.addEventListener('scroll', function() {
+        if (!ticking) {
+          requestAnimationFrame(atualizarParallax);
+          ticking = true;
+        }
+      }, { passive: true });
+      atualizarParallax();
+    })();
+
+    // ========================================================================
     // AVATARES DE PROVA SOCIAL (fotos das últimas pedras identificadas)
     // ========================================================================
     function carregarAvataresProvaSocial() {
