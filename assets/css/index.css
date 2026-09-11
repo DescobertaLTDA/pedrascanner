@@ -635,6 +635,12 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.12);
     }
     .sp-avatar:first-child { margin-left: 0; }
+    .sp-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
     .sp-avatar-more {
       background: var(--card-alt) !important;
       color: var(--ink-soft) !important;

@@ -2728,6 +2728,33 @@
     });
 
     // ========================================================================
+    // AVATARES DE PROVA SOCIAL (fotos das últimas pedras identificadas)
+    // ========================================================================
+    function carregarAvataresProvaSocial() {
+      var slots = [1, 2, 3, 4, 5].map(function(n) { return document.getElementById('sp-avatar-' + n); });
+      if (!slots[0]) return;
+      fetch('/api/vitrine?pagina=1')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          var itens = (data && data.itens) || [];
+          itens.slice(0, 5).forEach(function(item, i) {
+            var slot = slots[i];
+            if (!slot || !item.foto) return;
+            slot.style.background = 'transparent';
+            slot.textContent = '';
+            var img = document.createElement('img');
+            img.src = item.foto;
+            img.alt = item.pedra || 'Pedra avaliada';
+            slot.appendChild(img);
+          });
+        })
+        .catch(function(err) {
+          console.error('Erro ao carregar avatares de prova social:', err);
+          // mantém as iniciais fixas como fallback
+        });
+    }
+
+    // ========================================================================
     // ESTATÍSTICAS
     // ========================================================================
     function carregarEstatisticas() {
@@ -2887,6 +2914,7 @@
     });
     carregarEstatisticas();
     carregarRankingColecionadores();
+    carregarAvataresProvaSocial();
     setInterval(carregarEstatisticas, 60000);
     setInterval(carregarRankingColecionadores, 120000);
     document.addEventListener('visibilitychange', function() { if (!document.hidden) carregarEstatisticas(); });
