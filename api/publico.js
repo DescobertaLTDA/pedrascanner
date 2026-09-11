@@ -167,8 +167,8 @@ async function handlerStats(req, res) {
 }
 
 // ============================================================================
-// /api/vitrine — identificações desbloqueadas e com permissão de exibição
-// pública, paginadas (10 por página).
+// /api/vitrine — todas as identificações (pagas ou gratuitas) com permissão
+// de exibição pública (permite_vitrine = true), paginadas (10 por página).
 // ============================================================================
 const VITRINE_POR_PAGINA = 10;
 
@@ -193,7 +193,6 @@ async function handlerVitrine(req, res) {
     const { data: linhas, error, count } = await supabase
       .from('identificacoes')
       .select('id, nome_exibicao, whatsapp, nome_provavel, faixa_preco_brasil, foto_base64, foto_media_type, criado_em', { count: 'exact' })
-      .eq('desbloqueada', true)
       .eq('permite_vitrine', true)
       .not('foto_base64', 'is', null)
       .order('criado_em', { ascending: false })
