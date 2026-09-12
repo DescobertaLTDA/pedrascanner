@@ -2827,7 +2827,6 @@
       var statHoje = document.getElementById('stat-hoje');
       var statAtualizado = document.getElementById('stat-atualizado');
       var socialProofCount = document.getElementById('social-proof-count');
-      var spAvatarMore = document.getElementById('sp-avatar-more');
       if (!statMembros) return;
       statMembros.textContent = '...';
       statPedras.textContent = '...';
@@ -2841,7 +2840,6 @@
         statPedras.textContent = data.pedras || '0';
         statHoje.textContent = data.hoje || '+0';
         if (socialProofCount) socialProofCount.textContent = data.membros || '0';
-        if (spAvatarMore) spAvatarMore.textContent = '+' + (data.membros || '0');
         if (statAtualizado) {
           var agora = new Date();
           var hora = String(agora.getHours()).padStart(2, '0');
@@ -2852,12 +2850,11 @@
         return data;
       }).catch(function(err) {
         console.error('Erro ao carregar estatísticas:', err);
-        statMembros.textContent = '1.2k';
-        statPedras.textContent = '4.7k';
-        statHoje.textContent = '+38';
-        if (socialProofCount) socialProofCount.textContent = '1.2k';
-        if (spAvatarMore) spAvatarMore.textContent = '+1.2k';
-        if (statAtualizado) statAtualizado.textContent = 'Carregando...';
+        statMembros.textContent = '0';
+        statPedras.textContent = '0';
+        statHoje.textContent = '+0';
+        if (socialProofCount) socialProofCount.textContent = '0';
+        if (statAtualizado) statAtualizado.textContent = 'Erro ao atualizar';
       });
     }
 
