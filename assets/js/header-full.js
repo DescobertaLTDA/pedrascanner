@@ -80,6 +80,8 @@
     var btnGoogleLogin = document.getElementById('btn-google-login');
     var erroLoginEl = document.getElementById('erro-login');
     var btnSidebarToggle = document.getElementById('btn-sidebar-toggle');
+    var btnMobileMenu = document.getElementById('btn-mobile-menu');
+    var navLinksGroup = document.getElementById('nav-links-group');
 
     function esconderPaineis() {
       painelLogin.classList.remove('active');
@@ -126,6 +128,22 @@
     if (btnSidebarToggle) {
       btnSidebarToggle.addEventListener('click', function () {
         window.location.href = '/index.html?abrir=historico';
+      });
+    }
+
+    // Menu mobile: abre um dropdown com Catálogo/Rankings/Ajuda em vez de
+    // simplesmente escondê-los sem nenhuma forma de acessá-los no celular.
+    if (btnMobileMenu && navLinksGroup) {
+      btnMobileMenu.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var aberto = navLinksGroup.classList.toggle('mobile-menu-open');
+        btnMobileMenu.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+      });
+      document.addEventListener('click', function (e) {
+        if (!navLinksGroup.classList.contains('mobile-menu-open')) return;
+        if (e.target.closest && (e.target.closest('#nav-links-group') || e.target.closest('#btn-mobile-menu'))) return;
+        navLinksGroup.classList.remove('mobile-menu-open');
+        btnMobileMenu.setAttribute('aria-expanded', 'false');
       });
     }
 

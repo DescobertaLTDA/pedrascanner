@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
   <title>ROCCO — Identificador de Pedras com IA</title>
   <meta name="robots" content="noindex, nofollow">
-  <meta name="theme-color" content="#0f3326">
+  <meta name="theme-color" content="#000000">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -91,26 +91,31 @@
         </a>
       </div>
       <div class="nav-right">
-        <a class="nav-link" id="nav-link-minhas-pedras">
-          <svg viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z"/></svg>
-          Minhas Pedras
-        </a>
-        <a class="nav-link" id="nav-link-vender">
-          <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
-          Vender
-        </a>
-        <a class="nav-link" id="nav-link-catalogo" style="display:none;">
-          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
-          Catálogo
-        </a>
-        <a class="nav-link" id="nav-link-rankings" style="display:none;">
-          <svg viewBox="0 0 24 24"><path d="M12 2v20M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg>
-          Rankings
-        </a>
-        <a class="nav-link" id="nav-link-ajuda" href="ajuda.html">
-          <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;stroke-width:1.8;fill:none;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
-          Ajuda
-        </a>
+        <div class="nav-links-group" id="nav-links-group">
+          <a class="nav-link" id="nav-link-minhas-pedras">
+            <svg viewBox="0 0 24 24"><path d="M6 3h12l4 6-10 12L2 9z"/></svg>
+            Minhas Pedras
+          </a>
+          <a class="nav-link" id="nav-link-vender">
+            <svg viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+            Vender
+          </a>
+          <a class="nav-link" id="nav-link-catalogo" style="display:none;">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>
+            Catálogo
+          </a>
+          <a class="nav-link" id="nav-link-rankings" style="display:none;">
+            <svg viewBox="0 0 24 24"><path d="M12 2v20M4 12h16M8 8l-4 4 4 4M16 8l4 4-4 4"/></svg>
+            Rankings
+          </a>
+          <a class="nav-link" id="nav-link-ajuda" href="ajuda.html">
+            <svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;stroke-width:1.8;fill:none;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+            Ajuda
+          </a>
+        </div>
+        <button type="button" class="btn-mobile-menu" id="btn-mobile-menu" aria-label="Abrir menu" aria-expanded="false">
+          <svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
         <div id="header-auth-area">
           <button class="nav-cta" id="btn-header-entrar"><span class="full">Entrar / Registrar</span><span class="short">Entrar</span></button>
         </div>
@@ -169,11 +174,11 @@
       <p class="hero-sub"><strong>Identifique sua pedra com IA</strong> e veja como ela se compara com as descobertas da comunidade.</p>
       <div class="social-proof">
         <div class="social-proof-avatars" id="social-proof-avatars">
-          <span class="sp-avatar" id="sp-avatar-1" style="background:#2f6d54;">M</span>
-          <span class="sp-avatar" id="sp-avatar-2" style="background:#d98a6b;">A</span>
-          <span class="sp-avatar" id="sp-avatar-3" style="background:#d4a94a;">R</span>
-          <span class="sp-avatar" id="sp-avatar-4" style="background:#8fada5;">C</span>
-          <span class="sp-avatar" id="sp-avatar-5" style="background:#a58fc4;">J</span>
+          <span class="sp-avatar" id="sp-avatar-1" style="background:#2b2b2b;">M</span>
+          <span class="sp-avatar" id="sp-avatar-2" style="background:#555555;">A</span>
+          <span class="sp-avatar" id="sp-avatar-3" style="background:#787878;">R</span>
+          <span class="sp-avatar" id="sp-avatar-4" style="background:#9a9a9a;">C</span>
+          <span class="sp-avatar" id="sp-avatar-5" style="background:#bcbcbc;">J</span>
           <span class="sp-avatar sp-avatar-more" id="sp-avatar-more">+1.2k</span>
         </div>
         <p class="social-proof-text">
@@ -522,7 +527,7 @@
             <div style="font-family:'Space Mono',monospace;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--accent-dark);">À venda por</div>
             <div id="texto-valor-venda" style="font-size:18px;font-weight:700;color:var(--ink);margin-top:2px;"></div>
             <p id="texto-obs-venda" style="font-size:12.5px;color:var(--ink-mute);margin-top:4px;"></p>
-            <a id="btn-whatsapp-venda" href="#" target="_blank" rel="noopener" style="width:100%;margin-top:10px;background:#25D366;color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
+            <a id="btn-whatsapp-venda" href="#" target="_blank" rel="noopener" style="width:100%;margin-top:10px;background:#000000;color:#fff;border:none;border-radius:10px;padding:13px;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none;">
               <svg viewBox="0 0 24 24" style="width:16px;height:16px;fill:#fff;"><path d="M17.6 6.3A8.9 8.9 0 0012 4a8.9 8.9 0 00-7.7 13.4L3 21l3.7-1.3A8.9 8.9 0 0012 20.9 8.9 8.9 0 0017.6 6.3zM12 19.1a7.1 7.1 0 01-3.6-1l-.3-.1-2.2.8.8-2.1-.2-.3A7.1 7.1 0 1119 12a7.1 7.1 0 01-7 7.1zm3.9-5.3c-.2-.1-1.2-.6-1.4-.7-.2-.1-.3-.1-.5.1-.1.2-.5.7-.6.8-.1.1-.2.1-.4 0-.2-.1-.9-.3-1.7-1a6.3 6.3 0 01-1.2-1.5c-.1-.2 0-.3.1-.4l.3-.4.2-.3v-.3c0-.1-.5-1.2-.7-1.6-.2-.4-.4-.4-.5-.4h-.4c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2 1 2.4c.1.1 1.6 2.5 3.9 3.4.5.2 1 .4 1.3.5.5.2 1 .1 1.4.1.4-.1 1.2-.5 1.4-1 .2-.4.2-.8.1-1z"/></svg>
               Falar no WhatsApp
             </a>
@@ -640,20 +645,20 @@
     </div>
 
     <div class="conteudo" style="margin-top:28px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px;">
-      <h2 style="font-size:21px;margin-bottom:14px;display:flex;align-items:center;gap:10px;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--ink);stroke-width:1.8;fill:none;"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg> Pedra ou Rocha? Existe Diferença?</h2>
+      <h2 style="font-size:21px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;margin-top:3px;flex-shrink:0;stroke:var(--ink);stroke-width:1.8;fill:none;"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg> Pedra ou Rocha? Existe Diferença?</h2>
       <p style="font-size:14px;color:var(--ink-mute);margin-bottom:12px;">No dia a dia, usamos as duas palavras como sinônimos, mas há uma distinção que ajuda na identificação. <strong style="color:var(--ink);">Rocha</strong> é o termo geológico para o material sólido da crosta terrestre — pense em montanhas e afloramentos. <strong style="color:var(--ink);">Pedra</strong> costuma se referir a um fragmento menor, muitas vezes removido do seu local de origem e desgastado pela água, pelo tempo ou por mãos humanas.</p>
       <p style="font-size:14px;color:var(--ink-mute);margin-bottom:0;">Nosso identificador reconhece as duas coisas: seja um pedaço bruto de granito encontrado numa trilha ou uma gema já lapidada, a IA analisa cor, brilho, transparência e textura para sugerir a composição mineral mais provável.</p>
     </div>
 
     <div class="conteudo" style="margin-top:28px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px;">
-      <h2 style="font-size:21px;margin-bottom:14px;display:flex;align-items:center;gap:10px;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--ink);stroke-width:1.8;fill:none;"><path d="M12 2v4M12 22v-4M4 12H2M22 12h-2M19.07 4.93l-2.83 2.83M4.93 19.07l2.83-2.83M19.07 19.07l-2.83-2.83M4.93 4.93l2.83 2.83"/></svg> Como a IA Analisa a Sua Pedra</h2>
+      <h2 style="font-size:21px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;margin-top:3px;flex-shrink:0;stroke:var(--ink);stroke-width:1.8;fill:none;"><path d="M12 2v4M12 22v-4M4 12H2M22 12h-2M19.07 4.93l-2.83 2.83M4.93 19.07l2.83-2.83M19.07 19.07l-2.83-2.83M4.93 4.93l2.83 2.83"/></svg> Como a IA Analisa a Sua Pedra</h2>
       <p style="font-size:14px;color:var(--ink-mute);margin-bottom:12px;"><strong style="color:var(--ink);">Cor e transparência:</strong> a pedra é opaca, translúcida ou transparente? Esse é o primeiro critério observado — mas isoladamente não basta, já que um mesmo mineral pode aparecer em várias cores.</p>
       <p style="font-size:14px;color:var(--ink-mute);margin-bottom:12px;"><strong style="color:var(--ink);">Brilho e efeitos ópticos:</strong> reflexos como o "olho de gato" ou o brilho azulado de certas pedras luares são pistas importantes que a IA foi treinada para reconhecer.</p>
       <p style="font-size:14px;color:var(--ink-mute);margin-bottom:0;"><strong style="color:var(--ink);">Textura e inclusões:</strong> superfícies lisas, ásperas, vítreas ou foscas, além de padrões internos, ajudam a diferenciar pedras que à primeira vista parecem semelhantes.</p>
     </div>
 
     <div class="conteudo" style="margin-top:28px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:26px;">
-      <h2 style="font-size:21px;margin-bottom:14px;display:flex;align-items:center;gap:10px;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:var(--ink);stroke-width:1.8;fill:none;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg> Perguntas Frequentes</h2>
+      <h2 style="font-size:21px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px;"><svg viewBox="0 0 24 24" style="width:20px;height:20px;margin-top:3px;flex-shrink:0;stroke:var(--ink);stroke-width:1.8;fill:none;"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg> Perguntas Frequentes</h2>
       <div class="faq-item" style="background:var(--card-alt);border:1px solid var(--line);border-radius:9px;padding:16px 18px;margin-bottom:10px;"><h3 style="font-size:14.5px;margin-bottom:6px;">O identificador de pedras é gratuito?</h3><p style="font-size:13.5px;color:var(--ink-mute);margin:0;">Sim, você tem <strong style="color:var(--ink);">1 avaliação gratuita</strong> para testar. Nela, você vê o nome, características, confiança e faixa de preço da pedra. Para ver <strong style="color:var(--ink);">onde vender</strong> e continuar avaliando, é preciso comprar o pacote de 10 leituras por R$ 5,99.</p></div>
       <div class="faq-item" style="background:var(--card-alt);border:1px solid var(--line);border-radius:9px;padding:16px 18px;margin-bottom:10px;"><h3 style="font-size:14.5px;margin-bottom:6px;">Como funciona o pacote de 10 leituras?</h3><p style="font-size:13.5px;color:var(--ink-mute);margin:0;">Ao comprar, você desbloqueia o campo "onde vender" em até 10 identificações. As leituras ficam disponíveis na sua conta até você usá-las, sem cobrança recorrente.</p></div>
       <div class="faq-item" style="background:var(--card-alt);border:1px solid var(--line);border-radius:9px;padding:16px 18px;margin-bottom:10px;"><h3 style="font-size:14.5px;margin-bottom:6px;">Preciso de conta para usar?</h3><p style="font-size:13.5px;color:var(--ink-mute);margin:0;">Sim, é necessário criar uma conta gratuita com e-mail e senha para ver os resultados e comprar acesso. Isso também permite salvar seu histórico de identificações.</p></div>

@@ -390,7 +390,9 @@
     var navLinkRankings = document.getElementById('nav-link-rankings');
     var navLinkAjuda = document.getElementById('nav-link-ajuda');
     var secaoInstitucional = document.getElementById('secao-institucional');
-    var confiancaCores = { alta: '#1a7a3c', media: '#8a8a8a', baixa: '#d3302f' };
+    var confiancaCores = { alta: '#141414', media: '#8a8a8a', baixa: '#d3302f' };
+    var btnMobileMenu = document.getElementById('btn-mobile-menu');
+    var navLinksGroup = document.getElementById('nav-links-group');
     var timeoutIds = [];
     var rankingAtual = 'recentes';
     var catalogoPagina = 1;
@@ -707,6 +709,29 @@
     btnSidebarClose.addEventListener('click', fecharSidebar);
     sidebarBackdrop.addEventListener('click', fecharSidebar);
 
+    // Menu mobile: no lugar de simplesmente esconder os links (Minhas Pedras,
+    // Vender, Ajuda) sem nenhuma forma de acessá-los, o botão hambúrguer abre
+    // um dropdown com os mesmos links/ids/listeners de sempre.
+    if (btnMobileMenu && navLinksGroup) {
+      btnMobileMenu.addEventListener('click', function(e) {
+        e.stopPropagation();
+        var aberto = navLinksGroup.classList.toggle('mobile-menu-open');
+        btnMobileMenu.setAttribute('aria-expanded', aberto ? 'true' : 'false');
+      });
+      navLinksGroup.addEventListener('click', function(e) {
+        if (e.target.closest('.nav-link')) {
+          navLinksGroup.classList.remove('mobile-menu-open');
+          btnMobileMenu.setAttribute('aria-expanded', 'false');
+        }
+      });
+      document.addEventListener('click', function(e) {
+        if (!navLinksGroup.classList.contains('mobile-menu-open')) return;
+        if (e.target.closest('#nav-links-group') || e.target.closest('#btn-mobile-menu')) return;
+        navLinksGroup.classList.remove('mobile-menu-open');
+        btnMobileMenu.setAttribute('aria-expanded', 'false');
+      });
+    }
+
     btnCtaFinal.addEventListener('click', function() {
       document.getElementById('area-principal').scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
@@ -903,7 +928,7 @@
     var STATUS_VENDA_INFO = {
       ativo: { texto: 'Anunciado', cor: 'var(--accent)' },
       pausado: { texto: 'Pausado', cor: 'var(--ink-mute2)' },
-      vendido: { texto: 'Vendido', cor: '#b8860b' }
+      vendido: { texto: 'Vendido', cor: '#4a4a4a' }
     };
 
     function abrirPainelVender() {
@@ -1040,7 +1065,7 @@
           });
           acoes.appendChild(btnPausarReativar);
 
-          var btnVendida = criarBotaoAcao('Marcar vendida', '#b8860b');
+          var btnVendida = criarBotaoAcao('Marcar vendida', '#4a4a4a');
           btnVendida.style.color = '#fff';
           btnVendida.addEventListener('click', function() {
             btnVendida.disabled = true;
@@ -2700,7 +2725,7 @@
           btnWhatsCard.href = 'https://wa.me/' + telLimpoCard + '?text=' + msgWhatsCard;
           btnWhatsCard.target = '_blank';
           btnWhatsCard.rel = 'noopener';
-          btnWhatsCard.style.cssText = 'width:100%;margin-top:8px;background:#25D366;color:#fff;border:none;border-radius:7px;padding:7px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;text-decoration:none;';
+          btnWhatsCard.style.cssText = 'width:100%;margin-top:8px;background:#000000;color:#fff;border:none;border-radius:7px;padding:7px;font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;text-decoration:none;';
           btnWhatsCard.innerHTML =
             '<svg viewBox="0 0 24 24" style="width:12px;height:12px;fill:#fff;"><path d="M17.6 6.3A8.9 8.9 0 0012 4a8.9 8.9 0 00-7.7 13.4L3 21l3.7-1.3A8.9 8.9 0 0012 20.9 8.9 8.9 0 0017.6 6.3zM12 19.1a7.1 7.1 0 01-3.6-1l-.3-.1-2.2.8.8-2.1-.2-.3A7.1 7.1 0 1119 12a7.1 7.1 0 01-7 7.1zm3.9-5.3c-.2-.1-1.2-.6-1.4-.7-.2-.1-.3-.1-.5.1-.1.2-.5.7-.6.8-.1.1-.2.1-.4 0-.2-.1-.9-.3-1.7-1a6.3 6.3 0 01-1.2-1.5c-.1-.2 0-.3.1-.4l.3-.4.2-.3v-.3c0-.1-.5-1.2-.7-1.6-.2-.4-.4-.4-.5-.4h-.4c-.2 0-.4.1-.6.3-.2.2-.8.8-.8 1.9s.8 2.2 1 2.4c.1.1 1.6 2.5 3.9 3.4.5.2 1 .4 1.3.5.5.2 1 .1 1.4.1.4-.1 1.2-.5 1.4-1 .2-.4.2-.8.1-1z"/></svg>' +
             'WhatsApp';

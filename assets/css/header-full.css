@@ -9,9 +9,9 @@
   --ink-mute: #666666;
   --ink-mute2: #8a8a8a;
   --ink-soft: #333333;
-  --accent: #1a4d3a;
-  --accent-dark: #0f3326;
-  --accent-light: rgba(26, 77, 58, 0.08);
+  --accent: #141414;
+  --accent-dark: #000000;
+  --accent-light: rgba(0, 0, 0, 0.06);
   --on-accent: #ffffff;
   --danger: #d3302f;
   --line: rgba(0, 0, 0, 0.10);
@@ -132,7 +132,7 @@ header .nav-link:hover { color: var(--ink); }
 }
 .nav-name { font-size: 12.5px; font-weight: 600; color: var(--ink); max-width: 70px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nav-saldo-pill { font-size: 10.5px; font-weight: 700; color: var(--accent-dark); background: var(--accent-light); padding: 3px 8px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
-.nav-colecao-pill { font-size: 10.5px; font-weight: 700; color: #8a5a1e; background: rgba(201, 150, 46, 0.14); padding: 3px 8px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; display: flex; align-items: center; gap: 3px; }
+.nav-colecao-pill { font-size: 10.5px; font-weight: 700; color: #3a3a3a; background: rgba(0, 0, 0, 0.08); padding: 3px 8px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; display: flex; align-items: center; gap: 3px; }
 @media (max-width: 640px) { .nav-colecao-pill { display: none; } }
 .nav-chevron { width: 10px; height: 10px; stroke: var(--ink-mute); stroke-width: 2.4; fill: none; flex-shrink: 0; transition: transform .15s ease; }
 .nav-user.active .nav-chevron { transform: rotate(180deg); }
@@ -146,8 +146,8 @@ header .nav-link:hover { color: var(--ink); }
 .nav-dropdown-saldo { font-size: 11px; color: var(--ink-mute); padding: 8px 10px 6px; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
 .nav-dropdown-saldo strong { color: var(--accent-dark); }
 .nav-dropdown-colecao { font-size: 11px; color: var(--ink-mute); padding: 8px 10px 6px; border-bottom: 1px solid var(--line); margin-bottom: 4px; display: flex; align-items: center; gap: 5px; }
-.nav-dropdown-colecao strong { color: #8a5a1e; }
-.nav-dropdown-colecao svg { width: 12px; height: 12px; stroke: #8a5a1e; stroke-width: 2; fill: none; flex-shrink: 0; }
+.nav-dropdown-colecao strong { color: #3a3a3a; }
+.nav-dropdown-colecao svg { width: 12px; height: 12px; stroke: #3a3a3a; stroke-width: 2; fill: none; flex-shrink: 0; }
 .nav-dropdown button { width: 100%; text-align: left; background: transparent; border: none; padding: 9px 10px; font-size: 13px; color: var(--ink); border-radius: 6px; cursor: pointer; font-family: 'Inter', sans-serif; }
 .nav-dropdown button:hover { background: var(--card-alt); }
 .nav-dropdown button.sair { color: var(--danger); }
@@ -212,9 +212,34 @@ body.popup-aberto { overflow: hidden; }
   .logo .logo-main { font-size: 15px; }
   .logo .logo-sub { font-size: 8px; letter-spacing: 0.08em; }
 }
+.btn-mobile-menu { display: none; }
 @media (max-width: 420px) {
   .nav-name { max-width: 54px; }
-  .nav-link { display: none; }
+  .nav-wrap { position: relative; }
+  .nav-links-group { display: none; }
+  .btn-mobile-menu {
+    display: flex; align-items: center; justify-content: center;
+    width: 34px; height: 34px; border-radius: 7px;
+    border: 1px solid var(--line-strong); background: transparent;
+    cursor: pointer; flex-shrink: 0; color: var(--ink-soft);
+  }
+  .btn-mobile-menu:hover { background: var(--card-alt); }
+  .nav-links-group.mobile-menu-open {
+    display: flex; flex-direction: column;
+    position: absolute; top: 100%; left: 0; right: 0;
+    background: var(--bg); border-bottom: 1px solid var(--line);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+    padding: 6px max(16px, env(safe-area-inset-left)) 10px;
+    z-index: 55;
+  }
+  .nav-links-group.mobile-menu-open .nav-link {
+    display: flex !important;
+    padding: 12px 4px;
+    font-size: 14.5px;
+    border-bottom: 1px solid var(--line);
+  }
+  .nav-links-group.mobile-menu-open .nav-link:last-child { border-bottom: none; }
+  .nav-links-group.mobile-menu-open .nav-link svg { width: 17px; height: 17px; flex-shrink: 0; }
   .nav-cta .full { display: none; }
   .nav-cta .short { display: inline; }
 }
