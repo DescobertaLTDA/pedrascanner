@@ -55,6 +55,12 @@
       letter-spacing: -0.01em;
       color: var(--ink);
     }
+    .head h1 {
+      font-family: 'Baloo 2', sans-serif;
+      font-weight: 800;
+      letter-spacing: 0.01em;
+      text-transform: uppercase;
+    }
     a,
     button,
     input,
@@ -193,17 +199,17 @@
       line-height: 1.1;
     }
     .logo .logo-main {
-      font-family: 'Inter', sans-serif;
-      font-size: 18px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
+      font-family: 'Baloo 2', sans-serif;
+      font-size: 20px;
+      font-weight: 800;
+      letter-spacing: 0.01em;
       color: var(--ink);
       line-height: 1.2;
     }
     .logo .logo-sub {
-      font-family: 'Inter', sans-serif;
+      font-family: 'Baloo 2', sans-serif;
       font-size: 10px;
-      font-weight: 300;
+      font-weight: 600;
       letter-spacing: 0.12em;
       text-transform: uppercase;
       color: var(--ink-mute2);
@@ -224,15 +230,15 @@
         gap: 4px;
       }
       .logo .logo-main {
-        font-family: 'Fraunces', serif;
-        font-size: 16px;
-        font-weight: 700;
+        font-family: 'Baloo 2', sans-serif;
+        font-size: 17px;
+        font-weight: 800;
         letter-spacing: 0;
       }
       .logo .logo-sub {
-        font-family: 'Fraunces', serif;
-        font-size: 16px;
-        font-weight: 700;
+        font-family: 'Baloo 2', sans-serif;
+        font-size: 17px;
+        font-weight: 800;
         letter-spacing: 0;
         text-transform: none;
         color: var(--ink);
