@@ -28,10 +28,18 @@ header {
   right: 0;
   width: 100%;
   z-index: 50;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(26, 27, 29, 0.94);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
+header .logo .logo-main { color: #f5f5f4; }
+header .logo .logo-sub { color: rgba(245, 245, 244, 0.6); }
+header .btn-sidebar-toggle { border-color: rgba(255, 255, 255, 0.18); }
+header .btn-sidebar-toggle svg { stroke: #f5f5f4; }
+header .btn-sidebar-toggle:hover { background: rgba(255, 255, 255, 0.08); }
+header .nav-link { color: rgba(245, 245, 244, 0.75); }
+header .nav-link svg { stroke: rgba(245, 245, 244, 0.75); }
+header .nav-link:hover { color: #f5f5f4; }
 .nav-wrap {
   width: 100%;
   display: flex;
