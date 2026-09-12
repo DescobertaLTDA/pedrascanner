@@ -1628,6 +1628,18 @@
     });
     btnTrocar.addEventListener('click', resetarUploadCompleto);
 
+    var btnUploadHint = document.getElementById('btn-upload-hint');
+    if (btnUploadHint) {
+      btnUploadHint.addEventListener('click', function() {
+        if (ehNavegadorInterno) {
+          var modalAviso = document.getElementById('modal-navegador-interno');
+          if (modalAviso) { modalAviso.style.display = 'flex'; }
+          return;
+        }
+        abrirEscolhaFoto();
+      });
+    }
+
     // ========================================================================
     // ESCOLHA CÂMERA x GALERIA + CÂMERA AO VIVO COM "SENSOR"
     // ========================================================================
