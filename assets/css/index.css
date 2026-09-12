@@ -740,27 +740,27 @@
     }
     .eyebrow {
       font-family: 'Space Mono', monospace;
-      font-size: 11px;
+      font-size: 9px;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--accent-dark);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
       text-align: center;
     }
     .eyebrow-icon {
-      width: 14px;
-      height: 14px;
+      width: 11px;
+      height: 11px;
       object-fit: contain;
       flex-shrink: 0;
     }
     .eyebrow::before,
     .eyebrow::after {
       content: '';
-      width: 22px;
+      width: 18px;
       height: 1px;
       background: var(--accent);
     }
