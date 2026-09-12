@@ -2795,13 +2795,13 @@
     // AVATARES DE PROVA SOCIAL (fotos das últimas pedras identificadas)
     // ========================================================================
     function carregarAvataresProvaSocial() {
-      var slots = [1, 2, 3, 4, 5].map(function(n) { return document.getElementById('sp-avatar-' + n); });
+      var slots = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(function(n) { return document.getElementById('sp-avatar-' + n); });
       if (!slots[0]) return;
       fetch('/api/vitrine?pagina=1')
         .then(function(res) { return res.json(); })
         .then(function(data) {
           var itens = (data && data.itens) || [];
-          itens.slice(0, 5).forEach(function(item, i) {
+          itens.slice(0, 10).forEach(function(item, i) {
             var slot = slots[i];
             if (!slot || !item.foto) return;
             slot.style.background = 'transparent';

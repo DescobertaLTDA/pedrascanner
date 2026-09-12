@@ -798,8 +798,7 @@
     .social-proof {
       margin: 22px auto 0;
       display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 10px;
