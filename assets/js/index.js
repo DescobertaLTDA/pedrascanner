@@ -2901,7 +2901,7 @@
       card.dataset.id = item.id;
       card.dataset.rocks = rocks;
       card.style.zIndex = String(100 - indice);
-      card.style.transform = indice === 0 ? 'translateY(0) scale(1)' : 'translateY(' + (indice * 8) + 'px) scale(' + (1 - indice * 0.04) + ')';
+      card.classList.add('swipe-lvl-' + Math.min(indice, 2));
       card.innerHTML =
         '<img src="' + item.foto + '" alt="' + (item.pedra || 'Pedra da comunidade') + '">' +
         '<div class="swipe-card-stamp like">Curtir</div>' +

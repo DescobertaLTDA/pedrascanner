@@ -2515,3 +2515,16 @@
       font-family: 'Space Mono', monospace;
       color: var(--ink);
     }
+
+    /* Mobile: cartas espiam por trás, levemente descidas e menores */
+    .swipe-lvl-0 { transform: translateY(0) rotate(0deg) scale(1); }
+    .swipe-lvl-1 { transform: translateY(10px) rotate(0deg) scale(0.96); }
+    .swipe-lvl-2 { transform: translateY(20px) rotate(0deg) scale(0.92); }
+
+    /* Web: cartas de trás abrem em leque pros dois lados, dá pra ver as duas */
+    @media (min-width: 700px) {
+      .swipe-stage { max-width: 340px; }
+      .swipe-lvl-0 { transform: translateX(0) rotate(0deg) scale(1); }
+      .swipe-lvl-1 { transform: translateX(-42px) translateY(6px) rotate(-8deg) scale(0.94); }
+      .swipe-lvl-2 { transform: translateX(42px) translateY(6px) rotate(8deg) scale(0.94); }
+    }
