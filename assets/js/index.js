@@ -3004,6 +3004,38 @@
       topo.addEventListener('pointercancel', aoSoltar);
     }
 
+    var swipeJaCarregou = false;
+
+    function abrirSwipeOverlay() {
+      var overlay = document.getElementById('swipe-overlay');
+      if (!overlay) return;
+      overlay.classList.add('aberto');
+      overlay.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('swipe-aberto');
+      if (!swipeJaCarregou) {
+        swipeJaCarregou = true;
+        iniciarSwipeComunidade();
+      }
+    }
+
+    function fecharSwipeOverlay() {
+      var overlay = document.getElementById('swipe-overlay');
+      if (!overlay) return;
+      overlay.classList.remove('aberto');
+      overlay.setAttribute('aria-hidden', 'true');
+      document.body.classList.remove('swipe-aberto');
+    }
+
+    function iniciarBotaoSwipeFlutuante() {
+      var btnAbrir = document.getElementById('heart-float-btn');
+      var btnFechar = document.getElementById('swipe-overlay-fechar');
+      var overlay = document.getElementById('swipe-overlay');
+      if (btnAbrir) btnAbrir.addEventListener('click', abrirSwipeOverlay);
+      if (btnFechar) btnFechar.addEventListener('click', fecharSwipeOverlay);
+      if (overlay) overlay.addEventListener('click', function(e) { if (e.target === overlay) fecharSwipeOverlay(); });
+      document.addEventListener('keydown', function(e) { if (e.key === 'Escape') fecharSwipeOverlay(); });
+    }
+
     function iniciarSwipeComunidade() {
       var stage = document.getElementById('swipe-stage');
       var btnLike = document.getElementById('swipe-like');
@@ -3151,7 +3183,7 @@
     carregarEstatisticas();
     carregarRankingColecionadores();
     carregarAvataresProvaSocial();
-    iniciarSwipeComunidade();
+    iniciarBotaoSwipeFlutuante();
     setInterval(carregarEstatisticas, 60000);
     setInterval(carregarRankingColecionadores, 120000);
     document.addEventListener('visibilitychange', function() { if (!document.hidden) carregarEstatisticas(); });

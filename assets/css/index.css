@@ -2528,3 +2528,73 @@
       .swipe-lvl-1 { transform: translateX(-42px) translateY(6px) rotate(-8deg) scale(0.94); }
       .swipe-lvl-2 { transform: translateX(42px) translateY(6px) rotate(8deg) scale(0.94); }
     }
+
+    /* ========================================================================
+       OVERLAY PRETO ESTILO TINDER — abre ao clicar no coração flutuante
+       ======================================================================== */
+    body.swipe-aberto { overflow: hidden; }
+    #swipe-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 10000;
+      flex-direction: column;
+      align-items: center;
+      padding: 70px 18px 30px;
+      overflow-y: auto;
+    }
+    #swipe-overlay.aberto { display: flex; }
+    #swipe-overlay-fechar {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.25);
+      background: rgba(255,255,255,0.08);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10001;
+    }
+    #swipe-overlay-fechar svg { width: 18px; height: 18px; stroke-width: 2.4; }
+    #swipe-overlay-fechar:hover { background: rgba(255,255,255,0.16); }
+    .swipe-overlay-inner {
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: auto;
+    }
+    .swipe-overlay-titulo {
+      font-family: 'Fraunces', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+    }
+    .swipe-overlay-sub {
+      font-size: 13px;
+      color: rgba(255,255,255,0.6);
+      text-align: center;
+      margin-top: 8px;
+      line-height: 1.5;
+    }
+    .swipe-overlay-sub strong { color: #fff; }
+    .swipe-overlay-rocks { color: rgba(255,255,255,0.5) !important; }
+    .swipe-overlay-rocks strong { color: #fff; }
+    #swipe-overlay .swipe-empty {
+      background: rgba(255,255,255,0.05);
+      border-color: rgba(255,255,255,0.2);
+      color: rgba(255,255,255,0.55);
+    }
+    #swipe-overlay .swipe-btn {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.25);
+    }
+    #swipe-overlay .swipe-btn:hover { background: rgba(255,255,255,0.16); }
