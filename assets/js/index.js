@@ -2903,7 +2903,8 @@
       card.style.zIndex = String(100 - indice);
       card.classList.add('swipe-lvl-' + Math.min(indice, 2));
       card.innerHTML =
-        '<img src="' + item.foto + '" alt="' + (item.pedra || 'Pedra da comunidade') + '">' +
+        '<img class="swipe-card-bg" src="' + item.foto + '" alt="" aria-hidden="true">' +
+        '<img class="swipe-card-img" src="' + item.foto + '" alt="' + (item.pedra || 'Pedra da comunidade') + '">' +
         '<div class="swipe-card-stamp like">Curtir</div>' +
         '<div class="swipe-card-stamp nope">Pular</div>' +
         '<div class="swipe-card-overlay">' +

@@ -2372,8 +2372,8 @@
     .swipe-stage {
       position: relative;
       width: 100%;
-      max-width: 300px;
-      height: min(380px, 44vh);
+      max-width: 320px;
+      height: min(480px, 58vh);
       margin: 16px auto 0;
     }
     .swipe-card {
@@ -2381,7 +2381,7 @@
       inset: 0;
       border-radius: 18px;
       overflow: hidden;
-      background: var(--card-alt);
+      background: #000;
       box-shadow: 0 8px 24px rgba(0,0,0,0.16);
       touch-action: pan-y;
       cursor: grab;
@@ -2390,16 +2390,33 @@
       transition: transform 0.35s cubic-bezier(.2,.8,.3,1), opacity 0.35s ease;
     }
     .swipe-card:active { cursor: grabbing; }
-    .swipe-card img {
+    /* Foto de fundo, desfocada e ampliada — só pra preencher o retrato
+       sem deixar tarja preta quando a foto original é paisagem */
+    .swipe-card-bg {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       object-fit: cover;
+      filter: blur(26px) brightness(0.55) saturate(1.1);
+      transform: scale(1.2);
+      pointer-events: none;
+      display: block;
+    }
+    /* Foto real, inteira, sem cortar nada nas laterais */
+    .swipe-card-img {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
       pointer-events: none;
       display: block;
     }
     .swipe-card-overlay {
       position: absolute;
       inset: 0;
+      z-index: 2;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -2451,6 +2468,7 @@
     }
     .swipe-card-stamp {
       position: absolute;
+      z-index: 3;
       top: 26px;
       font-family: 'Space Mono', monospace;
       font-weight: 700;
@@ -2609,7 +2627,7 @@
     /* Telas bem baixas (celular deitado, notebooks pequenos): encolhe mais */
     @media (max-height: 640px) {
       .swipe-overlay-sub { display: none; }
-      .swipe-stage { height: min(320px, 50vh); margin-top: 10px; }
+      .swipe-stage { height: min(400px, 52vh); margin-top: 10px; }
       #swipe-overlay .swipe-actions { margin-top: 10px; }
       .swipe-overlay-rocks { margin-top: 8px; }
     }
