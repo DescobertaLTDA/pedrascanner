@@ -3054,7 +3054,24 @@
         .then(function(res) { return res.json(); })
         .then(function(data) {
           var itens = (data && data.itens) || [];
-          swipeFila = itens.filter(function(item) {
+          var totalPaginas = (data && data.total_paginas) || 1;
+          if (totalPaginas <= 1) return itens;
+
+          var promessas = [];
+          for (var p = 2; p <= totalPaginas; p++) {
+            promessas.push(
+              fetch('/api/vitrine?pagina=' + p)
+                .then(function(res) { return res.json(); })
+                .then(function(d) { return (d && d.itens) || []; })
+                .catch(function() { return []; })
+            );
+          }
+          return Promise.all(promessas).then(function(paginasExtras) {
+            return itens.concat.apply(itens, paginasExtras);
+          });
+        })
+        .then(function(todosItens) {
+          swipeFila = todosItens.filter(function(item) {
             return item.foto && votados.indexOf(item.id) === -1;
           });
           swipeRenderizarStage();
