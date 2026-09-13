@@ -284,6 +284,26 @@
       <p class="erro" id="erro" style="display:none;text-align:center;font-size:13.5px;color:var(--danger);margin-top:16px;"></p>
     </div>
 
+    <div class="card" id="area-swipe" style="margin-top:20px;">
+      <h2><svg viewBox="0 0 24 24" style="width:20px;height:20px;stroke:currentColor;stroke-width:2;fill:none;"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg> Vote nas pedras da comunidade</h2>
+      <p class="swipe-sub">Curta as pedras mais raras e ajude a valorizar os melhores achados. Cada curtida rende <strong>Rocks</strong> pra quem postou — nossa moeda de entretenimento, sem valor monetário real.</p>
+
+      <div class="swipe-stage" id="swipe-stage">
+        <div class="swipe-empty" id="swipe-empty" style="display:none;">Você já votou em todas as pedras disponíveis. Volte mais tarde pra ver novidades!</div>
+      </div>
+
+      <div class="swipe-actions">
+        <button type="button" class="swipe-btn swipe-btn-dislike" id="swipe-dislike" aria-label="Pular">
+          <svg viewBox="0 0 24 24" stroke="currentColor"><path d="M18 6L6 18M6 6l12 12"/></svg>
+        </button>
+        <button type="button" class="swipe-btn swipe-btn-like" id="swipe-like" aria-label="Curtir">
+          <svg viewBox="0 0 24 24" stroke="currentColor"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        </button>
+      </div>
+
+      <p class="swipe-rocks-ganhos">Você já distribuiu <strong id="swipe-rocks-total">0</strong> Rocks pra comunidade hoje</p>
+    </div>
+
     <div class="card" style="margin-top:20px;background:var(--accent-light);border-color:var(--line);display:none;">
       <h2 style="font-size:18px;"><svg viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4z"/><path d="M7 6H4a2 2 0 0 0 0 4h3M17 6h3a2 2 0 0 1 0 4h-3"/></svg> Top Colecionadores</h2>
       <p style="font-size:12.5px;color:var(--ink-mute);text-align:center;margin-top:4px;">Quem já catalogou mais valor em pedras na comunidade</p>

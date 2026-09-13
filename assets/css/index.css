@@ -2356,3 +2356,162 @@
     }
     .perfil-status.erro { color: var(--danger); }
     .perfil-status.sucesso { color: var(--accent-dark); }
+
+    /* ========================================================================
+       VOTAÇÃO ESTILO SWIPE — "Vote nas pedras da comunidade"
+       Moeda fictícia (Rocks), sem valor monetário real. Puramente entretenimento.
+       ======================================================================== */
+    .swipe-sub {
+      text-align: center;
+      font-size: 13px;
+      color: var(--ink-mute);
+      margin-top: 4px;
+      line-height: 1.5;
+    }
+    .swipe-sub strong { color: var(--ink); }
+    .swipe-stage {
+      position: relative;
+      width: 100%;
+      max-width: 300px;
+      height: 380px;
+      margin: 20px auto 0;
+    }
+    .swipe-card {
+      position: absolute;
+      inset: 0;
+      border-radius: 18px;
+      overflow: hidden;
+      background: var(--card-alt);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.16);
+      touch-action: pan-y;
+      cursor: grab;
+      user-select: none;
+      will-change: transform;
+      transition: transform 0.35s cubic-bezier(.2,.8,.3,1), opacity 0.35s ease;
+    }
+    .swipe-card:active { cursor: grabbing; }
+    .swipe-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      pointer-events: none;
+      display: block;
+    }
+    .swipe-card-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 14px;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 22%, rgba(0,0,0,0) 55%, rgba(0,0,0,0.75) 100%);
+      pointer-events: none;
+    }
+    .swipe-card-raridade {
+      align-self: flex-start;
+      font-family: 'Space Mono', monospace;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      color: #fff;
+      background: rgba(0,0,0,0.55);
+      backdrop-filter: blur(2px);
+      padding: 4px 9px;
+      border-radius: 20px;
+    }
+    .swipe-card-raridade.raridade-incomum { background: rgba(60,60,60,0.85); }
+    .swipe-card-raridade.raridade-rara { background: #141414; }
+    .swipe-card-raridade.raridade-raríssima { background: #141414; box-shadow: 0 0 0 1.5px rgba(255,255,255,0.5) inset; }
+    .swipe-card-info {
+      color: #fff;
+    }
+    .swipe-card-info strong {
+      display: block;
+      font-family: 'Fraunces', serif;
+      font-size: 19px;
+      line-height: 1.2;
+    }
+    .swipe-card-info span {
+      display: block;
+      font-size: 12px;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+    .swipe-card-rocks {
+      align-self: flex-end;
+      margin-top: 8px;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      font-size: 13px;
+      color: #141414;
+      background: #fff;
+      padding: 4px 10px;
+      border-radius: 20px;
+    }
+    .swipe-card-stamp {
+      position: absolute;
+      top: 26px;
+      font-family: 'Space Mono', monospace;
+      font-weight: 700;
+      font-size: 22px;
+      letter-spacing: 0.05em;
+      padding: 6px 14px;
+      border: 3px solid;
+      border-radius: 8px;
+      opacity: 0;
+      pointer-events: none;
+      text-transform: uppercase;
+    }
+    .swipe-card-stamp.like { right: 18px; color: #1e8e3e; border-color: #1e8e3e; transform: rotate(12deg); }
+    .swipe-card-stamp.nope { left: 18px; color: #c0392b; border-color: #c0392b; transform: rotate(-12deg); }
+    .swipe-empty {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      font-size: 13.5px;
+      color: var(--ink-mute);
+      padding: 30px;
+      background: var(--card-alt);
+      border-radius: 18px;
+      border: 1px dashed var(--line-strong);
+    }
+    .swipe-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 26px;
+      margin-top: 22px;
+    }
+    .swipe-btn {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      border: 1.5px solid var(--line-strong);
+      background: var(--card);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      transition: transform 0.15s ease;
+    }
+    .swipe-btn:active { transform: scale(0.9); }
+    .swipe-btn svg { width: 24px; height: 24px; stroke-width: 2.4; fill: none; }
+    .swipe-btn-dislike svg { stroke: #c0392b; }
+    .swipe-btn-like svg { stroke: #1e8e3e; }
+    .swipe-btn-like { width: 64px; height: 64px; }
+    .swipe-btn-like svg { width: 28px; height: 28px; }
+    .swipe-rocks-ganhos {
+      text-align: center;
+      font-size: 12.5px;
+      color: var(--ink-mute2);
+      margin-top: 16px;
+    }
+    .swipe-rocks-ganhos strong {
+      font-family: 'Space Mono', monospace;
+      color: var(--ink);
+    }

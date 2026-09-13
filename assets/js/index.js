@@ -2859,6 +2859,181 @@
     }
 
     // ========================================================================
+    // VOTAÇÃO ESTILO SWIPE — "Vote nas pedras da comunidade"
+    // PROTÓTIPO FRONT-END: o voto ainda não é salvo no servidor. Antes de ir
+    // pra produção é preciso criar endpoints (/api/curtir-pedra, etc.) que
+    // validem no backend: (1) usuário autenticado, (2) já fez pelo menos 1
+    // identificação própria, (3) 1 voto por pedra por usuário, (4) limite
+    // diário de votos por conta — pra evitar farm de curtidas com contas fake.
+    // Os "Rocks" são uma moeda 100% fictícia, só de entretenimento, sem
+    // qualquer valor monetário ou conversão pra dinheiro real.
+    // ========================================================================
+    var ROCKS_BASE_POR_LIKE = 2;
+    var swipeFila = [];
+    var swipeRocksHoje = 0;
+    var swipeChaveVotados = 'rocco_swipe_votados';
+
+    function swipeObterVotados() {
+      try {
+        return JSON.parse(localStorage.getItem(swipeChaveVotados) || '[]');
+      } catch (e) { return []; }
+    }
+    function swipeRegistrarVoto(id) {
+      try {
+        var votados = swipeObterVotados();
+        votados.push(id);
+        localStorage.setItem(swipeChaveVotados, JSON.stringify(votados));
+      } catch (e) { /* localStorage indisponível — segue sem persistir */ }
+    }
+
+    function calcularRaridade(valor) {
+      if (!valor || valor <= 50) return { label: 'Comum', mult: 1, classe: '' };
+      if (valor <= 200) return { label: 'Incomum', mult: 2, classe: 'raridade-incomum' };
+      if (valor <= 800) return { label: 'Rara', mult: 5, classe: 'raridade-rara' };
+      return { label: 'Raríssima', mult: 10, classe: 'raridade-raríssima' };
+    }
+
+    function swipeCriarCard(item, indice) {
+      var raridade = calcularRaridade(item.valor_exibicao);
+      var rocks = ROCKS_BASE_POR_LIKE * raridade.mult;
+      var card = document.createElement('div');
+      card.className = 'swipe-card';
+      card.dataset.id = item.id;
+      card.dataset.rocks = rocks;
+      card.style.zIndex = String(100 - indice);
+      card.style.transform = indice === 0 ? 'translateY(0) scale(1)' : 'translateY(' + (indice * 8) + 'px) scale(' + (1 - indice * 0.04) + ')';
+      card.innerHTML =
+        '<img src="' + item.foto + '" alt="' + (item.pedra || 'Pedra da comunidade') + '">' +
+        '<div class="swipe-card-stamp like">Curtir</div>' +
+        '<div class="swipe-card-stamp nope">Pular</div>' +
+        '<div class="swipe-card-overlay">' +
+          '<span class="swipe-card-raridade ' + raridade.classe + '">' + raridade.label + (raridade.mult > 1 ? ' ×' + raridade.mult : '') + '</span>' +
+          '<div class="swipe-card-info">' +
+            '<strong>' + (item.pedra || 'Pedra não identificada') + '</strong>' +
+            '<span>por ' + (item.nome || 'Membro da comunidade') + '</span>' +
+            '<span class="swipe-card-rocks">+' + rocks + ' Rocks</span>' +
+          '</div>' +
+        '</div>';
+      return card;
+    }
+
+    function swipeRenderizarStage() {
+      var stage = document.getElementById('swipe-stage');
+      var vazio = document.getElementById('swipe-empty');
+      if (!stage) return;
+      Array.prototype.slice.call(stage.querySelectorAll('.swipe-card')).forEach(function(c) { c.remove(); });
+      if (!swipeFila.length) {
+        if (vazio) vazio.style.display = 'flex';
+        return;
+      }
+      if (vazio) vazio.style.display = 'none';
+      swipeFila.slice(0, 3).forEach(function(item, i) {
+        stage.appendChild(swipeCriarCard(item, i));
+      });
+      swipeAtivarDragNoTopo();
+    }
+
+    function swipeResolverVoto(direcao) {
+      var stage = document.getElementById('swipe-stage');
+      if (!stage) return;
+      var topo = stage.querySelector('.swipe-card');
+      if (!topo || !swipeFila.length) return;
+      var item = swipeFila.shift();
+      var saiX = direcao === 'like' ? 600 : -600;
+      var rotacao = direcao === 'like' ? 18 : -18;
+      topo.style.transition = 'transform 0.4s ease, opacity 0.4s ease';
+      topo.style.transform = 'translateX(' + saiX + 'px) rotate(' + rotacao + 'deg)';
+      topo.style.opacity = '0';
+      var carimbo = topo.querySelector('.swipe-card-stamp.' + (direcao === 'like' ? 'like' : 'nope'));
+      if (carimbo) carimbo.style.opacity = '1';
+
+      if (direcao === 'like') {
+        var rocksGanhos = parseInt(topo.dataset.rocks, 10) || 0;
+        swipeRocksHoje += rocksGanhos;
+        var totalEl = document.getElementById('swipe-rocks-total');
+        if (totalEl) totalEl.textContent = swipeRocksHoje;
+        // TODO produção: POST /api/curtir-pedra { id: item.id } — validar no
+        // servidor antes de creditar Rocks de verdade na conta de quem postou.
+      }
+      swipeRegistrarVoto(item.id);
+
+      setTimeout(swipeRenderizarStage, 260);
+    }
+
+    function swipeAtivarDragNoTopo() {
+      var stage = document.getElementById('swipe-stage');
+      var topo = stage && stage.querySelector('.swipe-card');
+      if (!topo) return;
+      var arrastando = false, inicioX = 0, inicioY = 0, atualX = 0;
+
+      function aoIniciar(x, y) {
+        arrastando = true;
+        inicioX = x; inicioY = y; atualX = 0;
+        topo.style.transition = 'none';
+      }
+      function aoMover(x, y) {
+        if (!arrastando) return;
+        atualX = x - inicioX;
+        var rot = atualX / 18;
+        topo.style.transform = 'translateX(' + atualX + 'px) translateY(' + (y - inicioY) * 0.15 + 'px) rotate(' + rot + 'deg)';
+        var like = topo.querySelector('.swipe-card-stamp.like');
+        var nope = topo.querySelector('.swipe-card-stamp.nope');
+        if (like) like.style.opacity = String(Math.max(0, atualX / 100));
+        if (nope) nope.style.opacity = String(Math.max(0, -atualX / 100));
+      }
+      function aoSoltar() {
+        if (!arrastando) return;
+        arrastando = false;
+        if (atualX > 90) {
+          swipeResolverVoto('like');
+        } else if (atualX < -90) {
+          swipeResolverVoto('dislike');
+        } else {
+          topo.style.transition = 'transform 0.3s ease';
+          topo.style.transform = 'translateX(0) translateY(0) rotate(0)';
+          var like = topo.querySelector('.swipe-card-stamp.like');
+          var nope = topo.querySelector('.swipe-card-stamp.nope');
+          if (like) like.style.opacity = '0';
+          if (nope) nope.style.opacity = '0';
+        }
+      }
+
+      topo.addEventListener('pointerdown', function(e) { aoIniciar(e.clientX, e.clientY); topo.setPointerCapture(e.pointerId); });
+      topo.addEventListener('pointermove', function(e) { aoMover(e.clientX, e.clientY); });
+      topo.addEventListener('pointerup', aoSoltar);
+      topo.addEventListener('pointercancel', aoSoltar);
+    }
+
+    function iniciarSwipeComunidade() {
+      var stage = document.getElementById('swipe-stage');
+      var btnLike = document.getElementById('swipe-like');
+      var btnDislike = document.getElementById('swipe-dislike');
+      if (!stage) return;
+
+      var votados = swipeObterVotados();
+      fetch('/api/vitrine?pagina=1')
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          var itens = (data && data.itens) || [];
+          swipeFila = itens.filter(function(item) {
+            return item.foto && votados.indexOf(item.id) === -1;
+          });
+          swipeRenderizarStage();
+        })
+        .catch(function(err) {
+          console.error('Erro ao carregar pedras para votação:', err);
+          var vazio = document.getElementById('swipe-empty');
+          if (vazio) {
+            vazio.style.display = 'flex';
+            vazio.textContent = 'Não foi possível carregar as pedras agora. Tente novamente mais tarde.';
+          }
+        });
+
+      if (btnLike) btnLike.addEventListener('click', function() { swipeResolverVoto('like'); });
+      if (btnDislike) btnDislike.addEventListener('click', function() { swipeResolverVoto('dislike'); });
+    }
+
+    // ========================================================================
     // RANKING DE COLECIONADORES
     // ========================================================================
     function formatarMoedaCompacta(valor) {
@@ -2976,6 +3151,7 @@
     carregarEstatisticas();
     carregarRankingColecionadores();
     carregarAvataresProvaSocial();
+    iniciarSwipeComunidade();
     setInterval(carregarEstatisticas, 60000);
     setInterval(carregarRankingColecionadores, 120000);
     document.addEventListener('visibilitychange', function() { if (!document.hidden) carregarEstatisticas(); });
