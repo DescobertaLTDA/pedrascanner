@@ -3014,6 +3014,7 @@
         if (!sessao) { abrirPainelLogin(); return; }
         overlay.classList.add('aberto');
         overlay.setAttribute('aria-hidden', 'false');
+        document.documentElement.classList.add('swipe-aberto');
         document.body.classList.add('swipe-aberto');
         if (!swipeJaCarregou) {
           swipeJaCarregou = true;
@@ -3030,6 +3031,7 @@
       if (!overlay) return;
       overlay.classList.remove('aberto');
       overlay.setAttribute('aria-hidden', 'true');
+      document.documentElement.classList.remove('swipe-aberto');
       document.body.classList.remove('swipe-aberto');
     }
 

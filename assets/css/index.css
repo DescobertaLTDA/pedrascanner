@@ -2373,8 +2373,8 @@
       position: relative;
       width: 100%;
       max-width: 300px;
-      height: 380px;
-      margin: 20px auto 0;
+      height: min(380px, 44vh);
+      margin: 16px auto 0;
     }
     .swipe-card {
       position: absolute;
@@ -2532,17 +2532,21 @@
     /* ========================================================================
        OVERLAY PRETO ESTILO TINDER — abre ao clicar no coração flutuante
        ======================================================================== */
-    body.swipe-aberto { overflow: hidden; }
+    html.swipe-aberto, body.swipe-aberto { overflow: hidden; height: 100%; }
     #swipe-overlay {
       display: none;
       position: fixed;
       inset: 0;
+      height: 100vh;
+      height: 100dvh;
       background: #000;
       z-index: 10000;
       flex-direction: column;
       align-items: center;
-      padding: 70px 18px 30px;
-      overflow-y: auto;
+      justify-content: center;
+      padding: 16px;
+      overflow: hidden;
+      box-sizing: border-box;
     }
     #swipe-overlay.aberto { display: flex; }
     #swipe-overlay-fechar {
@@ -2566,27 +2570,29 @@
     .swipe-overlay-inner {
       width: 100%;
       max-width: 400px;
+      max-height: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
-      margin: auto;
+      justify-content: center;
+      overflow: hidden;
     }
     .swipe-overlay-titulo {
       font-family: 'Fraunces', serif;
-      font-size: 22px;
+      font-size: clamp(17px, 3.6vh, 22px);
       font-weight: 700;
       color: #fff;
       text-align: center;
     }
     .swipe-overlay-sub {
-      font-size: 13px;
+      font-size: 12.5px;
       color: rgba(255,255,255,0.6);
       text-align: center;
-      margin-top: 8px;
-      line-height: 1.5;
+      margin-top: 6px;
+      line-height: 1.45;
     }
     .swipe-overlay-sub strong { color: #fff; }
-    .swipe-overlay-rocks { color: rgba(255,255,255,0.5) !important; }
+    .swipe-overlay-rocks { color: rgba(255,255,255,0.5) !important; margin-top: 12px; }
     .swipe-overlay-rocks strong { color: #fff; }
     #swipe-overlay .swipe-empty {
       background: rgba(255,255,255,0.05);
@@ -2598,3 +2604,12 @@
       border-color: rgba(255,255,255,0.25);
     }
     #swipe-overlay .swipe-btn:hover { background: rgba(255,255,255,0.16); }
+    #swipe-overlay .swipe-actions { margin-top: 16px; }
+
+    /* Telas bem baixas (celular deitado, notebooks pequenos): encolhe mais */
+    @media (max-height: 640px) {
+      .swipe-overlay-sub { display: none; }
+      .swipe-stage { height: min(320px, 50vh); margin-top: 10px; }
+      #swipe-overlay .swipe-actions { margin-top: 10px; }
+      .swipe-overlay-rocks { margin-top: 8px; }
+    }
