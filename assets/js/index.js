@@ -3009,13 +3009,20 @@
     function abrirSwipeOverlay() {
       var overlay = document.getElementById('swipe-overlay');
       if (!overlay) return;
-      overlay.classList.add('aberto');
-      overlay.setAttribute('aria-hidden', 'false');
-      document.body.classList.add('swipe-aberto');
-      if (!swipeJaCarregou) {
-        swipeJaCarregou = true;
-        iniciarSwipeComunidade();
-      }
+      supa.auth.getSession().then(function(sessaoResp) {
+        var sessao = sessaoResp.data.session;
+        if (!sessao) { abrirPainelLogin(); return; }
+        overlay.classList.add('aberto');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('swipe-aberto');
+        if (!swipeJaCarregou) {
+          swipeJaCarregou = true;
+          iniciarSwipeComunidade();
+        }
+      }).catch(function(err) {
+        console.error('Erro ao checar sessão para votação:', err);
+        abrirPainelLogin();
+      });
     }
 
     function fecharSwipeOverlay() {
