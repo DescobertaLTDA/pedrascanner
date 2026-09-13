@@ -2593,7 +2593,24 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      overflow: hidden;
+      overflow: visible;
+    }
+    /* Telas largas (desktop/web): em vez da parede preta full-bleed,
+       usa um painel enquadrado com fundo translúcido + blur, igual aos
+       outros modais do site (dossiê, paywall etc). No celular o preto
+       ocupando a tela toda continua, propositalmente, estilo Tinder. */
+    @media (min-width: 700px) {
+      #swipe-overlay {
+        background: rgba(0,0,0,0.85);
+        backdrop-filter: blur(8px);
+      }
+      .swipe-overlay-inner {
+        max-width: 440px;
+        background: #141414;
+        border-radius: 24px;
+        padding: 32px 28px 28px;
+        box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+      }
     }
     .swipe-overlay-titulo {
       font-family: 'Fraunces', serif;
