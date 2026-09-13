@@ -2376,8 +2376,17 @@
       height: min(480px, 58vh);
       margin: 16px auto 0;
     }
+    .swipe-stage::before {
+      content: '';
+      position: absolute;
+      inset: -20px -60px;
+      background: #000;
+      border-radius: 24px;
+      z-index: 0;
+    }
     .swipe-card {
       position: absolute;
+      z-index: 1;
       inset: 0;
       border-radius: 18px;
       overflow: hidden;
